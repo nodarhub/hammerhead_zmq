@@ -1,0 +1,7 @@
+add_subdirectory(image_viewer)
+add_subdirectory(obstacle_data_generator)
+add_subdirectory(offline_point_cloud_generator)
+add_subdirectory(point_cloud_generator)
+add_subdirectory(point_cloud_stream)
+add_subdirectory(set_camera_params)
+add_subdirectory(toggle_recording)

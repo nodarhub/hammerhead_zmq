@@ -1,0 +1,58 @@
+# Introduction
+
+This repo contains several C++/CMake examples demonstrating how to interact with Hammerhead using ZeroMQ (ZMQ).
+
+## Dependencies
+
+You will need:
+
+1. A C++ compiler
+    - Ubuntu:
+        - You probably already have a compiler. If not, then the following will suffice:
+          `sudo apt install build-essential`
+    - Windows:
+        - Generally, the easiest is to install the latest Community (a.k.a. *free*) version of Visual
+          Studio: https://visualstudio.microsoft.com/vs/community/ . Note that unlike Visual Studio, Visual Studio Code
+          does not come bundled with compillers.
+2. CMake 3.11+:
+    - Ubuntu >=20:
+        - `sudo apt install cmake`
+    - Ubuntu < 20:
+        - The version in apt is likely 3.10, which is not sufficient. Follow the official directions for installing the
+          most recent version of CMake: https://apt.kitware.com/
+    - Windows:
+        - If you will be using Visual Studio to manage your projects, then it might have CMake bundled with it.
+          Otherwise, install one of the versions here: https://github.com/Kitware/CMake/releases/. For
+          example: https://github.com/Kitware/CMake/releases/download/v3.26.2/cmake-3.26.2-windows-x86_64.msi
+3. To interact with Hammerhead, you don't need OpenCV. However, a lot of our examples use it. Therefore, you should
+   consider installing it:
+    - Ubuntu:
+        - `sudo apt install libopencv-dev`
+    - Windows:
+        - Download version 4.6.0 or newer from https://opencv.org/releases/
+
+## Project Structure
+
+The `zmq_msgs` folder contains the code for the `zmq_msgs` target, which defines how objects are sent and received via
+ZeroMQ on the network. It also defines other important networking information, such as which ports are used for which
+topics.
+
+The `examples` folder contains some examples that you should look at. These demonstrate how one should interact with
+Hammerhead. We envision that you will use these examples as a jumping-off point for your application.
+
+We suggest that you start by examining the code and README's in the individual example directories for more details
+about what each example does.
+
+## Usage
+
+To use the message types in a new project, you can copy `zmq_msgs` folder into your project, and then modify your
+`CMakeLists.txt` to link to this target:
+
+    add_subdirectory(zmq_msgs)
+    target_link_libraries(
+            my_target
+            PRIVATE
+            hammerhead::zmq_msgs
+    )
+
+The other examples that we provide, such as the `set_camera_params` target, demonstrate how to do this.

@@ -1,0 +1,100 @@
+#include <atomic>
+#include <csignal>
+#include <filesystem>
+#include <iostream>
+#include <nodar/zmq/point_cloud.hpp>
+#include <nodar/zmq/topic_ports.hpp>
+#include <zmq.hpp>
+
+#include "ply.hpp"
+
+std::atomic_bool running{true};
+
+void signalHandler(int signum) {
+    std::cerr << "SIGINT or SIGTERM received." << std::endl;
+    running = false;
+}
+
+class PointCloudSink {
+public:
+    uint64_t last_frame_id = 0;
+
+    PointCloudSink(const std::filesystem::path &output_dir, const std::string &endpoint)
+        : output_dir(output_dir), context(1), socket(context, ZMQ_SUB) {
+        const int hwm = 1;  // set maximum queue length to 1 message
+        socket.set(zmq::sockopt::rcvhwm, hwm);
+        socket.set(zmq::sockopt::subscribe, "");
+        socket.connect(endpoint);
+        std::cout << "Subscribing to " << endpoint << std::endl;
+    }
+
+    void loopOnce(size_t frame_index) {
+        zmq::message_t msg;
+        const auto received_bytes = socket.recv(msg, zmq::recv_flags::none);
+        point_cloud.read(static_cast<uint8_t *>(msg.data()));
+
+        // If the point_cloud was not received correctly, return
+        if (point_cloud.empty()) {
+            return;
+        }
+
+        // Warn if we dropped a frame
+        const auto &frame_id = point_cloud.frame_id;
+        if (last_frame_id != 0 and frame_id != last_frame_id + 1) {
+            std::cerr << (frame_id - last_frame_id - 1) << " frames dropped. Current frame ID : " << frame_id
+                      << ", last frame ID: " << last_frame_id << std::endl;
+        }
+        last_frame_id = frame_id;
+        std::cout << "\rFrame # " << frame_id << ". " << std::flush;
+
+        // Note that this frame index represents the number of frames received.
+        // The messages themselves have a frame_id that tracks how many frames have been produced.
+        // Due to networking issues, it could be that there are dropped frames, resulting in these numbers being
+        // different
+        const auto filename = output_dir / (std::to_string(frame_index) + ".ply");
+        std::cout << "Writing " << filename << std::flush;
+        writePly(filename, point_cloud.points);
+    }
+
+private:
+    std::filesystem::path output_dir;
+    nodar::zmq::PointCloud point_cloud;
+    zmq::context_t context;
+    zmq::socket_t socket;
+};
+
+constexpr auto DEFAULT_IP = "127.0.0.1";
+
+void printUsage() {
+    std::cout << "You should specify the Orin's IP address:\n\n"
+                 "     ./point_cloud_stream orin_ip\n\n"
+                 "e.g. ./point_cloud_stream 192.168.1.9\n\n"
+                 "In the meantime, we are going to assume that you are running this on the Orin itself,\n"
+                 "that is, we assume that you specified\n\n     ./point_cloud_stream "
+              << DEFAULT_IP << "\n----------------------------------------" << std::endl;
+}
+
+int main(int argc, char *argv[]) {
+    static constexpr auto TOPIC = nodar::zmq::POINT_CLOUD_TOPIC;
+    signal(SIGINT, signalHandler);
+    signal(SIGTERM, signalHandler);
+    if (argc == 1) {
+        printUsage();
+    }
+    const auto ip = argc > 1 ? argv[1] : DEFAULT_IP;
+    const auto endpoint = std::string("tcp://") + ip + ":" + std::to_string(TOPIC.port);
+
+    const auto HERE = std::filesystem::path(__FILE__).parent_path();
+    const auto output_dir = HERE / "point_clouds";
+    std::filesystem::create_directories(output_dir);
+
+    PointCloudSink sink(output_dir, endpoint);
+    size_t frame_index = 0;
+    while (running) {
+        // Note that this frame index represents the number of frames received.
+        // The messages themselves have a frame_id that tracks how many frames have been produced.
+        // Due to networking issues, it could be that there are dropped frames, resulting in these numbers being
+        // different
+        sink.loopOnce(frame_index++);
+    }
+}
