@@ -1,0 +1,20 @@
+---
+Language: Cpp
+BasedOnStyle: Google
+AlignAfterOpenBracket: Align
+AlignTrailingComments: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+ColumnLimit: 120
+IndentWidth: 4
+AccessModifierOffset: -4
+IndentWrappedFunctionNames: true
+PointerAlignment: Left
+SpacesInParentheses: false
+Standard: Auto
+TabWidth: 4
+UseTab: Never
+
+...
