@@ -76,7 +76,7 @@ private:
 
     cv::Mat depth3d;
     size_t border = 8;
-    float z_min = 8.0;
+    float z_min = 0.5;
     float z_max = 500.0;
     float y_min = -50.0;
     float y_max = 50.0;
