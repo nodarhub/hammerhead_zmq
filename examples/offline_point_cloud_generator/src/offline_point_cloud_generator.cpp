@@ -12,17 +12,21 @@
 
 class PointCloudWriter {
 public:
-    void operator()(const std::string &ply_path, const Details &details, const cv::Mat &depth_image,
-                    const cv::Mat &left_rect) {
+    void operator()(const std::string &ply_path, const Details &details, const cv::Mat &input_image,
+                    const cv::Mat &left_rect, const bool &is_disparity) {
         // Allocate space for the point cloud
         std::vector<PointXYZRGB> point_cloud;
-        const auto rows = depth_image.rows;
-        const auto cols = depth_image.cols;
+        const auto rows = left_rect.rows;
+        const auto cols = left_rect.cols;
         point_cloud.resize(rows * cols);
 
-        // Convert the depth map to a point cloud
-        const auto disparity = details.focal_length * details.baseline / depth_image;
-        cv::reprojectImageTo3D(disparity, depth3d, details.projection);
+        // Convert the input map to a point cloud
+        if (is_disparity) {
+            cv::reprojectImageTo3D(input_image, depth3d, details.projection);
+        } else {
+            const auto disparity = details.focal_length * details.baseline / input_image;
+            cv::reprojectImageTo3D(disparity, depth3d, details.projection);
+        }
 
         auto xyz = reinterpret_cast<float *>(depth3d.data);
         auto bgr = left_rect.data;
@@ -82,6 +86,50 @@ private:
     float y_max = 50.0;
 };
 
+void processFiles(const std::vector<std::filesystem::path> &files, const std::filesystem::path &left_rect_dir,
+                  const std::filesystem::path &details_dir, const std::filesystem::path &output_dir,
+                  PointCloudWriter &point_cloud_writer, const bool &is_disparity) {
+    for (const auto &file : tq::tqdm(files)) {
+        auto input_image =
+            safeLoad(file, is_disparity ? cv::IMREAD_ANYDEPTH : (cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH),
+                     is_disparity ? CV_16UC1 : CV_32FC1, file, is_disparity ? "disparity image" : "depth image");
+
+        if (input_image.empty()) {
+            continue;
+        }
+
+        if (is_disparity && input_image.type() == CV_16UC1) {
+            input_image.convertTo(input_image, CV_32FC1, 1.0 / 16.0);
+        }
+
+        const auto tiff = left_rect_dir / (file.stem().string() + ".tiff");
+        const auto png = left_rect_dir / (file.stem().string() + ".png");
+        const auto left_rect_filename = std::filesystem::exists(tiff) ? tiff : png;
+        if (!std::filesystem::exists(left_rect_filename)) {
+            std::cerr << "Could not find the corresponding left rectified image for\n"
+                      << file << ". This path does not exist:\n"
+                      << left_rect_filename << std::endl;
+            continue;
+        }
+        const auto left_rect = safeLoad(left_rect_filename, cv::IMREAD_COLOR, CV_8UC3, file, "left rectified image");
+        if (left_rect.empty()) {
+            continue;
+        }
+
+        const auto details_filename = details_dir / (file.stem().string() + ".csv");
+        if (!std::filesystem::exists(details_filename)) {
+            std::cerr << "Could not find the corresponding details for\n"
+                      << file << ". This path does not exist:\n"
+                      << details_filename << std::endl;
+            continue;
+        }
+        const Details details(details_filename);
+
+        const auto ply_path = output_dir / (file.stem().string() + ".ply");
+        point_cloud_writer(ply_path, details, input_image, left_rect, is_disparity);
+    }
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         std::cerr << "Expecting at least one argument "
@@ -93,9 +141,14 @@ int main(int argc, char *argv[]) {
     const std::filesystem::path output_dir = argc > 2 ? argv[2] : (input_dir / "point_clouds");
 
     // Directories that we read
-    const auto depth_dir = input_dir / "depth";
+
+    // Mandatory directories
     const auto details_dir = input_dir / "details";
     const auto left_rect_dir = input_dir / "left-rect";
+
+    // Atleast one of the disparity or depth directories is needed
+    const auto disparity_dir = input_dir / "disparity";
+    const auto depth_dir = input_dir / "depth";
 
     // Remove old output directory if it exists
     if (std::filesystem::exists(output_dir)) {
@@ -113,35 +166,19 @@ int main(int argc, char *argv[]) {
     }
     std::filesystem::create_directories(output_dir);
 
-    // Load the depth data
-    const auto exrs = getFiles(input_dir / "depth", ".exr");
-    std::cout << "Found " << exrs.size() << " depth maps to convert to point clouds" << std::endl;
     PointCloudWriter point_cloud_writer;
-    for (const auto &exr : tq::tqdm(exrs)) {
-        // Safely load all the images.
-        const auto depth_image = safeLoad(exr, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH, CV_32FC1, exr, "depth image");
-        // New versions of the sdk save images as .tiff instead of .png
-        // Look for a tiff, and if it doesn't exist, look for a png.
-        const auto tiff = left_rect_dir / (exr.stem().string() + ".tiff");
-        const auto png = left_rect_dir / (exr.stem().string() + ".png");
-        const auto filename = std::filesystem::exists(tiff) ? tiff : png;
-        const auto left_rect = safeLoad(filename, cv::IMREAD_COLOR, CV_8UC3, exr, "left rectified image");
-        if (depth_image.empty() or left_rect.empty()) {
-            continue;
-        }
-
-        // Load the details
-        const auto details_filename = details_dir / (exr.stem().string() + ".csv");
-        if (not std::filesystem::exists(details_filename)) {
-            std::cerr << "Could not find the corresponding details for\n"
-                      << exr << ". This path does not exist:\n"
-                      << details_filename << std::endl;
-        }
-        const Details details(details_filename);
-
-        // Generate point clouds and write them to disk as ply files
-        const auto ply_path = output_dir / (exr.stem().string() + ".ply");
-        point_cloud_writer(ply_path, details, depth_image, left_rect);
+    if (std::filesystem::exists(disparity_dir)) {
+        const auto disparities = getFiles(disparity_dir, ".tiff");
+        std::cout << "Found " << disparities.size() << " disparity maps to convert to point clouds" << std::endl;
+        processFiles(disparities, left_rect_dir, details_dir, output_dir, point_cloud_writer, true);
+    } else if (std::filesystem::exists(depth_dir)) {
+        const auto depths = getFiles(depth_dir, ".exr");
+        std::cout << "Found " << depths.size() << " depth maps to convert to point clouds" << std::endl;
+        processFiles(depths, left_rect_dir, details_dir, output_dir, point_cloud_writer, false);
+    } else {
+        std::cerr << "No disparity or depth data found in the input directory. Exiting." << std::endl;
+        return EXIT_FAILURE;
     }
+
     return 0;
 }
