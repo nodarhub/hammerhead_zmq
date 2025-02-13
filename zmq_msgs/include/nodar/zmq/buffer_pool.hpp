@@ -4,6 +4,9 @@
 #include <mutex>
 #include <vector>
 
+namespace nodar {
+namespace zmq {
+
 struct BufferPool;
 class Buffer {
     std::vector<uint8_t> vec{};
@@ -71,3 +74,6 @@ inline void Buffer::release(void* data, void* hint) {
     auto buffer = static_cast<Buffer*>(hint);
     buffer->buffer_pool->put(buffer);
 }
+
+}  // namespace zmq
+}  // namespace nodar
