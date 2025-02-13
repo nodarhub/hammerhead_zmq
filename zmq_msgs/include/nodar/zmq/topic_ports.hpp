@@ -11,13 +11,14 @@ struct Topic {
     uint16_t port;
 };
 
-constexpr std::array<Topic, 6> IMAGE_TOPICS{{
+constexpr std::array<Topic, 7> IMAGE_TOPICS{{
     {"nodar/left/image_raw", 9800},  //
     {"nodar/right/image_raw", 9801},  //
     {"nodar/left/image_rect", 9802},  //
     {"nodar/right/image_rect", 9803},  //
     {"nodar/disparity", 9804},  //
     {"nodar/color_blended_depth/image_raw", 9805},  //
+    {"nodar/topbot", 9813}
 }};
 
 constexpr Topic SOUP_TOPIC{"nodar/point_cloud_soup", 9806};
