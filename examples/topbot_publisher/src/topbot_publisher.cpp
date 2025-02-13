@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
                 continue;
             }
 
-            uint64_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+            uint64_t timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
                                      std::chrono::system_clock::now().time_since_epoch()).count();
 
             publisher.publishImage(img, timestamp, frame_id);
