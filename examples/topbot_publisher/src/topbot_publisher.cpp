@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
     signal(SIGTERM, signalHandler);
 
     if (argc < 2) {
-        std::cerr << "Usage: topbot_publisher <image_folder>" << std::endl;
+        std::cerr << "Usage: topbot_publisher topbot_data_directory" << std::endl;
         return EXIT_FAILURE;
     }
 
