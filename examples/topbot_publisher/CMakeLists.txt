@@ -19,6 +19,7 @@ target_link_libraries(topbot_publisher
         opencv_imgproc
         hammerhead::zmq_msgs
         hammerhead::zmq_opencv
+        common
 )
 
 set_target_properties(topbot_publisher PROPERTIES

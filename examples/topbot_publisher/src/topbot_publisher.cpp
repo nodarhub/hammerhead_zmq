@@ -8,7 +8,8 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <thread>
-#include <vector>
+
+#include "get_files.hpp"
 
 constexpr auto FRAME_RATE = 10;
 std::atomic_bool running{true};
@@ -16,17 +17,6 @@ std::atomic_bool running{true};
 void signalHandler(int) {
     std::cerr << "SIGINT or SIGTERM received. Exiting..." << std::endl;
     running = false;
-}
-
-std::vector<std::string> getImageFiles(const std::string& folder) {
-    std::vector<std::string> image_files;
-    for (const auto& entry : std::filesystem::directory_iterator(folder)) {
-        if (entry.is_regular_file() && (entry.path().extension() == ".tiff" || entry.path().extension() == ".png")) {
-            image_files.push_back(entry.path().string());
-        }
-    }
-    std::sort(image_files.begin(), image_files.end());
-    return image_files;
 }
 
 std::string depthToString(const int& depth) {
@@ -83,7 +73,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    auto image_files = getImageFiles(argv[1]);
+    const auto image_files{getFiles(argv[1], ".tiff")};
     if (image_files.empty()) {
         std::cerr << "No images found in folder." << std::endl;
         return EXIT_FAILURE;
