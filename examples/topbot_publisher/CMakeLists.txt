@@ -13,8 +13,13 @@ add_executable(topbot_publisher
         src/topbot_publisher.cpp
 )
 
+target_include_directories(topbot_publisher
+        PRIVATE
+        include
+)
+
 target_link_libraries(topbot_publisher
-    PRIVATE
+        PRIVATE
         opencv_highgui
         opencv_imgproc
         hammerhead::zmq_msgs
@@ -23,7 +28,7 @@ target_link_libraries(topbot_publisher
 )
 
 set_target_properties(topbot_publisher PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED YES
+        CXX_EXTENSIONS NO
 )
