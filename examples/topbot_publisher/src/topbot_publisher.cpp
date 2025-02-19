@@ -44,20 +44,25 @@ class TopbotPublisher {
 public:
     TopbotPublisher() : publisher(nodar::zmq::IMAGE_TOPICS[6], "") {}
 
-    void publishImage(const cv::Mat& img, const uint64_t& timestamp, const uint64_t& frame_id) {
+    bool publishImage(const cv::Mat& img, const uint64_t& timestamp, const uint64_t& frame_id) {
+        if (img.empty()) {
+            std::cerr << "Failed to load image" << std::endl;
+            return false;
+        }
         const auto depth = img.depth();
         const auto channels = img.channels();
 
         if (!((depth == CV_8U || depth == CV_16U) && channels == 3)) {
             std::cerr << "Skipping unsupported image type: depth=" << depthToString(depth) << ", channels=" << channels
                       << std::endl;
-            return;
+            return false;
         }
 
         auto buffer = publisher.getBuffer();
         buffer->resize(nodar::zmq::StampedImage::msgSize(img.rows, img.cols, img.type()));
         nodar::zmq::StampedImage::write(buffer->data(), timestamp, frame_id, img.rows, img.cols, img.type(), img.data);
         publisher.send(buffer);
+        return true;
     }
 
 private:
@@ -80,26 +85,20 @@ int main(int argc, char* argv[]) {
     }
 
     TopbotPublisher publisher;
-    uint64_t frame_id = 0;
+    auto frame_id = 0;
 
     while (running) {
         for (const auto& file : image_files) {
             if (!running)
                 break;
-
-            cv::Mat img = cv::imread(file, cv::IMREAD_UNCHANGED);
-            if (img.empty()) {
-                std::cerr << "Failed to load image: " << file << std::endl;
-                continue;
+            const auto img = cv::imread(file, cv::IMREAD_UNCHANGED);
+            const auto timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                       std::chrono::system_clock::now().time_since_epoch())
+                                       .count();
+            if (publisher.publishImage(img, timestamp, frame_id)) {
+                std::cout << "Published frame " << frame_id << " from " << file << std::endl;
+                frame_id++;
             }
-
-            uint64_t timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                     std::chrono::system_clock::now().time_since_epoch())
-                                     .count();
-
-            publisher.publishImage(img, timestamp, frame_id);
-            std::cout << "Published frame " << frame_id << " from " << file << std::endl;
-            frame_id++;
 
             std::this_thread::sleep_for(std::chrono::milliseconds(1000 / FRAME_RATE));
         }
