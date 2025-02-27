@@ -33,7 +33,7 @@ std::string depthToString(const int& depth) {
 
 class TopbotPublisher {
 public:
-    explicit TopbotPublisher() : publisher(nodar::zmq::IMAGE_TOPICS[6], "") {}
+    explicit TopbotPublisher(const uint16_t& port) : publisher(Topic{"external/topbot_raw", port}, "") {}
 
     bool publishImage(const cv::Mat& img, const uint64_t& timestamp, const uint64_t& frame_id) {
         if (img.empty()) {
