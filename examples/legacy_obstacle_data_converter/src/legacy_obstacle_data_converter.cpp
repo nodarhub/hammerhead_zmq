@@ -52,6 +52,11 @@ int main(int argc, char *argv[]) {
     // Directories that we read
     const auto bbav_dir{input_dir / "bounding_boxes_and_velocities"};
 
+    if (!std::filesystem::exists(bbav_dir)) {
+        std::cerr << "Could not find the bounding_boxes_and_velocities directory: " << bbav_dir << "\n";
+        return EXIT_FAILURE;
+    }
+
     // Remove old output directory if it exists
     if (std::filesystem::exists(output_dir)) {
         // If you don't want to delete and overwrite old data, then set this bool to true
