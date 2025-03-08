@@ -1,8 +1,9 @@
 This example shows how to convert `.exr` depth images to `.tiff` disparity images. The disparity data is needed to generate point clouds in the Nodar Viewer.
 
-WARNING: The depth maps recorded by Hammerhead are in the EXR format. This example converts those images into lossless `.tiff` images. To do that, this example assumes that you have a version of OpenCV installed with EXR support. This seems to be
-the case for the OpenCV version in apt on many Ubuntu X86-64 installations. However, the OpenCV version in apt on the
-Orin does not seem to have EXR support.
+WARNING: The depth maps recorded by Hammerhead are in the EXR format. 
+This example converts those images into lossless `.tiff` images. 
+To do that, this example assumes that you have a version of OpenCV installed with EXR support. 
+This seems to be the case for the OpenCV version in `apt` on many Ubuntu X86-64 installations, but not on ARM systems. 
 
 To build this example, follow the traditional CMake process:
 

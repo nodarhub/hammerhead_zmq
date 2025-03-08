@@ -1,7 +1,8 @@
-This example shows how to subscribe to `PointCloud` messages being sent by Hammerhead, and then save them as `.ply`
-files in the `point_clouds` folder. You can 
-then open the `.ply` files in other programs, such as CloudCompare. Note that due to bandwidth constraints, point cloud
-streaming may not be enabled on your Orin, or it may only be enabled when other image types are disabled.
+This example shows how to subscribe to `PointCloud` messages being sent by Hammerhead, 
+and then save them as `.ply` files in the `point_clouds` folder. 
+You can then open the `.ply` files in other programs, such as CloudCompare. 
+Note that due to the amount of bandwidth required, 
+you should think twice before enabling point cloud streaming in hammerhead.
 
 To build this example, follow the traditional CMake process:
 
@@ -10,7 +11,7 @@ To build this example, follow the traditional CMake process:
     cmake ..
     cmake --build . --config Release
 
-To run this example, you need to provide the IP address of the ZMQ source (almost certainly the Orin's IP address):
+To run this example, you need to provide the IP address of the ZMQ source (the device running hammerhead):
 
     # Linux
     ./point_cloud_stream src_ip

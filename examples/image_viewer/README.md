@@ -7,7 +7,7 @@ To build this example, follow the traditional CMake process:
     cmake ..
     cmake --build . --config Release
 
-To run this example, you need to provide the IP address of the ZMQ source (almost certainly the Orin's IP address), as
+To run this example, you need to provide the IP address of the ZMQ source (the device running hammerhead), as
 well as the topic name or port number:
 
     # Linux
@@ -21,8 +21,8 @@ the entry
 
     "nodar/right/image_raw", 9801
 
-which indicates that the right raw images will be sent on port 9801. If you run this example on the Orin itself while
-Hammerhead is running, then the following command would open an image viewer for the right raw images:
+which indicates that the right raw images will be sent on port 9801. If you run this example on the device running 
+Hammerhead, then the following command would open an image viewer for the right raw images:
 
     ./image_viewer 127.0.0.1 9801 
 
