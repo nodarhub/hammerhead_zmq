@@ -32,6 +32,8 @@ constexpr Topic RECORDING_TOPIC{"nodar/recording", 9811};
 
 constexpr Topic OBSTACLE_TOPIC{"nodar/obstacle", 9812};
 
+constexpr Topic WAIT_TOPIC{"nodar/wait", 9814};
+
 // Function to retrieve reserved ports dynamically
 inline auto getReservedPorts() {
     std::set<uint16_t> reserved_ports;
@@ -45,6 +47,7 @@ inline auto getReservedPorts() {
     reserved_ports.insert(nodar::zmq::POINT_CLOUD_RGB_TOPIC.port);
     reserved_ports.insert(nodar::zmq::RECORDING_TOPIC.port);
     reserved_ports.insert(nodar::zmq::OBSTACLE_TOPIC.port);
+    reserved_ports.insert(nodar::zmq::WAIT_TOPIC.port);
     return reserved_ports;
 }
 
