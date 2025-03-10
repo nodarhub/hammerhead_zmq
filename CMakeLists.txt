@@ -7,5 +7,5 @@ add_subdirectory(zmq_opencv)
 
 option(BUILD_EXAMPLES "Whether or not to build examples" ON)
 if (BUILD_EXAMPLES)
-    add_subdirectory(examples)
+    add_subdirectory(examples/cpp)
 endif ()
