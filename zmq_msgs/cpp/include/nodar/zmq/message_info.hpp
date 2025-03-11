@@ -29,6 +29,9 @@ struct MessageInfo {
 
     constexpr bool operator!=(const MessageInfo &rhs) const { return not(*this == rhs); }
 
+    /**
+     * This is an inequality check that prints out some extra error information
+     */
     constexpr bool is_different(const MessageInfo &rhs, const char *expected_type) const {
         if (message_type != rhs.message_type) {
             std::cerr << "This message is not a " << expected_type << " message." << std::endl;
