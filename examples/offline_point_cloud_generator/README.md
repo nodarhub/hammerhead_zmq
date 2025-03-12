@@ -1,10 +1,11 @@
 This example shows how to turn the data saved by Hammerhead into point clouds, which are then saved as `.ply` files. You
 can open the `.ply` files in other programs, such as CloudCompare.
 
-WARNING: The depth maps recorded by Hammerhead are in the EXR format. This example converts those images into point
-clouds. To do that, this example assumes that you have a version of OpenCV installed with EXR support. This seems to be
-the case for the OpenCV version in apt on many Ubuntu X86-64 installations. However, the OpenCV version in apt on the
-Orin does not seem to have EXR support.
+WARNING: The depth maps recorded by Hammerhead are in the EXR format. 
+This example converts those images into point clouds. 
+To do that, this example assumes that you have a version of OpenCV installed with EXR support. 
+This seems to be the case for the OpenCV version in `apt` on many Ubuntu X86-64 installations, but not on ARM systems.
+
 
 To build this example, follow the traditional CMake process:
 

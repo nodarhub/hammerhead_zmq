@@ -10,7 +10,7 @@ To build this example, follow the traditional CMake process:
     cmake --build . --config Release
 
 This will build the binary `toggle_recording`. To run the examples, you need to provide the IP
-address of the ZMQ source (almost certainly the Orin's IP address):
+address of the ZMQ source (the device running hammerhead):
 
     # Linux
     ./toggle_recording src_ip

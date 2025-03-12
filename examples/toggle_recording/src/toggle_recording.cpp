@@ -34,10 +34,10 @@ private:
 constexpr auto DEFAULT_IP = "127.0.0.1";
 
 void printUsage() {
-    std::cout << "You should specify the Orin's IP address:\n\n"
-                 "     ./toggle_recording orin_ip\n\n"
+    std::cout << "You should specify the IP address of the device running hammerhead:\n\n"
+                 "     ./toggle_recording hammerhead_ip\n\n"
                  "e.g. ./toggle_recording 192.168.1.9\n\n"
-                 "In the meantime, we are going to assume that you are running this on the Orin itself,\n"
+                 "In the meantime, we are going to assume that you are running this on the device running hammerhead,\n"
                  "that is, we assume that you specified "
               << DEFAULT_IP << "\n----------------------------------------" << std::endl;
 }

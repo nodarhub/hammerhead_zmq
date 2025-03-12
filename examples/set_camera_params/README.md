@@ -7,7 +7,7 @@ To build this example, follow the traditional CMake process:
     cmake ..
     cmake --build . --config Release
 
-This will build 2 binaries: `set_exposure` and `set_gain`. To run either of these examples, you need to provide the IP address of the ZMQ source (almost certainly the Orin's IP address):
+This will build 2 binaries: `set_exposure` and `set_gain`. To run either of these examples, you need to provide the IP address of the ZMQ source (the device running hammerhead):
 
     # Linux
     ./set_exposure src_ip
