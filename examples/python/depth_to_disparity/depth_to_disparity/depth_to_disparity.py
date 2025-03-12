@@ -4,10 +4,60 @@ import sys
 
 import cv2
 import numpy as np
-from depth_to_disparity.details import Details
-from depth_to_disparity.get_files import get_files
-from depth_to_disparity.safe_load import safe_load
 from tqdm import tqdm
+
+
+class Details:
+    def __init__(self, filename):
+        self.disparity_to_depth4x4 = np.zeros((4, 4), dtype=np.float32)
+        with open(filename, 'r') as details_file:
+            header = details_file.readline()
+            detail_data = details_file.readline()
+            tokens = detail_data.split(',')
+            self.left_time = float(tokens[0])
+            self.right_time = float(tokens[1])
+            self.focal_length = float(tokens[2])
+            self.baseline = float(tokens[3])
+            for i in range(16):
+                self.disparity_to_depth4x4[i // 4, i % 4] = float(tokens[4 + i])
+
+    def __str__(self):
+        return ("Details:\n" +
+                f"\tleft_time    : {self.left_time}\n" +
+                f"\tright_time   : {self.right_time}\n" +
+                f"\tfocal_length : {self.focal_length}\n" +
+                f"\tbaseline     : {self.baseline}\n" +
+                f"disparity_to_depth4x4 : \n{self.disparity_to_depth4x4}\n"
+                )
+
+
+def get_files(dirname, ext):
+    files = [os.path.join(dirname, f) for f in os.listdir(dirname) if f.endswith(ext)]
+    files.sort()
+    return files
+
+
+def safe_load(filename, read_mode, valid_types, expected_num_channels):
+    if not os.path.exists(filename):
+        print(f"{filename} does not exist:\n")
+        return None
+    try:
+        img = cv2.imread(filename, read_mode)
+        if img is None:
+            print(f"Error loading {filename}. The image is empty")
+            return None
+        if img.dtype not in valid_types:
+            print(f"Error loading {filename}. The image is supposed to have one of the types {valid_types}, "
+                  f"not {img.dtype}")
+        num_channels = 1 if len(img.shape) == 2 else img.shape[2]
+        if num_channels != expected_num_channels:
+            print(f"Error loading {filename}. The image is supposed to have {expected_num_channels} channels, "
+                  f"not {num_channels}")
+            return None
+        return img
+    except Exception as e:
+        print(f"Error loading {filename}: {e}")
+        return None
 
 
 def main():
