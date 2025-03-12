@@ -132,7 +132,7 @@ class StampedImage:
         offset = StampedImage.infos().write(buffer, original_offset)
         struct.pack_into('QQIII', buffer, offset, time, frame_id, rows, cols, encode_cv_type(channels, img.dtype))
         offset = original_offset + StampedImage.HEADER_SIZE
-        buffer[offset:offset + img.nbytes] = img
+        buffer[offset:offset + img.nbytes] = img.tobytes()
         return offset + img.nbytes
 
     def write(self, buffer, offset):
