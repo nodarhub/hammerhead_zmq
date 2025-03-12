@@ -10,8 +10,8 @@ However, the OpenCV version in apt on the Orin does not seem to have EXR support
 To run this example, you need to provide the path to a directory of data saved by Hammerhead.
 It is necessary to have both the `depth` and `details` folders in the data directory:
 
-    cd examples/python/depth_to_disparity
-    OPENCV_IO_ENABLE_OPENEXR=1 python3 -m depth_to_disparity.depth_to_disparity data_directory [output_directory]
+    cd examples/python/depth_to_disparity/depth_to_disparity
+    OPENCV_IO_ENABLE_OPENEXR=1 python3 depth_to_disparity data_directory [output_directory]
 
 Note that by default, the output_directory will be a `disparity` folder in your `data_directory`.
 If you already have this directory, then the files inside it will be overridden.

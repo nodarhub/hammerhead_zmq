@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-package_name = 'image_viewer'
+package_name = 'topbot_publisher'
 
 setup(
     name=package_name,
@@ -10,7 +10,7 @@ setup(
     zip_safe=False,
     maintainer='nodar',
     maintainer_email='support@nodarsensor.com',
-    description='This example is a simple OpenCV viewer for images published by Hammerhead using ZMQ.',
+    description='This example shows how to publish topbot images from the disk to Hammerhead.',
     license='TODO',
     entry_points={
         'console_scripts': [

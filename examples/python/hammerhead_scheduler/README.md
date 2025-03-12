@@ -19,8 +19,8 @@ which tells hammerhead how many milliseconds to wait on a scheduler before givin
 This example implements a basic scheduler that can interact with hammerhead.
 To run this example, you should provide the IP address of the device running hammerhead:
 
-    cd examples/python/hammerhead_scheduler
-    python3 -m hammerhead_scheduler.hammerhead_scheduler src_ip
+    cd examples/python/hammerhead_scheduler/hammerhead_scheduler
+    python3 hammerhead_scheduler src_ip
 
 Note that if you specify an incorrect IP address or run this example when Hammerhead is not running, 
 then nothing will happen. It will appear like the binary is just waiting.
