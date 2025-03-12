@@ -36,12 +36,12 @@ class MessageInfo:
         return struct.calcsize('HBB')
 
     def read(self, buffer, offset=0):
-        (self.message_type, self.major_version, self.minor_version), = struct.unpack_from('HBB', buffer, offset)
+        self.message_type, self.major_version, self.minor_version,  = struct.unpack_from('HBB', buffer, offset)
         return offset + self.msg_size()
 
     @staticmethod
     def reads(buffer, offset=0):
-        message_info = MessageInfo()
+        message_info = MessageInfo(0)
         new_offset = message_info.read(buffer, offset)
         return message_info, new_offset
 

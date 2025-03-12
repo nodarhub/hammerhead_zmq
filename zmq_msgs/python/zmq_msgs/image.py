@@ -118,7 +118,7 @@ class StampedImage:
         # Convert opencv type to something more understandable
         self.channels, self.dtype = decode_cv_type(cv_type)
         self.img = np.frombuffer(buffer, dtype=self.dtype, count=self.elems(), offset=StampedImage.HEADER_SIZE)
-        return offset + self.msg_size()
+        return offset + StampedImage.msg_size(self.rows, self.cols, self.channels, self.dtype)
 
     @staticmethod
     def reads(buffer, offset=0):
