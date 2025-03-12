@@ -76,10 +76,6 @@ class StampedImage:
     def __init__(self, ):
         self.time = 0
         self.frame_id = 0
-        self.rows = 0
-        self.cols = 0
-        self.channels = 0
-        self.dtype = np.uint8
         self.img = None
 
     @staticmethod
@@ -97,29 +93,26 @@ class StampedImage:
     def data_size(rows, cols, channels, dtype):
         return rows * cols * channels * np.dtype(dtype).itemsize
 
-    def elems(self):
-        return self.rows * self.cols * self.channels
-
     def is_empty(self):
-        return self.rows == 0 or self.cols == 0 or self.channels == 0
+        return self.img.size == 0
 
     def read(self, buffer, offset=0):
         info, offset = MessageInfo.reads(buffer, offset)
         if info.is_different(self.info(), "StampedImage"):
             return None
 
-        self.time, self.frame_id, self.rows, self.cols, cv_type = struct.unpack_from('QQIII', buffer, offset)
-        if self.rows * self.cols > 1e8:
+        self.time, self.frame_id, rows, cols, cv_type = struct.unpack_from('QQIII', buffer, offset)
+        if rows * cols > 1e8:
             print("According to the message, the image has the impossibly large of dimensions "
-                  f"{self.rows} x {self.cols}. We are ignoring this message so that you don't run out of memory.")
+                  f"{rows} x {cols}. We are ignoring this message so that you don't run out of memory.")
             return
         offset += struct.calcsize('QQIII')
 
         # Convert opencv type to something more understandable
-        self.channels, self.dtype = decode_cv_type(cv_type)
-        self.img = np.frombuffer(buffer, dtype=self.dtype, count=self.elems(), offset=StampedImage.HEADER_SIZE).reshape(
-            self.rows, self.cols, self.channels)
-        return offset + StampedImage.msg_size(self.rows, self.cols, self.channels, self.dtype)
+        channels, dtype = decode_cv_type(cv_type)
+        self.img = np.frombuffer(buffer, dtype=dtype, count=rows * cols * channels,
+                                 offset=StampedImage.HEADER_SIZE).reshape(rows, cols, channels)
+        return offset + StampedImage.msg_size(rows, cols, channels, dtype)
 
     @staticmethod
     def reads(buffer, offset=0):
