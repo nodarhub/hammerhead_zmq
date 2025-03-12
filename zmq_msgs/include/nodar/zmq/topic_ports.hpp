@@ -22,8 +22,7 @@ constexpr std::array<Topic, 7> IMAGE_TOPICS{{{"nodar/left/image_raw", 9800},  //
                                              {"nodar/left/image_rect", 9802},  //
                                              {"nodar/right/image_rect", 9803},  //
                                              {"nodar/disparity", 9804},  //
-                                             {"nodar/color_blended_depth/image_raw", 9805},  //
-                                             {"nodar/topbot_raw", 9813}}};
+                                             {"nodar/color_blended_depth/image_raw", 9805}}};
 
 constexpr Topic SOUP_TOPIC{"nodar/point_cloud_soup", 9806};
 
