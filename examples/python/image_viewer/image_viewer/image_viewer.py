@@ -52,6 +52,7 @@ class ZMQImageViewer:
             # Highgui produces a strange-looking output for signed 16-bit images. Convert to unsigned
             img = img.astype(np.uint16)
         if img is None or img.size == 0:
+            print("img is None or img.size == 0")
             return True
 
         frame_id = stamped_image.frame_id
@@ -59,7 +60,7 @@ class ZMQImageViewer:
             print(
                 f"{frame_id - self.last_frame_id - 1} frames dropped. Current frame ID: {frame_id}, last frame ID: {self.last_frame_id}")
         self.last_frame_id = frame_id
-        print(f"\rFrame # {frame_id}", end="", flush=True)
+        print(f"\rFrame # {frame_id}, img.shape = {img.shape}, img.dtype = {img.dtype}", end="", flush=True)
 
         cv2.resizeWindow(self.window_name, 640, 480)
         cv2.imshow(self.window_name, img)
