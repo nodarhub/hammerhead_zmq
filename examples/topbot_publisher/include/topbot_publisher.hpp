@@ -3,64 +3,13 @@
 #include <filesystem>
 #include <iostream>
 #include <nodar/zmq/image.hpp>
+#include <nodar/zmq/opencv_utils.hpp>
 #include <nodar/zmq/publisher.hpp>
 #include <opencv2/opencv.hpp>
 #include <string>
 
 namespace nodar {
 namespace zmq {
-
-inline auto depthToString(const int& depth) {
-    switch (depth) {
-        case CV_8U:
-            return "CV_8U";
-        case CV_8S:
-            return "CV_8S";
-        case CV_16U:
-            return "CV_16U";
-        case CV_16S:
-            return "CV_16S";
-        case CV_32S:
-            return "CV_32S";
-        case CV_32F:
-            return "CV_32F";
-        case CV_64F:
-            return "CV_64F";
-        default:
-            return "Unknown depth";
-    }
-}
-
-inline auto isValidTopic(const cv::Mat& img, const Topic& topic) {
-    const auto depth = img.depth();
-    const auto channels = img.channels();
-
-    if (topic.name == EXTERNAL_TOPBOT_TOPICS[0].name) {
-        // BGR Format (3 Channels)
-        if (!((depth == CV_8U || depth == CV_16U) && channels == 3)) {
-            std::cerr << "[ERROR] Invalid BGR image type.\n"
-                      << "  Received: depth=" << depthToString(depth) << ", channels=" << channels << "\n"
-                      << "  Expected: depth=CV_8U or CV_16U, channels=3\n";
-            return false;
-        }
-    } else if (topic.name == EXTERNAL_TOPBOT_TOPICS[1].name) {
-        // Bayer BGGR Format (1 Channel)
-        if (!((depth == CV_8U || depth == CV_16U) && channels == 1)) {
-            std::cerr << "[ERROR] Invalid Bayer BGGR image type.\n"
-                      << "  Received: depth=" << depthToString(depth) << ", channels=" << channels << "\n"
-                      << "  Expected: depth=CV_8U or CV_16U, channels=1\n";
-            return false;
-        }
-    } else {
-        std::cerr << "[ERROR] Unknown topic: " << topic.name << "\n"
-                  << "  Supported topics:\n"
-                  << "    - " << EXTERNAL_TOPBOT_TOPICS[0].name << "\n"
-                  << "    - " << EXTERNAL_TOPBOT_TOPICS[1].name << "\n";
-        return false;
-    }
-
-    return true;
-}
 
 class TopbotPublisher {
 public:
@@ -72,7 +21,7 @@ public:
             return false;
         }
 
-        if (!isValidTopic(img, topic)) {
+        if (!isValidExternalTopic(img, topic)) {
             return false;
         }
 
