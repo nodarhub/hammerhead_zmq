@@ -10,7 +10,7 @@
 #include "nodar/zmq/topic_ports.hpp"
 
 constexpr auto FRAME_RATE = 10;
-constexpr auto DEFAULT_TOPIC = nodar::zmq::EXTERNAL_IMAGE_TOPICS[0];
+constexpr auto DEFAULT_TOPIC = nodar::zmq::EXTERNAL_TOPBOT_TOPICS[0];
 
 std::atomic_bool running{true};
 
@@ -24,14 +24,14 @@ void printUsage() {
         << "You should specify the topbot data directory, as well as \n"
            "the port of the message that you want to publish to like this:\n"
            "     ./topbot_publisher <topbot_data_directory> <port>\n"
-           "Alternatively, you can specify one of the external image topic names provided in topic_ports.hpp of "
+           "Alternatively, you can specify one of the external topbot topic names provided in topic_ports.hpp of "
            "zmq_msgs:\n"
            "     ./topbot_publisher <topbot_data_directory> <topic>\n\n"
            "In the meantime, we are going to assume that you are publishing BGR images, that is, we assume "
            "that you specified\n"
            "     ./topbot_publisher <topbot_data_directory> 5000\n"
            "     ./topbot_publisher <topbot_data_directory> external/topbot_bgr\n\n"
-        << "Note that the list of EXTERNAL_IMAGE_TOPICS mappings is in topic_ports.hpp header in the zmq_msgs target."
+        << "Note that the list of EXTERNAL_TOPBOT_TOPICS mappings is in topic_ports.hpp header in the zmq_msgs target."
         << "\n--------------------------------------------------------------------------------------------------\n";
 }
 
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
         size_t port = 0;
         std::istringstream iss(argv[2]);
         if (iss >> port) {
-            for (const auto& external_image_topic : nodar::zmq::EXTERNAL_IMAGE_TOPICS) {
+            for (const auto& external_image_topic : nodar::zmq::EXTERNAL_TOPBOT_TOPICS) {
                 if (port == external_image_topic.port) {
                     topic = external_image_topic;
                     invalid_topic = false;
@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
         } else {
             // It seems like you specified a topic name. Let's see if it is a valid image topic
             const std::string topic_name = argv[2];
-            for (const auto& external_image_topic : nodar::zmq::EXTERNAL_IMAGE_TOPICS) {
+            for (const auto& external_image_topic : nodar::zmq::EXTERNAL_TOPBOT_TOPICS) {
                 if (topic_name == external_image_topic.name) {
                     topic = external_image_topic;
                     invalid_topic = false;

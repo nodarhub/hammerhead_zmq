@@ -12,9 +12,9 @@ struct Topic {
     uint16_t port;
 };
 
-// External Image Topics
-constexpr std::array<Topic, 2> EXTERNAL_IMAGE_TOPICS{{{"external/topbot_bgr", 5000},  //
-                                                      {"external/topbot_bayer_bggr", 5001}}};
+// External Topbot Topics
+constexpr std::array<Topic, 2> EXTERNAL_TOPBOT_TOPICS{{{"external/topbot/bgr", 5000},  //
+                                                       {"external/topbot/bayer_bggr", 5001}}};
 
 // Image topics internal to Hammerhead
 constexpr std::array<Topic, 7> IMAGE_TOPICS{{{"nodar/left/image_raw", 9800},  //

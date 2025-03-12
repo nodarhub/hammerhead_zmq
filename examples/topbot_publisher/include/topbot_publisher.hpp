@@ -35,7 +35,7 @@ inline auto isValidTopic(const cv::Mat& img, const Topic& topic) {
     const auto depth = img.depth();
     const auto channels = img.channels();
 
-    if (topic.name == EXTERNAL_IMAGE_TOPICS[0].name) {
+    if (topic.name == EXTERNAL_TOPBOT_TOPICS[0].name) {
         // BGR Format (3 Channels)
         if (!((depth == CV_8U || depth == CV_16U) && channels == 3)) {
             std::cerr << "[ERROR] Invalid BGR image type.\n"
@@ -43,7 +43,7 @@ inline auto isValidTopic(const cv::Mat& img, const Topic& topic) {
                       << "  Expected: depth=CV_8U or CV_16U, channels=3\n";
             return false;
         }
-    } else if (topic.name == EXTERNAL_IMAGE_TOPICS[1].name) {
+    } else if (topic.name == EXTERNAL_TOPBOT_TOPICS[1].name) {
         // Bayer BGGR Format (1 Channel)
         if (!((depth == CV_8U || depth == CV_16U) && channels == 1)) {
             std::cerr << "[ERROR] Invalid Bayer BGGR image type.\n"
@@ -54,8 +54,8 @@ inline auto isValidTopic(const cv::Mat& img, const Topic& topic) {
     } else {
         std::cerr << "[ERROR] Unknown topic: " << topic.name << "\n"
                   << "  Supported topics:\n"
-                  << "    - " << EXTERNAL_IMAGE_TOPICS[0].name << "\n"
-                  << "    - " << EXTERNAL_IMAGE_TOPICS[1].name << "\n";
+                  << "    - " << EXTERNAL_TOPBOT_TOPICS[0].name << "\n"
+                  << "    - " << EXTERNAL_TOPBOT_TOPICS[1].name << "\n";
         return false;
     }
 
