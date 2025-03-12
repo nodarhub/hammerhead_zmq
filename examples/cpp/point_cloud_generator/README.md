@@ -9,7 +9,7 @@ To build this example, follow the traditional CMake process:
     cmake ..
     cmake --build . --config Release
 
-To run this example, you need to provide the IP address of the ZMQ source (almost certainly the Orin's IP address):
+To run this example, you need to provide the IP address of the ZMQ source (the device running hammerhead):
 
     # Linux
     ./point_cloud_generator src_ip
