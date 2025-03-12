@@ -10,6 +10,8 @@
 #include "nodar/zmq/topic_ports.hpp"
 
 constexpr auto FRAME_RATE = 10;
+constexpr auto DEFAULT_TOPIC = nodar::zmq::EXTERNAL_IMAGE_TOPICS[0];
+
 std::atomic_bool running{true};
 
 void signalHandler(int) {
@@ -17,20 +19,20 @@ void signalHandler(int) {
     running = false;
 }
 
-// Function to validate port number
-bool isValidPort(const uint16_t& port) {
-    const auto reservedPorts = nodar::zmq::getReservedPorts();
-
-    if (port < 1024 or port > 65535) {
-        std::cerr << "Invalid port number: Port number must be in the range [1024, 65535]." << std::endl;
-        return false;
-    }
-    if (reservedPorts.find(port) != reservedPorts.end()) {
-        std::cerr << "Invalid port number: Port number is reserved. Please choose a port number other than 98xx."
-                  << std::endl;
-        return false;
-    }
-    return true;
+void printUsage() {
+    std::cout
+        << "You should specify the topbot data directory, as well as \n"
+           "the port of the message that you want to publish to like this:\n"
+           "     ./topbot_publisher <topbot_data_directory> <port>\n"
+           "Alternatively, you can specify one of the external image topic names provided in topic_ports.hpp of "
+           "zmq_msgs:\n"
+           "     ./topbot_publisher <topbot_data_directory> <topic>\n\n"
+           "In the meantime, we are going to assume that you are publishing BGR images, that is, we assume "
+           "that you specified\n"
+           "     ./topbot_publisher <topbot_data_directory> 5000\n"
+           "     ./topbot_publisher <topbot_data_directory> external/topbot_bgr\n\n"
+        << "Note that the list of EXTERNAL_IMAGE_TOPICS mappings is in topic_ports.hpp header in the zmq_msgs target."
+        << "\n--------------------------------------------------------------------------------------------------\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -38,8 +40,46 @@ int main(int argc, char* argv[]) {
     signal(SIGTERM, signalHandler);
 
     if (argc < 3) {
-        std::cerr << "Usage: topbot_publisher <topbot_data_directory> <port_number>" << std::endl;
-        return EXIT_FAILURE;
+        printUsage();
+    }
+
+    // If no second argument was provided, then assume the default topic.
+    // Try to parse the second argument to see if you provided a port number.
+    nodar::zmq::Topic topic;
+    if (argc < 3) {
+        topic = DEFAULT_TOPIC;
+    } else {
+        // See if we can parse the second argument as a port number
+        bool invalid_topic = true;
+        size_t port = 0;
+        std::istringstream iss(argv[2]);
+        if (iss >> port) {
+            for (const auto& external_image_topic : nodar::zmq::EXTERNAL_IMAGE_TOPICS) {
+                if (port == external_image_topic.port) {
+                    topic = external_image_topic;
+                    invalid_topic = false;
+                }
+            }
+            if (invalid_topic) {
+                std::cerr << "It seems like you specified a port number " << port
+                          << " that does not correspond to a port on the topic/port mapping list." << std::endl;
+                return EXIT_FAILURE;
+            }
+        } else {
+            // It seems like you specified a topic name. Let's see if it is a valid image topic
+            const std::string topic_name = argv[2];
+            for (const auto& external_image_topic : nodar::zmq::EXTERNAL_IMAGE_TOPICS) {
+                if (topic_name == external_image_topic.name) {
+                    topic = external_image_topic;
+                    invalid_topic = false;
+                }
+            }
+            if (invalid_topic) {
+                std::cerr << "It seems like you specified a topic name " << topic_name
+                          << " that does not correspond to a topic on the topic/port mapping list." << std::endl;
+                return EXIT_FAILURE;
+            }
+        }
     }
 
     const auto image_files{getFiles(argv[1], ".tiff")};
@@ -48,24 +88,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    uint16_t port;
-    try {
-        const auto parsed_port = std::stoul(argv[2]);
-
-        // Convert parsed value to uint16_t
-        port = static_cast<uint16_t>(parsed_port);
-
-        // Validate port number
-        if (!isValidPort(port)) {
-            return EXIT_FAILURE;
-        }
-
-    } catch (const std::exception& e) {
-        std::cerr << "Invalid port number: " << e.what() << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    nodar::zmq::TopbotPublisher publisher(port);
+    nodar::zmq::TopbotPublisher publisher(topic);
     auto frame_id = 0;
 
     while (running) {
