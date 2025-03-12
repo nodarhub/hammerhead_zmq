@@ -127,6 +127,12 @@ int main(int argc, char *argv[]) {
                     invalid_topic = false;
                 }
             }
+            for (const auto &image_topic : nodar::zmq::EXTERNAL_TOPBOT_TOPICS) {
+                if (port == image_topic.port) {
+                    topic = image_topic;
+                    invalid_topic = false;
+                }
+            }
             if (invalid_topic) {
                 std::cerr << "It seems like you specified a port number " << port
                           << " that does not correspond to a port on which images are being published." << std::endl;
@@ -137,6 +143,12 @@ int main(int argc, char *argv[]) {
             const std::string topic_name = argv[2];
             for (const auto &image_topic : nodar::zmq::IMAGE_TOPICS) {
                 if (topic_name == image_topic.name) {
+                    topic = image_topic;
+                    invalid_topic = false;
+                }
+            }
+            for (const auto &image_topic : nodar::zmq::EXTERNAL_TOPBOT_TOPICS) {
+                if (port == image_topic.port) {
                     topic = image_topic;
                     invalid_topic = false;
                 }
