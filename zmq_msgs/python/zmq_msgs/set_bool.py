@@ -38,8 +38,9 @@ class SetBoolRequest:
     @staticmethod
     def writes(buffer, offset, val):
         offset = SetBoolRequest.infos().write(buffer, offset)
-        buffer[offset:offset + struct.calcsize('?')] = struct.pack('?', val)
-        return offset + struct.calcsize('?')
+        new_offset = offset + struct.calcsize('?')
+        buffer[offset:new_offset] = struct.pack('?', val)
+        return new_offset
 
     def write(self, buffer, offset=0):
         return self.writes(buffer, offset, self.val)
@@ -77,8 +78,9 @@ class SetBoolResponse:
     @staticmethod
     def writes(buffer, offset, success):
         offset = SetBoolResponse.infos().write(buffer, offset)
-        buffer[offset:offset + struct.calcsize('?')] = struct.pack('?', success)
-        return offset + struct.calcsize('?')
+        new_offset = offset + struct.calcsize('?')
+        buffer[offset:new_offset] = struct.pack('?', success)
+        return new_offset
 
     def write(self, buffer, offset=0):
         return self.writes(buffer, offset, self.success)

@@ -96,8 +96,8 @@ class StampedImage:
     def is_empty(self):
         return self.img.size == 0
 
-    def read(self, buffer, offset=0):
-        info, offset = MessageInfo.reads(buffer, offset)
+    def read(self, buffer, original_offset=0):
+        info, offset = MessageInfo.reads(buffer, original_offset)
         if info.is_different(self.info(), "StampedImage"):
             return None
 
@@ -106,13 +106,12 @@ class StampedImage:
             print("According to the message, the image has the impossibly large of dimensions "
                   f"{rows} x {cols}. We are ignoring this message so that you don't run out of memory.")
             return
-        offset += struct.calcsize('QQIII')
 
         # Convert opencv type to something more understandable
         channels, dtype = decode_cv_type(cv_type)
         self.img = np.frombuffer(buffer, dtype=dtype, count=rows * cols * channels,
-                                 offset=StampedImage.HEADER_SIZE).reshape(rows, cols, channels)
-        return offset + StampedImage.msg_size(rows, cols, channels, dtype)
+                                 offset=original_offset + StampedImage.HEADER_SIZE).reshape(rows, cols, channels)
+        return original_offset + StampedImage.msg_size(rows, cols, channels, dtype)
 
     @staticmethod
     def reads(buffer, offset=0):
@@ -121,7 +120,7 @@ class StampedImage:
         return image, offset
 
     @staticmethod
-    def writes(buffer, offset, time, frame_id, img):
+    def writes(buffer, original_offset, time, frame_id, img):
         if img.ndim == 2:
             rows, cols = img.shape
             channels = 1
@@ -130,9 +129,9 @@ class StampedImage:
         else:
             print(f"Cannot write this image, it has either less than 2 or more than 3 dimensions")
             return
-        offset = StampedImage.infos().write(buffer, offset)
+        offset = StampedImage.infos().write(buffer, original_offset)
         struct.pack_into('QQIII', buffer, offset, time, frame_id, rows, cols, encode_cv_type(channels, img.dtype))
-        offset += struct.calcsize('QQIII')
+        offset = original_offset + StampedImage.HEADER_SIZE
         buffer[offset:offset + img.nbytes] = img
         return offset + img.nbytes
 
