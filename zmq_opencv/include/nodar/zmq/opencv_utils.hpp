@@ -39,7 +39,7 @@ inline auto depthToString(const int& depth) {
     }
 }
 
-inline auto isValidExternalTopic(const cv::Mat& img, const Topic& topic) {
+inline auto isValidExternalImage(const cv::Mat& img, const Topic& topic) {
     const auto depth = img.depth();
     const auto channels = img.channels();
 

@@ -21,7 +21,7 @@ public:
             return false;
         }
 
-        if (!isValidExternalTopic(img, topic)) {
+        if (!isValidExternalImage(img, topic)) {
             return false;
         }
 
