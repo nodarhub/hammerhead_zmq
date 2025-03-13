@@ -51,8 +51,9 @@ inline auto isValidExternalImage(const cv::Mat& img, const Topic& topic) {
                       << "  Expected: depth=CV_8U or CV_16U, channels=3\n";
             return false;
         }
-    } else if (topic.name == EXTERNAL_TOPBOT_TOPICS[1].name) {
-        // Bayer BGGR Format (1 Channel)
+    } else if (topic.name == EXTERNAL_TOPBOT_TOPICS[1].name or topic.name == EXTERNAL_TOPBOT_TOPICS[2].name or
+               topic.name == EXTERNAL_TOPBOT_TOPICS[3].name or topic.name == EXTERNAL_TOPBOT_TOPICS[4].name) {
+        // Bayer Format (1 Channel)
         if (!((depth == CV_8U || depth == CV_16U) && channels == 1)) {
             std::cerr << "[ERROR] Invalid Bayer BGGR image type.\n"
                       << "  Received: depth=" << depthToString(depth) << ", channels=" << channels << "\n"
@@ -63,7 +64,10 @@ inline auto isValidExternalImage(const cv::Mat& img, const Topic& topic) {
         std::cerr << "[ERROR] Unknown topic: " << topic.name << "\n"
                   << "  Supported topics:\n"
                   << "    - " << EXTERNAL_TOPBOT_TOPICS[0].name << "\n"
-                  << "    - " << EXTERNAL_TOPBOT_TOPICS[1].name << "\n";
+                  << "    - " << EXTERNAL_TOPBOT_TOPICS[1].name << "\n"
+                  << "    - " << EXTERNAL_TOPBOT_TOPICS[2].name << "\n"
+                  << "    - " << EXTERNAL_TOPBOT_TOPICS[3].name << "\n"
+                  << "    - " << EXTERNAL_TOPBOT_TOPICS[4].name << "\n";
         return false;
     }
 
