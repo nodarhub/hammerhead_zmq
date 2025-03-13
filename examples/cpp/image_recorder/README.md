@@ -1,4 +1,4 @@
-This example is a simple OpenCV viewer for images published by Hammerhead with ZMQ.
+This example demonstrates how to record images published by Hammerhead with ZMQ.
 
 To build this example, follow the traditional CMake process:
 
@@ -8,13 +8,13 @@ To build this example, follow the traditional CMake process:
     cmake --build . --config Release
 
 To run this example, you need to provide the IP address of the ZMQ source (the device running hammerhead),
-as well as the topic name or port number:
+the topic name or port number, and the folder where you want the data to be saved:
 
     # Linux
-    ./image_viewer src_ip image_topic_or_port
+    ./image_recorder src_ip image_topic_or_port output_dir
 
     # Windows 
-    ./Release/image_viewer.exe src_ip image_topic_or_port
+    ./Release/image_recorder.exe src_ip image_topic_or_port output_dir
 
 The file `topic_ports.hpp` defines the `topic->port` mappings.
 For example, in that file, you will find the entry
@@ -23,17 +23,17 @@ For example, in that file, you will find the entry
 
 which indicates that the raw right images will be sent on port 9801.
 If you run this example on the device running Hammerhead,
-then the following command would open an image viewer for the raw right images:
+then the following command would save the raw right images in the `raw_right_images` folder:
 
-    ./image_viewer 127.0.0.1 9801 
+    ./image_recorder 127.0.0.1 9801 raw_right_images
 
 Alternatively, you can specify the topic name:
 
-    ./image_viewer 127.0.0.1 nodar/right/image_raw
+    ./image_recorder 127.0.0.1 nodar/right/image_raw raw_right_images
 
 Note that the parameter `image_topic` should be one of the `IMAGE_TOPICS` in `topic_ports.hpp`. Furthermore:
 
-- On Windows, replace `./image_viewer` with `./Release/image_viewer.exe` in the above commands.
+- On Windows, replace `./image_recorder` with `./Release/image_recorder.exe` in the above commands.
 - If you specify an incorrect IP address or run this example when Hammerhead is not running, then ZMQ will attempt to
   subscribe, and nothing will happen. It will appear like the binary is just waiting.
 

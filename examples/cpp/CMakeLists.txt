@@ -1,6 +1,7 @@
 add_subdirectory(common)
 add_subdirectory(depth_to_disparity)
 add_subdirectory(hammerhead_scheduler)
+add_subdirectory(image_recorder)
 add_subdirectory(image_viewer)
 add_subdirectory(legacy_obstacle_data_converter)
 add_subdirectory(obstacle_data_generator)
