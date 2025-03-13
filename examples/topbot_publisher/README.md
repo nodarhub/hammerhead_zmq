@@ -22,11 +22,12 @@ the entry
 
     "external/topbot/bayer_rggb", 55001
 
-which indicates that the Bayer BGGR format images will be sent on port 55001. 
+which indicates that the Bayer RGGB format images will be sent on port 55001. 
 
-Alternatively, you can specify the topic name:
+You can specify either the port or topic name:
 
-    ./topbot_publisher <topbot_data_directory> external/topbot/bayer_bggr
+    ./topbot_publisher <topbot_data_directory> 55001
+    ./topbot_publisher <topbot_data_directory> external/topbot/bayer_rggb
 
 Note that the parameter `topbot_topic_or_port` should be one of the `EXTERNAL_TOPBOT_TOPICS` in `topic_ports.hpp`.
 
