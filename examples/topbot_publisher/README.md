@@ -20,7 +20,7 @@ Note that the images inside the topbot_data_directory should be sequentially num
 The file `topic_ports.hpp` defines the `topic->port` mappings for topbots. For example, in that file, you will find
 the entry
 
-    "external/topbot/bayer_bggr", 5001
+    "external/topbot/bayer_rggb", 5001
 
 which indicates that the Bayer BGGR format images will be sent on port 5001. 
 
@@ -35,4 +35,7 @@ To kill this example, just press CTRL+C.
 Some currently valid topbot topic names are:
 
     external/topbot/bgr
+    external/topbot/bayer_rggb
+    external/topbot/bayer_grbg
     external/topbot/bayer_bggr
+    external/topbot/bayer_gbrg
