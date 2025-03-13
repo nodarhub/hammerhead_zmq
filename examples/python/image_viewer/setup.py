@@ -10,7 +10,7 @@ setup(
     zip_safe=False,
     maintainer='nodar',
     maintainer_email='support@nodarsensor.com',
-    description='This example is a simple OpenCV viewer for images published by Hammerhead using ZMQ.',
+    description='This example is a simple OpenCV viewer for images published by Hammerhead with ZMQ.',
     license='TODO',
     entry_points={
         'console_scripts': [
