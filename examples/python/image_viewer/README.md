@@ -19,7 +19,7 @@ Alternatively, you can specify the topic name:
 
     python image_viewer.py 127.0.0.1 nodar/right/image_raw
 
-Note that the parameter `image_topic` should be one of the `IMAGE_TOPICS` in `topic_ports.py`. 
+Note that the parameter `image_topic` should be one of the `IMAGE_TOPICS` in `topic_ports.py`.
 Furthermore, if you specify an incorrect IP address or run this example when Hammerhead is not running,
 then ZMQ will attempt to subscribe, and nothing will happen. It will appear like the binary is just waiting.
 

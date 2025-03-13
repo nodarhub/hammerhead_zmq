@@ -7,7 +7,7 @@ To build this example, follow the traditional CMake process:
     cmake ..
     cmake --build . --config Release
 
-To run this example, you need to provide the IP address of the ZMQ source (the device running hammerhead),
+To run this example, you need to provide the IP address of the ZMQ source (the device running Hammerhead),
 the topic name or port number, and the folder where you want the data to be saved:
 
     # Linux
