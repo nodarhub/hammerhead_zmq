@@ -111,7 +111,7 @@ def main():
                     f"It seems like you specified a topic name {topic_name} that does not correspond to a topic on which images are being published.")
                 return
 
-    output_dirname = sys.argv[3] if sys.argc >= 4 else DEFAULT_OUTPUT_DIR
+    output_dirname = sys.argv[3] if len(sys.argv) >= 4 else DEFAULT_OUTPUT_DIR
     endpoint = f"tcp://{ip}:{topic.port}"
     subscriber = ZMQImageRecorder(endpoint, output_dirname)
     running = True
