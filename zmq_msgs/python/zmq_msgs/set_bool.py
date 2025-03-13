@@ -11,39 +11,25 @@ class SetBoolRequest:
     def __init__(self, val=False):
         self.val = val
 
+    def info(self):
+        return MessageInfo(6)
+
+    def msg_size(self):
+        return self.info().msg_size() + struct.calcsize('?')
+
     def read(self, buffer, offset=0):
-        info, offset = MessageInfo.reads(buffer, offset)
-        if info.is_different(self.info(), "SetBoolRequest"):
+        msg_info = MessageInfo()
+        offset = msg_info.read(buffer, offset)
+        if msg_info.is_different(self.info(), "SetBoolRequest"):
             return None
         self.val, = struct.unpack_from('?', buffer, offset)
         return offset + struct.calcsize('?')
 
-    @staticmethod
-    def msg_size():
-        return MessageInfo.msg_size() + struct.calcsize('?')
-
-    @staticmethod
-    def infos():
-        return MessageInfo(6)
-
-    def info(self, ):
-        return SetBoolRequest.infos()
-
-    @staticmethod
-    def reads(buffer, offset=0):
-        request = SetBoolRequest()
-        new_offset = request.read(buffer, offset)
-        return request, new_offset
-
-    @staticmethod
-    def writes(buffer, offset, val):
-        offset = SetBoolRequest.infos().write(buffer, offset)
+    def write(self, buffer, offset):
+        offset = self.info().write(buffer, offset)
         new_offset = offset + struct.calcsize('?')
-        buffer[offset:new_offset] = struct.pack('?', val)
+        buffer[offset:new_offset] = struct.pack('?', self.val)
         return new_offset
-
-    def write(self, buffer, offset=0):
-        return self.writes(buffer, offset, self.val)
 
 
 class SetBoolResponse:
@@ -51,36 +37,22 @@ class SetBoolResponse:
     def __init__(self, success=False):
         self.success = success
 
+    def info(self):
+        return MessageInfo(7)
+
+    def msg_size(self):
+        return self.info().msg_size() + struct.calcsize('?')
+
     def read(self, buffer, offset=0):
-        info, offset = MessageInfo.reads(buffer, offset)
-        if info.is_different(self.info(), "SetBoolResponse"):
+        msg_info = MessageInfo()
+        offset = msg_info.read(buffer, offset)
+        if msg_info.is_different(self.info(), "SetBoolResponse"):
             return None
         self.success, = struct.unpack_from('?', buffer, offset)
         return offset + struct.calcsize('?')
 
-    @staticmethod
-    def msg_size():
-        return MessageInfo.msg_size() + struct.calcsize('?')
-
-    @staticmethod
-    def infos():
-        return MessageInfo(7)
-
-    def info(self, ):
-        return SetBoolResponse.infos()
-
-    @staticmethod
-    def reads(buffer, offset=0):
-        response = SetBoolResponse()
-        new_offset = response.read(buffer, offset)
-        return response, new_offset
-
-    @staticmethod
-    def writes(buffer, offset, success):
-        offset = SetBoolResponse.infos().write(buffer, offset)
+    def write(self, buffer, offset):
+        offset = self.info().write(buffer, offset)
         new_offset = offset + struct.calcsize('?')
-        buffer[offset:new_offset] = struct.pack('?', success)
+        buffer[offset:new_offset] = struct.pack('?', self.success)
         return new_offset
-
-    def write(self, buffer, offset=0):
-        return self.writes(buffer, offset, self.success)

@@ -73,32 +73,21 @@ def encode_cv_type(channels, dtype):
 class StampedImage:
     HEADER_SIZE = 64
 
-    def __init__(self, ):
-        self.time = 0
-        self.frame_id = 0
-        self.img = None
+    def __init__(self, time=0, frame_id=0, img=None):
+        self.time = time
+        self.frame_id = frame_id
+        self.img = img
 
-    @staticmethod
-    def msg_size(rows, cols, channels, dtype):
-        return StampedImage.HEADER_SIZE + StampedImage.data_size(rows, cols, channels, dtype)
-
-    @staticmethod
-    def infos():
+    def info(self):
         return MessageInfo(0)
 
-    def info(self, ):
-        return StampedImage.infos()
-
-    @staticmethod
-    def data_size(rows, cols, channels, dtype):
-        return rows * cols * channels * np.dtype(dtype).itemsize
-
-    def is_empty(self):
-        return self.img.size == 0
+    def msg_size(self):
+        return StampedImage.HEADER_SIZE + self.img.nbytes
 
     def read(self, buffer, original_offset=0):
-        info, offset = MessageInfo.reads(buffer, original_offset)
-        if info.is_different(self.info(), "StampedImage"):
+        msg_info = MessageInfo()
+        offset = msg_info.read(buffer, original_offset)
+        if msg_info.is_different(self.info(), "StampedImage"):
             return None
 
         self.time, self.frame_id, rows, cols, cv_type = struct.unpack_from('QQIII', buffer, offset)
@@ -111,29 +100,20 @@ class StampedImage:
         channels, dtype = decode_cv_type(cv_type)
         self.img = np.frombuffer(buffer, dtype=dtype, count=rows * cols * channels,
                                  offset=original_offset + StampedImage.HEADER_SIZE).reshape(rows, cols, channels)
-        return original_offset + StampedImage.msg_size(rows, cols, channels, dtype)
+        return original_offset + self.msg_size()
 
-    @staticmethod
-    def reads(buffer, offset=0):
-        image = StampedImage()
-        offset = image.read(buffer, offset)
-        return image, offset
-
-    @staticmethod
-    def writes(buffer, original_offset, time, frame_id, img):
+    def write(self, buffer, original_offset):
+        time, frame_id, img = self.time, self.frame_id, self.img
         if img.ndim == 2:
             rows, cols = img.shape
             channels = 1
         elif img.ndim == 3:
             rows, cols, channels = img.shape
         else:
-            print(f"Cannot write this image, it has either less than 2 or more than 3 dimensions")
+            print(f"Cannot write this image, it has either less than 2 dimensions, or more than 3 dimensions")
             return
-        offset = StampedImage.infos().write(buffer, original_offset)
+        offset = self.info().write(buffer, original_offset)
         struct.pack_into('QQIII', buffer, offset, time, frame_id, rows, cols, encode_cv_type(channels, img.dtype))
         offset = original_offset + StampedImage.HEADER_SIZE
         buffer[offset:offset + img.nbytes] = img.tobytes()
-        return offset + img.nbytes
-
-    def write(self, buffer, offset):
-        return self.writes(buffer, offset, self.time, self.frame_id, self.img)
+        return original_offset + self.msg_size()

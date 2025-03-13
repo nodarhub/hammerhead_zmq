@@ -46,8 +46,9 @@ class TopbotPublisher:
         if not (img.dtype == np.uint8 or img.dtype == np.uint16):
             print(f"Hammerhead expects either uint8 or uint16 pixels")
             return False
-        buffer = bytearray(StampedImage.msg_size(img.shape[0], img.shape[1], img.shape[2], img.dtype))
-        StampedImage.writes(buffer, 0, timestamp, frame_id, img)
+        stamped_image = StampedImage(timestamp, frame_id, img)
+        buffer = bytearray(stamped_image.msg_size())
+        stamped_image.write(buffer, 0)
         self.publisher.send(buffer)
         return True
 

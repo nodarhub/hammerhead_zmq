@@ -5,7 +5,7 @@ class MessageInfo:
     MAJOR_VERSION = 0
     MINOR_VERSION = 1
 
-    def __init__(self, message_type):
+    def __init__(self, message_type=-1): # -1 denotes INVALID
         self.message_type = message_type
         self.major_version = self.MAJOR_VERSION
         self.minor_version = self.MINOR_VERSION
@@ -31,24 +31,16 @@ class MessageInfo:
             return True
         return False
 
-    @staticmethod
-    def msg_size():
+    def msg_size(self):
         return struct.calcsize('HBB')
 
     def read(self, buffer, offset=0):
-        self.message_type, self.major_version, self.minor_version,  = struct.unpack_from('HBB', buffer, offset)
+        self.message_type, self.major_version, self.minor_version, = struct.unpack_from('HBB', buffer, offset)
         return offset + self.msg_size()
 
-    @staticmethod
-    def reads(buffer, offset=0):
-        message_info = MessageInfo(0)
-        new_offset = message_info.read(buffer, offset)
-        return message_info, new_offset
-
-    @staticmethod
-    def writes(buffer, offset, message_type, major_version, minor_version):
-        buffer[offset:offset + MessageInfo.msg_size()] = struct.pack('HBB', message_type, major_version, minor_version)
-        return offset + MessageInfo.msg_size()
-
-    def write(self, buffer, offset=0):
-        return self.writes(buffer, offset, self.message_type, self.major_version, self.minor_version)
+    def write(self, buffer, offset):
+        buffer[offset:offset + self.msg_size()] = struct.pack('HBB',
+                                                              self.message_type,
+                                                              self.major_version,
+                                                              self.minor_version)
+        return offset + self.msg_size()
