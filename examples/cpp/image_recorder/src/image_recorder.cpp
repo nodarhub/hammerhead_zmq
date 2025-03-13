@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    const auto output_dirname = argc >= 4 ? argv[2] : DEFAULT_OUTPUT_DIR;
+    const auto output_dirname = argc >= 4 ? argv[3] : DEFAULT_OUTPUT_DIR;
     const auto endpoint = std::string("tcp://") + ip + ":" + std::to_string(topic.port);
     ZMQImageRecorder subscriber(endpoint, output_dirname);
     while (running) {
