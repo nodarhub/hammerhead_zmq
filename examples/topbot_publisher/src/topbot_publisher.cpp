@@ -29,7 +29,7 @@ void printUsage() {
            "     ./topbot_publisher <topbot_data_directory> <topic>\n\n"
            "In the meantime, we are going to assume that you are publishing BGR images, that is, we assume "
            "that you specified\n"
-           "     ./topbot_publisher <topbot_data_directory> 5000\n"
+           "     ./topbot_publisher <topbot_data_directory> 55000\n"
            "     ./topbot_publisher <topbot_data_directory> external/topbot_bgr\n\n"
         << "Note that the list of EXTERNAL_TOPBOT_TOPICS mappings is in topic_ports.hpp header in the zmq_msgs target."
         << "\n--------------------------------------------------------------------------------------------------\n";

@@ -13,11 +13,11 @@ struct Topic {
 };
 
 // External Topbot Topics
-constexpr std::array<Topic, 5> EXTERNAL_TOPBOT_TOPICS{{{"external/topbot/bgr", 5000},  //
-                                                       {"external/topbot/bayer_rggb", 5001},  //
-                                                       {"external/topbot/bayer_grbg", 5002},  //
-                                                       {"external/topbot/bayer_bggr", 5003},  //
-                                                       {"external/topbot/bayer_gbrg", 5004}}};
+constexpr std::array<Topic, 5> EXTERNAL_TOPBOT_TOPICS{{{"external/topbot/bgr", 55000},  //
+                                                       {"external/topbot/bayer_rggb", 55001},  //
+                                                       {"external/topbot/bayer_grbg", 55002},  //
+                                                       {"external/topbot/bayer_bggr", 55003},  //
+                                                       {"external/topbot/bayer_gbrg", 55004}}};
 
 // Image topics internal to Hammerhead
 constexpr std::array<Topic, 7> IMAGE_TOPICS{{{"nodar/left/image_raw", 9800},  //
