@@ -76,13 +76,13 @@ DEFAULT_TOPIC = IMAGE_TOPICS[0]
 def print_usage(DEFAULT_IP, DEFAULT_PORT):
     print("You should specify the Orin's IP address as well as\n"
           "the port of the message that you want to listen to like this:\n\n"
-          "     ./image_viewer orin_ip port\n\n"
-          "e.g. ./image_viewer 192.168.1.9 9800\n\n"
+          "     python image_viewer.py orin_ip port\n\n"
+          "e.g. python image_viewer.py 192.168.1.9 9800\n\n"
           "Alternatively, you can specify one of the image topic names provided in topic_ports.hpp of zmq_msgs:"
-          "e.g. ./image_viewer 192.168.1.9 nodar/right/image_raw\n\n"
+          "e.g. python image_viewer.py 192.168.1.9 nodar/right/image_raw\n\n"
           "In the meantime, we are going to assume that you are running this on the Orin itself,\n"
           "and that you want the images on port 9800, that is, we assume that you specified\n\n"
-          f"     ./image_viewer {DEFAULT_IP} {DEFAULT_PORT}\n\n"
+          f"     python image_viewer.py {DEFAULT_IP} {DEFAULT_PORT}\n\n"
           "Note that the list of topic/port mappings is in topic_ports.hpp header in the zmq_msgs target.\n"
           "----------------------------------------")
 

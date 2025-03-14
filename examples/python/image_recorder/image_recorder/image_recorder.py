@@ -50,13 +50,13 @@ class ZMQImageRecorder:
 def print_usage(default_ip, default_port, default_output_dir):
     print("You should specify the IP address of the ZMQ source (the device running Hammerhead),\n"
           "the topic name or port number, and the folder where you want the data to be saved:\n\n"
-          "     ./image_recorder orin_ip port output_dir\n\n"
-          "e.g. ./image_recorder 192.168.1.9 9800 images\n\n"
+          "     python image_recorder.py orin_ip port output_dir\n\n"
+          "e.g. python image_recorder.py 192.168.1.9 9800 images\n\n"
           "Alternatively, you can specify one of the image topic names provided in topic_ports.hpp of zmq_msgs:"
-          "e.g. ./image_recorder 192.168.1.9 nodar/right/image_raw recorded_images\n\n"
+          "e.g. python image_recorder.py 192.168.1.9 nodar/right/image_raw recorded_images\n\n"
           "If unspecified, then we assume that you are running this on the device running Hammerhead,\n"
           "along with the other defaults\n\n"
-          f"     ./image_recorder {default_ip} {default_port} {default_output_dir}\n\n"
+          f"     python image_recorder.py {default_ip} {default_port} {default_output_dir}\n\n"
           "Note that the list of topic/port mappings is in topic_ports.hpp header in the zmq_msgs target.\n"
           "----------------------------------------")
 
