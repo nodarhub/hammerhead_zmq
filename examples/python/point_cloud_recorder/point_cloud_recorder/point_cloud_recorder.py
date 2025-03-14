@@ -12,23 +12,29 @@ except ImportError:
     from zmq_msgs.topic_ports import POINT_CLOUD_TOPIC
 
 
-def writePlyAscii(filename, point_cloud):
+def writePlyAscii(filename, points):
     with open(filename, 'w') as out:
         out.write("ply\n")
         out.write("format ascii 1.0\n")
-        out.write(f"element vertex {point_cloud.shape[0]}\n")
-        out.write("property float x\nproperty float y\nproperty float z\nend_header\n")
-        for pt in point_cloud:
+        out.write(f"element vertex {len(points)}\n")
+        out.write("property float x\n")
+        out.write("property float y\n")
+        out.write("property float z\n")
+        out.write("end_header\n")
+        for pt in points:
             out.write(f"{pt[0]} {pt[1]} {pt[2]}\n")
 
 
-def writePlyBinary(filename, point_cloud):
+def writePlyBinary(filename, points):
     with open(filename, 'wb') as out:
         out.write(b"ply\n")
         out.write(b"format binary_little_endian 1.0\n")
-        out.write(f"element vertex {point_cloud.shape[0]}\n".encode())
-        out.write(b"property float x\nproperty float y\nproperty float z\nend_header\n")
-        out.write(point_cloud.tobytes())
+        out.write(f"element vertex {len(points)}\n".encode())
+        out.write(b"property float x\n")
+        out.write(b"property float y\n")
+        out.write(b"property float z\n")
+        out.write(b"end_header\n")
+        out.write(points.tobytes())
 
 
 class PointCloudRecorder:
