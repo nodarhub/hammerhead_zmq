@@ -35,15 +35,22 @@ def writePlyBinary(filename, points, colors):
     assert len(points) == len(colors), "Points and colors must be the same size"
     rgb8 = (colors * 255).astype(np.uint8)
     alpha = np.zeros((len(points), 1), dtype=np.uint8)
-    point_cloud = np.hstack((points, rgb8, alpha)).astype(np.dtype([
+    point_cloud = np.empty(len(points), dtype=[
         ('x', np.float32),
         ('y', np.float32),
         ('z', np.float32),
         ('red', np.uint8),
         ('green', np.uint8),
         ('blue', np.uint8),
-        ('alpha', np.uint8)  # Adding the alpha channel
-    ]))
+        ('alpha', np.uint8)
+    ])
+    point_cloud['x'] = points[:, 0]
+    point_cloud['y'] = points[:, 1]
+    point_cloud['z'] = points[:, 2]
+    point_cloud['red'] = rgb8[:, 0]
+    point_cloud['green'] = rgb8[:, 1]
+    point_cloud['blue'] = rgb8[:, 2]
+    point_cloud['alpha'] = alpha[:, 0]
     with open(filename, 'wb') as out:
         out.write(b"ply\n")
         out.write(b"format binary_little_endian 1.0\n")
