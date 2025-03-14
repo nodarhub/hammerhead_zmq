@@ -60,14 +60,14 @@ class ZMQImageRecorder:
 
 
 def print_usage(default_ip, default_port, default_output_dir):
-    print("You should specify the Orin's IP address as well as\n"
-          "the port of the message that you want to listen to like this:\n\n"
-          "     ./image_recorder orin_ip port\n\n"
-          "e.g. ./image_recorder 192.168.1.9 9800\n\n"
+    print("You should specify the IP address of the ZMQ source (the device running Hammerhead),\n"
+          "the topic name or port number, and the folder where you want the data to be saved:\n\n"
+          "     ./image_recorder orin_ip port output_dir\n\n"
+          "e.g. ./image_recorder 192.168.1.9 9800 images\n\n"
           "Alternatively, you can specify one of the image topic names provided in topic_ports.hpp of zmq_msgs:"
-          "e.g. ./image_recorder 192.168.1.9 nodar/right/image_raw\n\n"
-          "In the meantime, we are going to assume that you are running this on the Orin itself,\n"
-          "and that you want the images on port 9800, that is, we assume that you specified\n\n"
+          "e.g. ./image_recorder 192.168.1.9 nodar/right/image_raw recorded_images\n\n"
+          "If unspecified, then we assume that you are running this on the device running Hammerhead,\n"
+          "along with the other defaults\n\n"
           f"     ./image_recorder {default_ip} {default_port} {default_output_dir}\n\n"
           "Note that the list of topic/port mappings is in topic_ports.hpp header in the zmq_msgs target.\n"
           "----------------------------------------")
