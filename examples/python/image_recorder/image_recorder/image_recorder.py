@@ -12,18 +12,6 @@ except ImportError:
     from zmq_msgs.image import StampedImage
     from zmq_msgs.topic_ports import IMAGE_TOPICS
 
-# Mapping of OpenCV types to strings
-types = {
-    0: "CV_8UC1",
-    16: "CV_8UC3",
-    1: "CV_8SC1",
-    17: "CV_8SC3",
-    2: "CV_16UC1",
-    18: "CV_16UC3",
-    3: "CV_16SC1",
-    19: "CV_16SC3",
-}
-
 
 class ZMQImageRecorder:
     def __init__(self, endpoint, output_dir):
