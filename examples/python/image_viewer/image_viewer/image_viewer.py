@@ -26,11 +26,6 @@ types = {
 }
 
 
-def print_details(mat):
-    print(
-        f"{mat.shape[0]}, {mat.shape[1]}, {mat.shape[2] if len(mat.shape) > 2 else 1}, {types.get(mat.dtype.itemsize * 8 + ((mat.shape[2] - 1) if len(mat.shape) > 2 else 0))}")
-
-
 class ZMQImageViewer:
     def __init__(self, endpoint: str):
         self.context = zmq.Context()
