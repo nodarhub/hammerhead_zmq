@@ -76,7 +76,8 @@ int main(int argc, char* argv[]) {
             const auto timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
                                        std::chrono::system_clock::now().time_since_epoch())
                                        .count();
-            if (publisher.publishImage(img, timestamp, frame_id)) {
+            const auto cvt_to_bgr_code = cv::COLOR_BGR2BGRA;
+            if (publisher.publishImage(img, timestamp, frame_id, cvt_to_bgr_code)) {
                 std::cout << "Published frame " << frame_id << " from " << file << std::endl;
                 frame_id++;
             }

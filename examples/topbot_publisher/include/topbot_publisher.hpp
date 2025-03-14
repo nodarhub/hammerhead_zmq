@@ -13,27 +13,28 @@ namespace zmq {
 
 class TopbotPublisher {
 public:
-    explicit TopbotPublisher(const Topic& topic_) : topic(topic_), publisher(topic, "") {}
+    explicit TopbotPublisher(const uint16_t& port) : publisher(Topic{"external/topbot_raw", port}, "") {}
 
-    bool publishImage(const cv::Mat& img, const uint64_t& timestamp, const uint64_t& frame_id) {
+    bool publishImage(const cv::Mat& img, const uint64_t& timestamp, const uint64_t& frame_id,
+                      const uint8_t cvt_to_bgr_code) {
         if (img.empty()) {
             std::cerr << "Failed to load image" << std::endl;
             return false;
         }
 
-        if (!isValidExternalImage(img, topic)) {
+        if (!isValidExternalImage(img, cvt_to_bgr_code)) {
             return false;
         }
 
         auto buffer = publisher.getBuffer();
         buffer->resize(nodar::zmq::StampedImage::msgSize(img.rows, img.cols, img.type()));
-        nodar::zmq::StampedImage::write(buffer->data(), timestamp, frame_id, img.rows, img.cols, img.type(), img.data);
+        nodar::zmq::StampedImage::write(buffer->data(), timestamp, frame_id, img.rows, img.cols, img.type(),
+                                        cvt_to_bgr_code, img.data);
         publisher.send(buffer);
         return true;
     }
 
 private:
-    Topic topic;
     nodar::zmq::Publisher<nodar::zmq::StampedImage> publisher;
 };
 

@@ -3,6 +3,7 @@
 #include <nodar/zmq/image.hpp>
 #include <nodar/zmq/topic_ports.hpp>
 #include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 
 namespace nodar {
 namespace zmq {
@@ -39,11 +40,11 @@ inline auto depthToString(const int& depth) {
     }
 }
 
-inline auto isValidExternalImage(const cv::Mat& img, const Topic& topic) {
+inline auto isValidExternalImage(const cv::Mat& img, const uint8_t& cvt_to_bgr_code) {
     const auto depth = img.depth();
     const auto channels = img.channels();
 
-    if (topic.name == EXTERNAL_TOPBOT_TOPICS[0].name) {
+    if (cvt_to_bgr_code == cv::COLOR_BGR2BGRA) {
         // BGR Format (3 Channels)
         if (!((depth == CV_8U || depth == CV_16U) && channels == 3)) {
             std::cerr << "[ERROR] Invalid BGR image type.\n"
@@ -51,8 +52,8 @@ inline auto isValidExternalImage(const cv::Mat& img, const Topic& topic) {
                       << "  Expected: depth=CV_8U or CV_16U, channels=3\n";
             return false;
         }
-    } else if (topic.name == EXTERNAL_TOPBOT_TOPICS[1].name or topic.name == EXTERNAL_TOPBOT_TOPICS[2].name or
-               topic.name == EXTERNAL_TOPBOT_TOPICS[3].name or topic.name == EXTERNAL_TOPBOT_TOPICS[4].name) {
+    } else if (cvt_to_bgr_code == cv::COLOR_BayerBG2BGR or cvt_to_bgr_code == cv::COLOR_BayerGB2BGR or
+               cvt_to_bgr_code == cv::COLOR_BayerRG2BGR or cvt_to_bgr_code == cv::COLOR_BayerGR2BGR) {
         // Bayer Format (1 Channel)
         if (!((depth == CV_8U || depth == CV_16U) && channels == 1)) {
             std::cerr << "[ERROR] Invalid Bayer BGGR image type.\n"
@@ -61,13 +62,13 @@ inline auto isValidExternalImage(const cv::Mat& img, const Topic& topic) {
             return false;
         }
     } else {
-        std::cerr << "[ERROR] Unknown topic: " << topic.name << "\n"
-                  << "  Supported topics:\n"
-                  << "    - " << EXTERNAL_TOPBOT_TOPICS[0].name << "\n"
-                  << "    - " << EXTERNAL_TOPBOT_TOPICS[1].name << "\n"
-                  << "    - " << EXTERNAL_TOPBOT_TOPICS[2].name << "\n"
-                  << "    - " << EXTERNAL_TOPBOT_TOPICS[3].name << "\n"
-                  << "    - " << EXTERNAL_TOPBOT_TOPICS[4].name << "\n";
+        std::cerr << "[ERROR] Unknown cvt_to_bgr_code: " << cvt_to_bgr_code << "\n"
+                  << "  Supported cvt_to_bgr_code:\n"
+                  << "    - cv::COLOR_BGR2BGRA\n"
+                  << "    - cv::COLOR_BayerBG2BGR\n"
+                  << "    - cv::COLOR_BayerGB2BGR\n"
+                  << "    - cv::COLOR_BayerRG2BGR\n"
+                  << "    - cv::COLOR_BayerGR2BGR\n";
         return false;
     }
 
