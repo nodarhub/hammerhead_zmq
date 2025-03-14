@@ -28,7 +28,7 @@ class PointCloud:
         if msg_info.is_different(self.info(), "PointCloud"):
             return None
 
-        self.time, self.frame_id, num_points = struct.unpack_from('QQW', buffer, offset)
+        self.time, self.frame_id, num_points = struct.unpack_from('QQQ', buffer, offset)
         if num_points > 1e8:
             print(f"According to the message, the point cloud has {num_points}.  "
                   "We are ignoring this message so that you don't run out of memory.")
