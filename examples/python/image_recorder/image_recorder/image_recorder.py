@@ -45,7 +45,7 @@ class ZMQImageRecorder:
         img = stamped_image.img
         if img is None or img.size == 0:
             print("img is None or img.size == 0")
-            return True
+            return
 
         frame_id = stamped_image.frame_id
         if self.last_frame_id != 0 and frame_id != self.last_frame_id + 1:
@@ -56,10 +56,10 @@ class ZMQImageRecorder:
 
         # We recommend saving tiffs with no compression if the data rate is high.
         cv2.imwrite(self.output_dir + f"/{frame_id:09}.tiff", img, self.compression_params)
-        return True
+        return
 
 
-def print_usage(DEFAULT_IP, DEFAULT_PORT, DEFAULT_OUTPUT_DIR):
+def print_usage(default_ip, default_port, default_output_dir):
     print("You should specify the Orin's IP address as well as\n"
           "the port of the message that you want to listen to like this:\n\n"
           "     ./image_recorder orin_ip port\n\n"
@@ -68,22 +68,22 @@ def print_usage(DEFAULT_IP, DEFAULT_PORT, DEFAULT_OUTPUT_DIR):
           "e.g. ./image_recorder 192.168.1.9 nodar/right/image_raw\n\n"
           "In the meantime, we are going to assume that you are running this on the Orin itself,\n"
           "and that you want the images on port 9800, that is, we assume that you specified\n\n"
-          f"     ./image_recorder {DEFAULT_IP} {DEFAULT_PORT} {DEFAULT_OUTPUT_DIR}\n\n"
+          f"     ./image_recorder {default_ip} {default_port} {default_output_dir}\n\n"
           "Note that the list of topic/port mappings is in topic_ports.hpp header in the zmq_msgs target.\n"
           "----------------------------------------")
 
 
 def main():
-    DEFAULT_IP = "127.0.0.1"
-    DEFAULT_TOPIC = IMAGE_TOPICS[0]
-    DEFAULT_PORT = DEFAULT_TOPIC.port
-    DEFAULT_OUTPUT_DIR = "recorded_images"
+    default_ip = "127.0.0.1"
+    default_topic = IMAGE_TOPICS[0]
+    default_port = default_topic.port
+    default_output_dir = "recorded_images"
     if len(sys.argv) < 4:
-        print_usage(DEFAULT_IP, DEFAULT_PORT, DEFAULT_OUTPUT_DIR)
+        print_usage(default_ip, default_port, default_output_dir)
 
-    ip = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_IP
+    ip = sys.argv[1] if len(sys.argv) > 1 else default_ip
 
-    topic = DEFAULT_TOPIC
+    topic = default_topic
     if len(sys.argv) >= 3:
         try:
             port = int(sys.argv[2])
@@ -106,12 +106,11 @@ def main():
                     f"It seems like you specified a topic name {topic_name} that does not correspond to a topic on which images are being published.")
                 return
 
-    output_dirname = sys.argv[3] if len(sys.argv) >= 4 else DEFAULT_OUTPUT_DIR
+    output_dir = sys.argv[3] if len(sys.argv) >= 4 else default_output_dir
     endpoint = f"tcp://{ip}:{topic.port}"
-    subscriber = ZMQImageRecorder(endpoint, output_dirname)
-    running = True
-    while running:
-        running = subscriber.loop_once()
+    subscriber = ZMQImageRecorder(endpoint, output_dir)
+    while True:
+        subscriber.loop_once()
 
 
 if __name__ == "__main__":
