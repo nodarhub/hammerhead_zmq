@@ -5,6 +5,7 @@
 #include <csignal>
 #include <iostream>
 #include <thread>
+#include <unordered_map>
 
 #include "get_files.hpp"
 #include "nodar/zmq/topic_ports.hpp"
@@ -33,12 +34,30 @@ bool isValidPort(const uint16_t& port) {
     return true;
 }
 
+// Function to parse pixel format string to OpenCV conversion code
+uint8_t parsePixelFormat(const std::string& pixel_format) {
+    static const std::unordered_map<std::string, uint8_t> pixel_format_map = {
+        {"BGR", 0},  // Default, no conversion needed
+        {"Bayer_RGGB", cv::COLOR_BayerBG2BGR},
+        {"Bayer_GRBG", cv::COLOR_BayerGB2BGR},
+        {"Bayer_BGGR", cv::COLOR_BayerRG2BGR},
+        {"Bayer_GBRG", cv::COLOR_BayerGR2BGR},
+    };
+
+    auto it = pixel_format_map.find(pixel_format);
+    if (it == pixel_format_map.end()) {
+        throw std::invalid_argument("Unsupported pixel format: " + pixel_format);
+    }
+    return it->second;
+}
+
 int main(int argc, char* argv[]) {
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
 
-    if (argc < 3) {
-        std::cerr << "Usage: topbot_publisher <topbot_data_directory> <port_number>" << std::endl;
+    if (argc < 3 || argc > 4) {
+        std::cerr << "Usage: topbot_publisher <topbot_data_directory> <port_number> [pixel_format]" << std::endl;
+        std::cerr << "Supported pixel formats: BGR, Bayer_RGGB, Bayer_GRBG, Bayer_BGGR, Bayer_GBRG" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -59,9 +78,20 @@ int main(int argc, char* argv[]) {
         if (!isValidPort(port)) {
             return EXIT_FAILURE;
         }
-
     } catch (const std::exception& e) {
         std::cerr << "Invalid port number: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    uint8_t cvt_to_bgr_code = 0;  // Default: BGR, no conversion
+
+    try {
+        if (argc == 4) {
+            cvt_to_bgr_code = parsePixelFormat(argv[3]);
+        }
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "Supported formats: BGR, Bayer_RGGB, Bayer_GRBG, Bayer_BGGR, Bayer_GBRG" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -76,7 +106,6 @@ int main(int argc, char* argv[]) {
             const auto timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
                                        std::chrono::system_clock::now().time_since_epoch())
                                        .count();
-            const auto cvt_to_bgr_code = cv::COLOR_BGR2BGRA;
             if (publisher.publishImage(img, timestamp, frame_id, cvt_to_bgr_code)) {
                 std::cout << "Published frame " << frame_id << " from " << file << std::endl;
                 frame_id++;
