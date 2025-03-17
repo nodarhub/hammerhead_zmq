@@ -44,7 +44,7 @@ inline auto isValidExternalImage(const cv::Mat& img, const uint8_t& cvt_to_bgr_c
     const auto depth = img.depth();
     const auto channels = img.channels();
 
-    if (cvt_to_bgr_code == cv::COLOR_BGR2BGRA) {
+    if (cvt_to_bgr_code == 0) {
         // BGR Format (3 Channels)
         if (!((depth == CV_8U || depth == CV_16U) && channels == 3)) {
             std::cerr << "[ERROR] Invalid BGR image type.\n"
@@ -64,7 +64,7 @@ inline auto isValidExternalImage(const cv::Mat& img, const uint8_t& cvt_to_bgr_c
     } else {
         std::cerr << "[ERROR] Unknown cvt_to_bgr_code: " << cvt_to_bgr_code << "\n"
                   << "  Supported cvt_to_bgr_code:\n"
-                  << "    - cv::COLOR_BGR2BGRA\n"
+                  << "    - 0\n"
                   << "    - cv::COLOR_BayerBG2BGR\n"
                   << "    - cv::COLOR_BayerGB2BGR\n"
                   << "    - cv::COLOR_BayerRG2BGR\n"
