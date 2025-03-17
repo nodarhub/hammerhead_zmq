@@ -56,7 +56,7 @@ inline auto isValidExternalImage(const cv::Mat& img, const uint8_t& cvt_to_bgr_c
                cvt_to_bgr_code == cv::COLOR_BayerRG2BGR or cvt_to_bgr_code == cv::COLOR_BayerGR2BGR) {
         // Bayer Format (1 Channel)
         if (!((depth == CV_8U || depth == CV_16U) && channels == 1)) {
-            std::cerr << "[ERROR] Invalid Bayer BGGR image type.\n"
+            std::cerr << "[ERROR] Invalid Bayer image type.\n"
                       << "  Received: depth=" << depthToString(depth) << ", channels=" << channels << "\n"
                       << "  Expected: depth=CV_8U or CV_16U, channels=1\n";
             return false;
