@@ -43,6 +43,8 @@ class ZMQImageRecorder:
         print(f"\rFrame # {frame_id}, img.shape = {img.shape}, img.dtype = {img.dtype}", end="", flush=True)
 
         # We recommend saving tiffs with no compression if the data rate is high.
+        # Depending on the underlying image type, you might want to use stamped_image.cvt_to_bgr_code
+        # to convert to BGR before saving.
         cv2.imwrite(self.output_dir + f"/{frame_id:09}.tiff", img, self.compression_params)
         return
 

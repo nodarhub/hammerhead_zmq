@@ -71,6 +71,8 @@ public:
         std::cout << "\rFrame # " << frame_id << std::flush;
 
         // We recommend saving tiffs with no compression if the data rate is high.
+        // Depending on the underlying image type, you might want to use stamped_image.cvt_to_bgr_code
+        // to convert to BGR before saving.
         cv::imwrite(output_dir / frame_string(frame_id), img, compression_params);
     }
 
