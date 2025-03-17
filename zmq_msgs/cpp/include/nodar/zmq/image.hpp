@@ -9,6 +9,9 @@
 namespace nodar {
 namespace zmq {
 
+// This is used to denote that no conversion is necessary for a BGR image
+constexpr uint8_t NO_CONVERSION = 255;
+
 struct StampedImage {
     static constexpr uint64_t HEADER_SIZE = 64;
     static constexpr MessageInfo getInfo() { return MessageInfo(0); }
@@ -27,17 +30,23 @@ struct StampedImage {
     uint32_t rows{};
     uint32_t cols{};
     uint32_t type{};  // For compatibility, this should be equivalent to cv::Mat::type(), e.g. CV_8UC3
+    uint8_t cvt_to_bgr_code{NO_CONVERSION};
     std::vector<uint8_t> img;
 
     StampedImage() = default;
 
     StampedImage(uint64_t time_arg, uint64_t frame_id_arg, uint32_t rows_arg, uint32_t cols_arg, uint32_t type_arg,
                  const uint8_t *data)
+        : StampedImage(time_arg, frame_id_arg, rows_arg, cols_arg, type_arg, NO_CONVERSION, data) {}
+
+    StampedImage(uint64_t time_arg, uint64_t frame_id_arg, uint32_t rows_arg, uint32_t cols_arg, uint32_t type_arg,
+                 uint8_t cvt_to_bgr_code_arg, const uint8_t *data)
         : time(time_arg),
           frame_id(frame_id_arg),
           rows(rows_arg),
           cols(cols_arg),
           type(type_arg),
+          cvt_to_bgr_code(cvt_to_bgr_code_arg),
           img(data, data + dataSize()) {}
 
     explicit StampedImage(const uint8_t *src) {
@@ -64,6 +73,7 @@ struct StampedImage {
             return;
         }
         header = utils::read(header, type);
+        header = utils::read(header, cvt_to_bgr_code);
 
         // Copy the image data
         img = std::vector<uint8_t>(data, data + dataSize());
@@ -111,18 +121,24 @@ struct StampedImage {
     [[nodiscard]] uint64_t msgSize() const { return msgSize(rows, cols, type); }
 
     void update(uint64_t time_, uint64_t frame_id_, uint32_t rows_, uint32_t cols_, uint32_t type_,
-                const uint8_t *data_) {
+                uint8_t cvt_to_bgr_code_, const uint8_t *data_) {
         time = time_;
         frame_id = frame_id_;
         rows = rows_;
         cols = cols_;
         type = type_;
+        cvt_to_bgr_code = cvt_to_bgr_code_;
         img.resize(dataSize());
         memcpy(img.data(), data_, dataSize());
     }
 
+    void update(uint64_t time_, uint64_t frame_id_, uint32_t rows_, uint32_t cols_, uint32_t type_,
+                const uint8_t *data_) {
+        update(time_, frame_id_, rows_, cols_, type_, NO_CONVERSION, data_);
+    }
+
     static auto write(uint8_t *dst, uint64_t time_, uint64_t frame_id_, uint32_t rows_, uint32_t cols_, uint32_t type_,
-                      const uint8_t *img) {
+                      uint8_t cvt_to_bgr_code_, const uint8_t *img) {
         // The message has a header, followed by the image data
         auto header = dst;
         const auto data = header + HEADER_SIZE;
@@ -134,6 +150,7 @@ struct StampedImage {
         header = utils::append(header, rows_);
         header = utils::append(header, cols_);
         header = utils::append(header, type_);
+        header = utils::append(header, cvt_to_bgr_code_);
 
         // Copy the image data
         const auto data_size = dataSize(rows_, cols_, type_);
@@ -143,7 +160,12 @@ struct StampedImage {
         return data + data_size;
     }
 
-    auto write(uint8_t *dst) const { return write(dst, time, frame_id, rows, cols, type, img.data()); }
+    static auto write(uint8_t *dst, uint64_t time_, uint64_t frame_id_, uint32_t rows_, uint32_t cols_, uint32_t type_,
+                      const uint8_t *img) {
+        return write(dst, time_, frame_id_, rows_, cols_, type_, NO_CONVERSION, img);
+    }
+
+    auto write(uint8_t *dst) const { return write(dst, time, frame_id, rows, cols, type, cvt_to_bgr_code, img.data()); }
 };
 
 }  // namespace zmq

@@ -115,26 +115,17 @@ int main(int argc, char *argv[]) {
     // If no second argument was provided, then assume the default topic.
     // Try to parse the second argument to see if you provided a port number.
     nodar::zmq::Topic topic = DEFAULT_TOPIC;
+    int port = 0;
+    bool is_port_number = false;
     if (argc >= 3) {
         // See if we can parse the second argument as a port number
-        bool invalid_topic = true;
-        size_t port = 0;
         std::istringstream iss(argv[2]);
-        if (iss >> port) {
-            for (const auto &image_topic : nodar::zmq::IMAGE_TOPICS) {
-                if (port == image_topic.port) {
-                    topic = image_topic;
-                    invalid_topic = false;
-                }
-            }
-            if (invalid_topic) {
-                std::cerr << "It seems like you specified a port number " << port
-                          << " that does not correspond to a port on which images are being published." << std::endl;
-                return EXIT_FAILURE;
-            }
+        if (iss >> port && port > 0 && port <= 65535) {
+            is_port_number = true;
         } else {
             // It seems like you specified a topic name. Let's see if it is a valid image topic
             const std::string topic_name = argv[2];
+            bool invalid_topic = true;
             for (const auto &image_topic : nodar::zmq::IMAGE_TOPICS) {
                 if (topic_name == image_topic.name) {
                     topic = image_topic;
@@ -148,7 +139,12 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-    const auto endpoint = std::string("tcp://") + ip + ":" + std::to_string(topic.port);
+    std::string endpoint;
+    if (is_port_number) {
+        endpoint = "tcp://" + std::string(ip) + ":" + std::to_string(port);
+    } else {
+        endpoint = "tcp://" + std::string(ip) + ":" + std::to_string(topic.port);
+    }
     ZMQImageViewer subscriber(endpoint);
     while (running) {
         subscriber.loopOnce();
