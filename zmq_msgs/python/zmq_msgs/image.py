@@ -72,10 +72,12 @@ def encode_cv_type(channels, dtype):
 
 class StampedImage:
     HEADER_SIZE = 64
+    NO_CONVERSION = 255
 
-    def __init__(self, time=0, frame_id=0, img=None):
+    def __init__(self, time=0, frame_id=0, cvt_to_bgr_code=NO_CONVERSION, img=None):
         self.time = time
         self.frame_id = frame_id
+        self.cvt_to_bgr_code = cvt_to_bgr_code
         self.img = img
 
     def info(self):
@@ -90,7 +92,8 @@ class StampedImage:
         if msg_info.is_different(self.info(), "StampedImage"):
             return None
 
-        self.time, self.frame_id, rows, cols, cv_type = struct.unpack_from('QQIII', buffer, offset)
+        self.time, self.frame_id, rows, cols, cv_type, self.cvt_to_bgr_code = struct.unpack_from('QQIIIB', buffer,
+                                                                                                 offset)
         if rows * cols > 1e8:
             print("According to the message, the image has the impossibly large of dimensions "
                   f"{rows} x {cols}. We are ignoring this message so that you don't run out of memory.")
@@ -103,7 +106,7 @@ class StampedImage:
         return original_offset + self.msg_size()
 
     def write(self, buffer, original_offset):
-        time, frame_id, img = self.time, self.frame_id, self.img
+        time, frame_id, cvt_to_bgr_code, img = self.time, self.frame_id, self.cvt_to_bgr_code, self.img
         if img.ndim == 2:
             rows, cols = img.shape
             channels = 1
@@ -113,7 +116,8 @@ class StampedImage:
             print(f"Cannot write this image, it has either less than 2 dimensions, or more than 3 dimensions")
             return
         offset = self.info().write(buffer, original_offset)
-        struct.pack_into('QQIII', buffer, offset, time, frame_id, rows, cols, encode_cv_type(channels, img.dtype))
+        struct.pack_into('QQIIIB', buffer, offset, time, frame_id, rows, cols, encode_cv_type(channels, img.dtype),
+                         cvt_to_bgr_code)
         offset = original_offset + StampedImage.HEADER_SIZE
         buffer[offset:offset + img.nbytes] = img.tobytes()
         return original_offset + self.msg_size()
