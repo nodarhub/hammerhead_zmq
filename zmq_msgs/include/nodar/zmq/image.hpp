@@ -9,6 +9,9 @@
 namespace nodar {
 namespace zmq {
 
+// This is used to denote that no conversion is necessary for a BGR image
+constexpr uint8_t NO_CONVERSION = 255;
+
 struct StampedImage {
     static constexpr uint64_t HEADER_SIZE = 64;
     static constexpr MessageInfo getInfo() { return MessageInfo(0); }
@@ -27,14 +30,14 @@ struct StampedImage {
     uint32_t rows{};
     uint32_t cols{};
     uint32_t type{};  // For compatibility, this should be equivalent to cv::Mat::type(), e.g. CV_8UC3
-    uint8_t cvt_to_bgr_code{};
+    uint8_t cvt_to_bgr_code{NO_CONVERSION};
     std::vector<uint8_t> img;
 
     StampedImage() = default;
 
     StampedImage(uint64_t time_arg, uint64_t frame_id_arg, uint32_t rows_arg, uint32_t cols_arg, uint32_t type_arg,
                  const uint8_t *data)
-        : StampedImage(time_arg, frame_id_arg, rows_arg, cols_arg, type_arg, 0, data) {}
+        : StampedImage(time_arg, frame_id_arg, rows_arg, cols_arg, type_arg, NO_CONVERSION, data) {}
 
     StampedImage(uint64_t time_arg, uint64_t frame_id_arg, uint32_t rows_arg, uint32_t cols_arg, uint32_t type_arg,
                  uint8_t cvt_to_bgr_code_arg, const uint8_t *data)
@@ -131,7 +134,7 @@ struct StampedImage {
 
     void update(uint64_t time_, uint64_t frame_id_, uint32_t rows_, uint32_t cols_, uint32_t type_,
                 const uint8_t *data_) {
-        update(time_, frame_id_, rows_, cols_, type_, 0, data_);
+        update(time_, frame_id_, rows_, cols_, type_, NO_CONVERSION, data_);
     }
 
     static auto write(uint8_t *dst, uint64_t time_, uint64_t frame_id_, uint32_t rows_, uint32_t cols_, uint32_t type_,
@@ -159,7 +162,7 @@ struct StampedImage {
 
     static auto write(uint8_t *dst, uint64_t time_, uint64_t frame_id_, uint32_t rows_, uint32_t cols_, uint32_t type_,
                       const uint8_t *img) {
-        return write(dst, time_, frame_id_, rows_, cols_, type_, 0, img);
+        return write(dst, time_, frame_id_, rows_, cols_, type_, NO_CONVERSION, img);
     }
 
     auto write(uint8_t *dst) const { return write(dst, time, frame_id, rows, cols, type, cvt_to_bgr_code, img.data()); }
