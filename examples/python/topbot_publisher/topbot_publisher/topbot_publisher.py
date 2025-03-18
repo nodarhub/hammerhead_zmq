@@ -36,17 +36,8 @@ class TopbotPublisher:
     def __init__(self, port):
         self.publisher = Publisher("external/topbot_raw", "", port)
 
-    def publish_image(self, img, timestamp, frame_id):
-        if img is None:
-            print("Failed to load image")
-            return False
-        if img.ndim != 3:
-            print("Hammerhead will be expected 3-channel images")
-            return
-        if not (img.dtype == np.uint8 or img.dtype == np.uint16):
-            print(f"Hammerhead expects either uint8 or uint16 pixels")
-            return False
-        stamped_image = StampedImage(timestamp, frame_id, img)
+    def publish_image(self, img, timestamp, frame_id, cvt_to_bgr_code):
+        stamped_image = StampedImage(timestamp, frame_id, cvt_to_bgr_code, img)
         buffer = bytearray(stamped_image.msg_size())
         stamped_image.write(buffer, 0)
         self.publisher.send(buffer)
@@ -93,14 +84,36 @@ def main():
     frame_id = 0
     while True:
         for file in image_files:
+            # Load the image
             img = cv2.imread(file, cv2.IMREAD_UNCHANGED)
+            if img is None:
+                print("Failed to load image")
+                return False
             timestamp = int(datetime.now().timestamp() * 1e9)
-            if publisher.publish_image(img, timestamp, frame_id):
+            cvt_to_bgr_code = StampedImage.COLOR_CONVERSION.BGR2BGR
+
+            # Check that the image is loaded in the format expected by cvt_to_bgr_code.
+            # If using a different format, then add your checks
+            if cvt_to_bgr_code == StampedImage.COLOR_CONVERSION.BGR2BGR:
+                if img.ndim != 3:
+                    print("The BGR2BGR conversion expects 3-channel images")
+                    return
+                if not (img.dtype == np.uint8 or img.dtype == np.uint16):
+                    print(f"The BGR2BGR conversion expects either uint8 or uint16 pixels")
+                    return False
+            elif cvt_to_bgr_code == cv2.COLOR_GRAY2BGR:
+                if img.ndim != 1:
+                    print("The COLOR_GRAY2BGR conversion expects 1-channel images")
+                    return
+                if not (img.dtype == np.uint8 or img.dtype == np.uint16):
+                    print(f"The COLOR_GRAY2BGR conversion expects either uint8 or uint16 pixels")
+                    return False
+
+            # Ready to publish
+            if publisher.publish_image(img, timestamp, frame_id, cvt_to_bgr_code):
                 print(f"Published frame {frame_id} from {file}")
                 frame_id += 1
             time.sleep(1 / FRAME_RATE)
-
-    print("Publisher stopped.")
 
 
 if __name__ == "__main__":

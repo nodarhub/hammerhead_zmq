@@ -1,5 +1,4 @@
 import struct
-from enum import Enum
 
 import numpy as np
 
@@ -75,7 +74,7 @@ def encode_cv_type(channels, dtype):
 
 
 class StampedImage:
-    class COLOR_CONVERSION(Enum):
+    class COLOR_CONVERSION:
         BGR2BGR = 253
         INCONVERTIBLE = 254
         UNSPECIFIED = 255
