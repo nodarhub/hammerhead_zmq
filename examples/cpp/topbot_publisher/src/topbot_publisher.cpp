@@ -37,9 +37,11 @@ bool isValidPort(const uint16_t& port) {
 // Function to parse pixel format string to OpenCV conversion code
 uint8_t parsePixelFormat(const std::string& pixel_format) {
     static const std::unordered_map<std::string, uint8_t> pixel_format_map = {
-        {"BGR", nodar::zmq::NO_CONVERSION},  // Default, no conversion needed
-        {"Bayer_RGGB", cv::COLOR_BayerBG2BGR}, {"Bayer_GRBG", cv::COLOR_BayerGB2BGR},
-        {"Bayer_BGGR", cv::COLOR_BayerRG2BGR}, {"Bayer_GBRG", cv::COLOR_BayerGR2BGR},
+        {"BGR", nodar::zmq::StampedImage::COLOR_CONVERSION::NO_CONVERSION},  // Default, no conversion needed
+        {"Bayer_RGGB", cv::COLOR_BayerBG2BGR},
+        {"Bayer_GRBG", cv::COLOR_BayerGB2BGR},
+        {"Bayer_BGGR", cv::COLOR_BayerRG2BGR},
+        {"Bayer_GBRG", cv::COLOR_BayerGR2BGR},
     };
 
     auto it = pixel_format_map.find(pixel_format);
@@ -81,7 +83,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    uint8_t cvt_to_bgr_code = nodar::zmq::NO_CONVERSION;
+    uint8_t cvt_to_bgr_code = nodar::zmq::StampedImage::COLOR_CONVERSION::NO_CONVERSION;
 
     try {
         if (argc == 4) {

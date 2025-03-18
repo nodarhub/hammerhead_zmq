@@ -9,10 +9,9 @@
 namespace nodar {
 namespace zmq {
 
-// This is used to denote that no conversion is necessary for a BGR image
-constexpr uint8_t NO_CONVERSION = 255;
-
 struct StampedImage {
+    enum COLOR_CONVERSION : uint8_t { NO_CONVERSION = 253, INCONVERTIBLE = 254, UNSPECIFIED = 255 };
+
     static constexpr uint64_t HEADER_SIZE = 64;
     static constexpr MessageInfo getInfo() { return MessageInfo(0); }
 

@@ -7,7 +7,9 @@ try:
 except ImportError:
     from .message_info import MessageInfo
 
-
+# Note that one could import these types from the cv2 package.
+# We intentionally don't do that here because you would be importing
+# an extra package just for these type definitions
 def decode_cv_type(cv_type):
     if cv_type == 1:
         return 1, np.int8
