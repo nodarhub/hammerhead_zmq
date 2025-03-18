@@ -20,7 +20,7 @@ inline StampedImage stampedImageFromCvMat(uint64_t time, uint64_t frame_id, uint
 }
 
 inline StampedImage stampedImageFromCvMat(uint64_t time, uint64_t frame_id, const cv::Mat& mat) {
-    return stampedImageFromCvMat(time, frame_id, StampedImage::COLOR_CONVERSION::NO_CONVERSION, mat);
+    return stampedImageFromCvMat(time, frame_id, StampedImage::COLOR_CONVERSION::UNSPECIFIED, mat);
 }
 
 inline auto depthToString(const int& depth) {
@@ -47,8 +47,7 @@ inline auto depthToString(const int& depth) {
 inline auto isValidExternalImage(const cv::Mat& img, const uint8_t& cvt_to_bgr_code) {
     const auto depth = img.depth();
     const auto channels = img.channels();
-
-    if (cvt_to_bgr_code == nodar::zmq::StampedImage::COLOR_CONVERSION::NO_CONVERSION) {
+    if (cvt_to_bgr_code == nodar::zmq::StampedImage::COLOR_CONVERSION::BGR2BGR) {
         // BGR Format (3 Channels)
         if (!((depth == CV_8U || depth == CV_16U) && channels == 3)) {
             std::cerr << "[ERROR] Invalid BGR image type.\n"
