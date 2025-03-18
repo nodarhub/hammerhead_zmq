@@ -67,7 +67,7 @@ inline auto isValidExternalImage(const cv::Mat& img, const uint8_t& cvt_to_bgr_c
     } else {
         std::cerr << "[ERROR] Unknown cvt_to_bgr_code: " << cvt_to_bgr_code << "\n"
                   << "  Supported cvt_to_bgr_code:\n"
-                  << "    - NO_CONVERSION\n"
+                  << "    - StampedImage::COLOR_CONVERSION::BGR2BGR\n"
                   << "    - cv::COLOR_BayerBG2BGR\n"
                   << "    - cv::COLOR_BayerGB2BGR\n"
                   << "    - cv::COLOR_BayerRG2BGR\n"

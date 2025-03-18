@@ -1,4 +1,5 @@
 import struct
+from enum import Enum
 
 import numpy as np
 
@@ -6,6 +7,7 @@ try:
     from zmq_msgs.message_info import MessageInfo
 except ImportError:
     from .message_info import MessageInfo
+
 
 # Note that one could import these types from the cv2 package.
 # We intentionally don't do that here because you would be importing
@@ -73,10 +75,14 @@ def encode_cv_type(channels, dtype):
 
 
 class StampedImage:
-    HEADER_SIZE = 64
-    NO_CONVERSION = 255
+    class COLOR_CONVERSION(Enum):
+        BGR2BGR = 253
+        INCONVERTIBLE = 254
+        UNSPECIFIED = 255
 
-    def __init__(self, time=0, frame_id=0, cvt_to_bgr_code=NO_CONVERSION, img=None):
+    HEADER_SIZE = 64
+
+    def __init__(self, time=0, frame_id=0, cvt_to_bgr_code=COLOR_CONVERSION.UNSPECIFIED, img=None):
         self.time = time
         self.frame_id = frame_id
         self.cvt_to_bgr_code = cvt_to_bgr_code
