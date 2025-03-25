@@ -6,6 +6,8 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
+os.environ['OPENCV_IO_ENABLE_OPENEXR'] = '1'
+
 
 class Details:
     def __init__(self, filename):
