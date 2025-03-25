@@ -1,8 +1,8 @@
 # Introduction
 
-This repo contains several C++/CMake examples demonstrating how to interact with Hammerhead using ZeroMQ (ZMQ).
+This repo contains several C++/CMake and Python examples demonstrating how to interact with Hammerhead using ZeroMQ (ZMQ).
 
-## Dependencies
+## C++ Dependencies
 
 You will need:
 
@@ -43,16 +43,39 @@ Hammerhead. We envision that you will use these examples as a jumping-off point 
 We suggest that you start by examining the code and README's in the individual example directories for more details
 about what each example does.
 
-## Usage
+## C++ Usage
 
-To use the message types in a new project, you can copy `zmq_msgs` folder into your project, and then modify your
+To use the message types in a new project, you can copy `zmq_msgs/cpp` folder into your project, and then modify your
 `CMakeLists.txt` to link to this target:
 
-    add_subdirectory(zmq_msgs)
+    add_subdirectory(zmq_msgs/cpp)
     target_link_libraries(
             my_target
             PRIVATE
             hammerhead::zmq_msgs
     )
 
-The other examples that we provide, such as the `set_camera_params` target, demonstrate how to do this.
+The other examples that we provide, such as the `image_viewer` target, demonstrate how to do this.
+
+## Python Usage
+
+We set up the python examples so that you can `cd` into the example folder and directly run the code: 
+
+    $ cd examples/python/image_viewer/image_viewer
+    $ python image_viewer.py 
+
+Alternatively, we recommend that you create a virtual environment somewhere on your system, 
+where you can install the requirements, the `zmq_msgs` package, and the examples of your choosing:
+
+    cd ~/testing
+    python3 -m venv nodarenv
+    source nodarenv/bin/activate
+    python -m pip install -r /path/to/hammerhead_zmq/requirements.txt
+    python -m pip install /path/to/hammerhead_zmq/zmq_msgs/python
+    python -m pip install /path/to/hammerhead_zmq/examples/python/image_viewer
+
+    # Now you can run the example: 
+    image_viewer
+
+        
+
