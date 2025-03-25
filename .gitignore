@@ -5,3 +5,4 @@ cmake-build*
 point_clouds
 point_clouds_rgb
 data
+*.egg-info/
