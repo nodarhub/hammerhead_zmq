@@ -122,8 +122,11 @@ def main():
     endpoint = f"tcp://{ip}:{topic.port}"
     subscriber = ZMQImageViewer(endpoint)
     running = True
-    while running:
-        running = subscriber.loop_once()
+    try:
+        while running:
+            subscriber.loop_once()
+    except KeyboardInterrupt:
+        print("\nExiting...")
 
 
 if __name__ == "__main__":

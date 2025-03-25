@@ -64,7 +64,7 @@ class PointCloudRecorder:
                 f"{frame_id - self.last_frame_id - 1} frames dropped. Current frame ID: {frame_id}, last frame ID: {self.last_frame_id}")
         self.last_frame_id = frame_id
 
-        filename = self.output_dir + f"/{frame_id:09}.ply"
+        filename = os.path.join(self.output_dir, f"{frame_id:09}.ply")
         print(f"\rWriting {filename}", end="", flush=True)
         if self.ascii:
             writePlyAscii(filename, point_cloud.points)

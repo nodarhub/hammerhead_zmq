@@ -43,7 +43,7 @@ public:
         initialized = true;
         last_frame_id = frame_id;
 
-        // Halt hammerhead execution by 1 second before telling it to continue
+        // Halt hammerhead execution before telling it to continue
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
         zmq::message_t reply(0);  // Intentionally empty message
         socket.send(identity_msg, zmq::send_flags::sndmore);

@@ -99,8 +99,11 @@ def main():
     output_dir = sys.argv[3] if len(sys.argv) >= 4 else default_output_dir
     endpoint = f"tcp://{ip}:{topic.port}"
     subscriber = ZMQImageRecorder(endpoint, output_dir)
-    while True:
-        subscriber.loop_once()
+    try:
+        while True:
+            subscriber.loop_once()
+    except KeyboardInterrupt:
+        print("\nExiting...")
 
 
 if __name__ == "__main__":

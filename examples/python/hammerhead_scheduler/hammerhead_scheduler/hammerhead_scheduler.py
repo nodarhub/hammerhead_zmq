@@ -64,8 +64,11 @@ def main():
     scheduler = Scheduler(endpoint)
 
     # Infinite loop that runs
-    while True:
-        scheduler.loop()
+    try:
+        while True:
+            scheduler.loop()
+    except KeyboardInterrupt:
+        print("\nExiting...")
 
 
 if __name__ == "__main__":

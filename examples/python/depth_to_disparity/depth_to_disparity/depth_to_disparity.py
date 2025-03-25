@@ -49,6 +49,7 @@ def safe_load(filename, read_mode, valid_types, expected_num_channels):
         if img.dtype not in valid_types:
             print(f"Error loading {filename}. The image is supposed to have one of the types {valid_types}, "
                   f"not {img.dtype}")
+            return None
         num_channels = 1 if len(img.shape) == 2 else img.shape[2]
         if num_channels != expected_num_channels:
             print(f"Error loading {filename}. The image is supposed to have {expected_num_channels} channels, "
