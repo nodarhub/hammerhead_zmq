@@ -1,11 +1,10 @@
+import cv2
+import numpy as np
 import os
 import sys
 import time
-from datetime import datetime
-
-import cv2
-import numpy as np
 import zmq
+from datetime import datetime
 
 FRAME_RATE = 10
 
@@ -90,6 +89,8 @@ def main():
                 print("Failed to load image")
                 return False
             timestamp = int(datetime.now().timestamp() * 1e9)
+
+            # Assume that the image doesn't need a transform. Change this to match your data
             cvt_to_bgr_code = StampedImage.COLOR_CONVERSION.BGR2BGR
 
             # Check that the image is loaded in the format expected by cvt_to_bgr_code.

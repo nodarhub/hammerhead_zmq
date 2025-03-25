@@ -83,7 +83,9 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    uint8_t cvt_to_bgr_code = nodar::zmq::StampedImage::COLOR_CONVERSION::UNSPECIFIED;
+    // Assume that the image doesn't need a transform.
+    // Note that in the publisher.publishImage there is a check to see if the loaded image is roughly correct
+    uint8_t cvt_to_bgr_code = nodar::zmq::StampedImage::COLOR_CONVERSION::BGR2BGR;
     try {
         if (argc == 4) {
             cvt_to_bgr_code = parsePixelFormat(argv[3]);
