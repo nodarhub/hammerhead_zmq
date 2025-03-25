@@ -57,3 +57,25 @@ To use the message types in a new project, you can copy `zmq_msgs/cpp` folder in
 
 The other examples that we provide, such as the `image_viewer` target, demonstrate how to do this.
 
+## Python Usage
+
+We set up the python examples so that you can `cd` into the example folder and directly run the code: 
+
+    $ cd examples/python/image_viewer/image_viewer
+    $ python image_viewer.py 
+
+Alternatively, we recommend that you create a virtual environment somewhere on your system, 
+where you can install the requirements, the `zmq_msgs` package, and the examples of your choosing:
+
+    cd ~/testing
+    python3 -m venv nodarenv
+    source nodarenv/bin/activate
+    python -m pip install -r /path/to/hammerhead_zmq/requirements.txt
+    python -m pip install /path/to/hammerhead_zmq/zmq_msgs/python
+    python -m pip install /path/to/hammerhead_zmq/examples/python/image_viewer
+
+    # Now you can run the example: 
+    image_viewer
+
+        
+
