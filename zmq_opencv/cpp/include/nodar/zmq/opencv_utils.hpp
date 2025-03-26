@@ -16,7 +16,7 @@ inline cv::Mat cvMatFromStampedImage(const StampedImage& stamped_image) {
 inline StampedImage stampedImageFromCvMat(uint64_t time, uint64_t frame_id, uint8_t cvt_to_bgr_code_arg,
                                           const cv::Mat& mat) {
     return StampedImage(time, frame_id, static_cast<uint32_t>(mat.rows), static_cast<uint32_t>(mat.cols),
-                        cvt_to_bgr_code_arg, static_cast<uint32_t>(mat.type()), mat.data);
+                        static_cast<uint32_t>(mat.type()), cvt_to_bgr_code_arg, mat.data);
 }
 
 inline StampedImage stampedImageFromCvMat(uint64_t time, uint64_t frame_id, const cv::Mat& mat) {
