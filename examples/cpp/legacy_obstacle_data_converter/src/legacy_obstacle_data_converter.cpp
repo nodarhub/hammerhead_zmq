@@ -27,7 +27,7 @@ std::vector<std::string> split_new_line(const std::string &source) {
         end = source.find(DELIMITER, start);
     }
 
-    // add the remaning part
+    // add the remaining part
     std::string line{source.substr(start)};
 
     if (!line.empty()) {

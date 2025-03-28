@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
     const auto details_dir = input_dir / "details";
     const auto left_rect_dir = input_dir / "left-rect";
 
-    // Atleast one of the disparity or depth directories is needed
+    // At least one of the disparity or depth directories is needed
     const auto disparity_dir = input_dir / "disparity";
     const auto depth_dir = input_dir / "depth";
 
