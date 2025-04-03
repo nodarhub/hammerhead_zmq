@@ -11,7 +11,11 @@ setup(
     maintainer='nodar',
     maintainer_email='support@nodarsensor.com',
     description='This example demonstrates how to record point clouds published by Hammerhead with ZMQ.',
-    license='TODO',
+    license='NODAR Limited Copyright License',
+    license_files=['LICENSE'],
+    project_urls={
+    'License': 'https://github.com/nodarhub/hammerhead_zmq/blob/main/LICENSE',
+    },
     entry_points={
         'console_scripts': [
             f'{package_name} = {package_name}.{package_name}:main',
