@@ -11,5 +11,9 @@ setup(
     maintainer='nodar',
     maintainer_email='support@nodarsensor.com',
     description='This package contains all of the ZMQ message types.',
-    license='TODO',
+    license='NODAR Limited Copyright License',
+    license_files=['LICENSE'],
+    project_urls={
+    'License': 'https://github.com/nodarhub/hammerhead_zmq/blob/main/LICENSE',
+    },
 )
