@@ -139,7 +139,8 @@ void printUsage() {
                  "     ./point_cloud_generator hammerhead_ip\n\n"
                  "e.g. ./point_cloud_generator 192.168.1.9\n\n"
                  "In the meantime, we are going to assume that you are running this on the device running hammerhead,\n"
-                 "that is, we assume that you specified\n\n     ./point_cloud_generator "
+                 "that is, we assume that you specified\n\n"
+                 "     ./point_cloud_generator "
               << DEFAULT_IP << "\n----------------------------------------" << std::endl;
 }
 
