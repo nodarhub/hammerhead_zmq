@@ -63,6 +63,9 @@ public:
         cv::reprojectImageTo3D(disparity_scaled, depth3d, disparity_to_depth4x4);
 
         auto xyz = reinterpret_cast<float *>(depth3d.data);
+        const auto rect_type = soup.rectified.type;
+        assert(rect_type == CV_8UC3 or rect_type == CV_8SC3 or rect_type == CV_16UC3 or rect_type == CV_16SC3);
+        const auto bgr_step = rect_type == CV_8UC3 or rect_type == CV_8SC3 ? 3 : 6;
         auto bgr = soup.rectified.img.data();
         const auto min_row = border;
         const auto max_row = rows - 1 - border;
@@ -74,15 +77,24 @@ public:
         const auto downsample = 1;
         size_t num_points = 0;
         for (size_t row = 0; row < rows; ++row) {
-            for (size_t col = 0; col < cols; ++col, xyz += 3, bgr += 3) {
+            for (size_t col = 0; col < cols; ++col, xyz += 3, bgr += bgr_step) {
                 if (row > min_row and row < max_row and col > min_col and col < max_col and isValid(xyz)) {
                     ++valid;
                     if (inRange(xyz)) {
                         ++in_range;
                         if ((in_range % downsample) == 0) {
                             auto &point = point_cloud[num_points++];
-                            point.x = -xyz[0], point.y = xyz[1], point.z = xyz[2];
-                            point.b = bgr[0], point.g = bgr[1], point.r = bgr[2];
+                            point.x = -xyz[0], point.y = -xyz[1], point.z = -xyz[2];
+                            if (rect_type == CV_8UC3 || rect_type == CV_8SC3) {
+                                point.b = bgr[0];
+                                point.g = bgr[1];
+                                point.r = bgr[2];
+                            } else if (rect_type == CV_16UC3 || rect_type == CV_16SC3) {
+                                const auto *bgr16 = reinterpret_cast<const uint16_t *>(bgr);
+                                point.b = static_cast<uint8_t>(bgr16[0] / 257);
+                                point.g = static_cast<uint8_t>(bgr16[1] / 257);
+                                point.r = static_cast<uint8_t>(bgr16[2] / 257);
+                            }
                         }
                     }
                 }
@@ -139,7 +151,8 @@ void printUsage() {
                  "     ./point_cloud_generator hammerhead_ip\n\n"
                  "e.g. ./point_cloud_generator 192.168.1.9\n\n"
                  "In the meantime, we are going to assume that you are running this on the device running hammerhead,\n"
-                 "that is, we assume that you specified\n\n     ./point_cloud_generator "
+                 "that is, we assume that you specified\n\n"
+                 "     ./point_cloud_generator "
               << DEFAULT_IP << "\n----------------------------------------" << std::endl;
 }
 
