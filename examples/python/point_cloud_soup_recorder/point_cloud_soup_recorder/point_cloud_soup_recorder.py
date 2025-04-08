@@ -1,8 +1,5 @@
-import cProfile
 import os
-import pstats
 import sys
-from io import StringIO
 
 import cv2
 import numpy as np
@@ -160,17 +157,9 @@ def main():
     output_dir = sys.argv[2] if len(sys.argv) >= 3 else default_output_dir
     point_cloud_soup_recorder = PointCloudSoupRecorder(endpoint, output_dir)
     index = 0
-    profiler = cProfile.Profile()
-    profiler.enable()
-    while index < 50:
+    while True:
         index += 1
         point_cloud_soup_recorder.loop_once()
-    profiler.disable()
-    s = StringIO()
-    ps = pstats.Stats(profiler, stream=s).sort_stats('cumulative')
-    ps.print_stats()
-    # Print the profile stats to the console
-    print(s.getvalue())
 
 
 if __name__ == "__main__":
