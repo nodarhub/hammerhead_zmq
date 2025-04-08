@@ -1,0 +1,19 @@
+Nodar generates high resolution point clouds; much higher than what you would find on a traditional lidar.
+Because of this, we need to be very careful about how data is passed on the network.
+In particular, instead of passing a traditional point cloud,
+we supply a much smaller representation called a `PointCloudSoup` from which a point cloud can be reconstructed on the client machine.
+
+This example shows how to subscribe to `PointCloudSoup` messages sent by Hammerhead,
+construct point clouds on your machine, 
+and save those point clouds in `.ply` files.
+You can then open the `.ply` files in other programs, such as CloudCompare.
+
+To run this example, you need to provide the IP address of the ZMQ source (the device running Hammerhead):
+
+    python point_cloud_soup_recorder.py src_ip
+
+Note that if you specify an incorrect IP address or run this example when Hammerhead is not running,
+then ZMQ will attempt to subscribe, and nothing will happen.
+It will appear like the binary is just waiting.
+
+To kill this example, just press CTRL+C.
