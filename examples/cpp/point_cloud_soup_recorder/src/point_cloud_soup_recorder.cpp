@@ -23,7 +23,7 @@ public:
     uint64_t last_frame_id = 0;
 
     PointCloudSink(const std::filesystem::path &output_dir, const std::string &endpoint)
-        : output_dir(output_dir), context(1), socket(context, ZMQ_SUB), window_name(endpoint) {
+        : output_dir(output_dir), context(1), socket(context, ZMQ_SUB) {
         const int hwm = 1;  // set maximum queue length to 1 message
         socket.set(zmq::sockopt::rcvhwm, hwm);
         socket.set(zmq::sockopt::subscribe, "");
@@ -133,7 +133,7 @@ private:
     }
 
     std::filesystem::path output_dir;
-    cv::Mat disparity_scaled, depth3d;
+    cv::Mat depth3d;
     std::vector<PointXYZRGB> point_cloud;
     size_t border = 8;
     float z_min = 8.0;
@@ -142,7 +142,6 @@ private:
     float y_max = 50.0;
     zmq::context_t context;
     zmq::socket_t socket;
-    std::string window_name;
 };
 
 void printUsage(const std::string &default_ip) {
