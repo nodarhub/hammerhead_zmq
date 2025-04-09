@@ -30,35 +30,28 @@ public:
 
         auto xyz = reinterpret_cast<float *>(depth3d.data);
         auto bgr = left_rect.data;
-        const auto min_row = border;
-        const auto max_row = rows - 1 - border;
-        const auto min_col = border;
-        const auto max_col = cols - 1 - border;
         size_t total = 0;
-        size_t in_range = 0;
         size_t valid = 0;
         const auto downsample = 1;
         size_t num_points = 0;
         for (size_t row = 0; row < rows; ++row) {
             for (size_t col = 0; col < cols; ++col, xyz += 3, bgr += 3) {
-                if (row > min_row and row < max_row and col > min_col and col < max_col and isValid(xyz)) {
-                    ++valid;
-                    if (inRange(xyz)) {
-                        ++in_range;
-                        if ((in_range % downsample) == 0) {
-                            auto &point = point_cloud[num_points++];
-                            point.x = -xyz[0], point.y = xyz[1], point.z = xyz[2];
-                            point.b = bgr[0], point.g = bgr[1], point.r = bgr[2];
-                        }
-                    }
-                }
                 ++total;
+                if (not isValid(xyz)) {
+                    continue;
+                }
+                ++valid;
+                if (valid % downsample) {
+                    continue;
+                }
+                auto &point = point_cloud[num_points++];
+                point.x = -xyz[0], point.y = xyz[1], point.z = xyz[2];
+                point.b = bgr[0], point.g = bgr[1], point.r = bgr[2];
             }
         }
         point_cloud.resize(num_points);
         if (false) {
             std::cout << num_points << " / " << total << " number of points used" << std::endl;
-            std::cout << in_range << " / " << total << " in_range points" << std::endl;
             std::cout << valid << " / " << total << " valid points" << std::endl;
         }
         writePly(ply_path, point_cloud);
@@ -69,21 +62,7 @@ private:
         return not std::isinf(xyz[0]) and not std::isinf(xyz[1]) and not std::isinf(xyz[2]);
     }
 
-    bool inRange(const float *const xyz) const {
-        const auto x = -xyz[0];
-        const auto y = -xyz[1];
-        const auto z = -xyz[2];
-        return not(std::isinf(x)  //
-                   or std::isinf(y) or y < y_min or y > y_max  //
-                   or std::isinf(z) or z < z_min or z > z_max);
-    }
-
     cv::Mat depth3d;
-    size_t border = 8;
-    float z_min = 0.5;
-    float z_max = 500.0;
-    float y_min = -50.0;
-    float y_max = 50.0;
 };
 
 void processFiles(const std::vector<std::filesystem::path> &files, const std::filesystem::path &left_rect_dir,
