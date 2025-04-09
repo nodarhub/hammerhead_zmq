@@ -28,7 +28,7 @@ def write_ply_ascii(filename, points, colors):
         out.write("property uchar blue\n")
         out.write("end_header\n")
         for pt, rgb in zip(points, colors):
-            out.write(f"{pt[0]} {pt[1]} {pt[2]} {int(colors[2])} {int(colors[1])} {int(colors[0])}\n")
+            out.write(f"{pt[0]} {pt[1]} {pt[2]} {int(rgb[2])} {int(rgb[1])} {int(rgb[0])}\n")
 
 
 def write_ply_binary(filename, points, colors):
