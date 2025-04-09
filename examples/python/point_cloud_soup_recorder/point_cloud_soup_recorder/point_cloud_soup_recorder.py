@@ -103,12 +103,12 @@ class PointCloudSoupRecorder:
         else:
             cv2.reprojectImageTo3D(disparity_scaled, point_cloud_soup.disparity_to_depth4x4, self.depth3d)
 
-        xyz = self.depth3d[self.border:-self.border, self.border:-self.border, :]
+        xyz = -self.depth3d[self.border:-self.border, self.border:-self.border, :]
         bgr = rectified[self.border:-self.border, self.border:-self.border, :]
 
-        x = -xyz[:, :, 0]
-        y = -xyz[:, :, 1]
-        z = -xyz[:, :, 2]
+        x = xyz[:, :, 0]
+        y = xyz[:, :, 1]
+        z = xyz[:, :, 2]
         valid = ~(np.isinf(x) | np.isinf(y) | np.isinf(z))
 
         in_range = valid & (y >= self.y_min) & (y <= self.y_max) & (z >= self.z_min) & (z <= self.z_max)
