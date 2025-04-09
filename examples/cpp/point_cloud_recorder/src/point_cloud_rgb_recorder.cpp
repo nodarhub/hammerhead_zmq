@@ -28,7 +28,7 @@ public:
         std::cout << "Subscribing to " << endpoint << std::endl;
     }
 
-    void loopOnce(size_t frame_index) {
+    void loopOnce() {
         zmq::message_t msg;
         const auto received_bytes = socket.recv(msg, zmq::recv_flags::none);
         point_cloud_rgb.read(static_cast<uint8_t *>(msg.data()));
@@ -47,11 +47,9 @@ public:
         last_frame_id = frame_id;
         std::cout << "\rFrame # " << frame_id << ". " << std::flush;
 
-        // Note that this frame index represents the number of frames received.
-        // The messages themselves have a frame_id that tracks how many frames have been produced.
-        // Due to networking issues, it could be that there are dropped frames, resulting in these numbers being
-        // different
-        const auto filename = output_dir / (std::to_string(frame_index) + ".ply");
+        std::ostringstream filename_ss;
+        filename_ss << std::setw(9) << std::setfill('0') << frame_id << ".ply";
+        const auto filename = output_dir / filename_ss.str();
         std::cout << "Writing " << filename << std::flush;
         writePly(filename, point_cloud_rgb.points, point_cloud_rgb.colors);
     }
@@ -88,12 +86,7 @@ int main(int argc, char *argv[]) {
     std::filesystem::create_directories(output_dir);
 
     PointCloudRGBSink sink(output_dir, endpoint);
-    size_t frame_index = 0;
     while (running) {
-        // Note that this frame index represents the number of frames received.
-        // The messages themselves have a frame_id that tracks how many frames have been produced.
-        // Due to networking issues, it could be that there are dropped frames, resulting in these numbers being
-        // different
-        sink.loopOnce(frame_index++);
+        sink.loopOnce();
     }
 }
