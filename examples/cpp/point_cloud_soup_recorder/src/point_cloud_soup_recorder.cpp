@@ -76,6 +76,7 @@ public:
         size_t num_points = 0;
         for (size_t row = 0; row < rows; ++row) {
             for (size_t col = 0; col < cols; ++col, xyz += 3, bgr += bgr_step) {
+                ++total;
                 if (not isValid(xyz)) {
                     continue;
                 }
@@ -95,7 +96,6 @@ public:
                     point.g = static_cast<uint8_t>(bgr16[1] / 257);
                     point.r = static_cast<uint8_t>(bgr16[2] / 257);
                 }
-                ++total;
             }
         }
         point_cloud.resize(num_points);
