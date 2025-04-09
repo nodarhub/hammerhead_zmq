@@ -62,9 +62,12 @@ public:
         disparity_scaled.convertTo(disparity_scaled, CV_32F, 1. / 16);
         cv::reprojectImageTo3D(disparity_scaled, depth3d, disparity_to_depth4x4);
 
-        auto xyz = reinterpret_cast<float *>(depth3d.data);
+        // Assert types before continuing
+        assert(depth3d.type() == CV_32FC3);
         const auto rect_type = soup.rectified.type;
         assert(rect_type == CV_8UC3 or rect_type == CV_8SC3 or rect_type == CV_16UC3 or rect_type == CV_16SC3);
+
+        auto xyz = reinterpret_cast<float *>(depth3d.data);
         const auto bgr_step = rect_type == CV_8UC3 or rect_type == CV_8SC3 ? 3 : 6;
         auto bgr = soup.rectified.img.data();
         const auto min_row = border;
@@ -74,7 +77,7 @@ public:
         size_t total = 0;
         size_t in_range = 0;
         size_t valid = 0;
-        const auto downsample = 1;
+        const auto downsample = 10;
         size_t num_points = 0;
         for (size_t row = 0; row < rows; ++row) {
             for (size_t col = 0; col < cols; ++col, xyz += 3, bgr += bgr_step) {
