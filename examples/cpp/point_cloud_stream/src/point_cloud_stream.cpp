@@ -63,26 +63,25 @@ private:
     zmq::socket_t socket;
 };
 
-constexpr auto DEFAULT_IP = "127.0.0.1";
-
-void printUsage() {
+void printUsage(const std::string &default_ip) {
     std::cout << "You should specify the IP address of the device running hammerhead:\n\n"
                  "     ./point_cloud_stream hammerhead_ip\n\n"
                  "e.g. ./point_cloud_stream 192.168.1.9\n\n"
                  "In the meantime, we are going to assume that you are running this on the device running hammerhead,\n"
                  "that is, we assume that you specified\n\n     ./point_cloud_stream "
-              << DEFAULT_IP << "\n----------------------------------------" << std::endl;
+              << default_ip << "\n----------------------------------------" << std::endl;
 }
 
 int main(int argc, char *argv[]) {
-    static constexpr auto TOPIC = nodar::zmq::POINT_CLOUD_TOPIC;
+    static constexpr auto default_ip = "127.0.0.1";
+    static constexpr auto topic = nodar::zmq::POINT_CLOUD_TOPIC;
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
     if (argc == 1) {
-        printUsage();
+        printUsage(default_ip);
     }
-    const auto ip = argc > 1 ? argv[1] : DEFAULT_IP;
-    const auto endpoint = std::string("tcp://") + ip + ":" + std::to_string(TOPIC.port);
+    const auto ip = argc > 1 ? argv[1] : default_ip;
+    const auto endpoint = std::string("tcp://") + ip + ":" + std::to_string(topic.port);
 
     const auto HERE = std::filesystem::path(__FILE__).parent_path();
     const auto output_dir = HERE / "point_clouds";

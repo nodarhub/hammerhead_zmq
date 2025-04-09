@@ -84,7 +84,7 @@ private:
     std::string window_name;
 };
 
-void printUsage(const std::string &DEFAULT_IP, const std::string &DEFAULT_PORT) {
+void printUsage(const std::string &default_ip, const std::string &default_port) {
     std::cout << "You should specify the IP address of the device running hammerhead, \n"
                  "the port of the message that you want to listen to, "
                  "and the folder where you want the data to be saved:\n\n"
@@ -95,26 +95,26 @@ void printUsage(const std::string &DEFAULT_IP, const std::string &DEFAULT_PORT) 
                  "In the meantime, we are going to assume that you are running this on the device running hammerhead,\n"
                  "and that you want the images on port 9800, that is, we assume that you specified\n\n"
                  "     ./image_viewer " +
-                     DEFAULT_IP + " " + DEFAULT_PORT + "\n\n"
+                     default_ip + " " + default_port + "\n\n"
               << "\n\nNote that the list of topic/port mappings is in topic_ports.hpp header in the zmq_msgs target."
               << "\n----------------------------------------" << std::endl;
 }
 
 int main(int argc, char *argv[]) {
-    constexpr auto DEFAULT_IP = "127.0.0.1";
-    constexpr auto DEFAULT_TOPIC = nodar::zmq::IMAGE_TOPICS[0];
-    const std::string DEFAULT_PORT = std::to_string(DEFAULT_TOPIC.port);
+    constexpr auto default_ip = "127.0.0.1";
+    constexpr auto default_topic = nodar::zmq::IMAGE_TOPICS[0];
+    const std::string default_port = std::to_string(default_topic.port);
 
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
     if (argc < 3) {
-        printUsage(DEFAULT_IP, DEFAULT_PORT);
+        printUsage(default_ip, default_port);
     }
-    const auto ip = argc > 1 ? argv[1] : DEFAULT_IP;
+    const auto ip = argc > 1 ? argv[1] : default_ip;
 
     // If no second argument was provided, then assume the default topic.
     // Try to parse the second argument to see if you provided a port number.
-    nodar::zmq::Topic topic = DEFAULT_TOPIC;
+    nodar::zmq::Topic topic = default_topic;
     int port = 0;
     bool is_port_number = false;
     if (argc >= 3) {
