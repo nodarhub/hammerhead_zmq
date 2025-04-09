@@ -14,15 +14,15 @@ To build this example, follow the traditional CMake process:
 To run this example, you need to provide the IP address of the ZMQ source (the device running hammerhead):
 
     # Linux
-    ./point_cloud_stream src_ip
+    ./point_cloud_recorder src_ip
 
     # Windows
-    ./Release/point_cloud_stream.exe src_ip
+    ./Release/point_cloud_recorder.exe src_ip
 
 Note that if you specify an incorrect IP address or run this example when Hammerhead is not running, then ZMQ will
 attempt to subscribe, and nothing will happen. It will appear like the binary is just waiting.
 
 To kill this example, just press CTRL+C.
 
-There is an additional example `point_cloud_rgb_stream` demonstrating how to receive RGB point clouds. 
+There is an additional example `point_cloud_rgb_recorder` demonstrating how to receive RGB point clouds. 
 However, the bandwidth requirements are even higher. Use with caution.
