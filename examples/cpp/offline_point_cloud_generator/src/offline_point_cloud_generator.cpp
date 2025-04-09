@@ -45,7 +45,7 @@ public:
                     continue;
                 }
                 auto &point = point_cloud[num_points++];
-                point.x = -xyz[0], point.y = xyz[1], point.z = xyz[2];
+                point.x = xyz[0], point.y = xyz[1], point.z = xyz[2];
                 point.b = bgr[0], point.g = bgr[1], point.r = bgr[2];
             }
         }

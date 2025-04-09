@@ -85,7 +85,7 @@ public:
                     continue;
                 }
                 auto &point = point_cloud[num_points++];
-                point.x = -xyz[0], point.y = -xyz[1], point.z = -xyz[2];
+                point.x = xyz[0], point.y = xyz[1], point.z = xyz[2];
                 if (rect_type == CV_8UC3 || rect_type == CV_8SC3) {
                     point.b = bgr[0];
                     point.g = bgr[1];
