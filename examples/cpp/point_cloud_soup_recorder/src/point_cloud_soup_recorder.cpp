@@ -59,7 +59,7 @@ public:
         cv::Mat disparity_to_depth4x4(4, 4, CV_32FC1);
         memcpy(disparity_to_depth4x4.data, soup.disparity_to_depth4x4.data(), sizeof(soup.disparity_to_depth4x4));
         auto disparity_scaled = nodar::zmq::cvMatFromStampedImage(soup.disparity);
-        disparity_scaled.convertTo(disparity_scaled, CV_32F, 1. / 16);
+        disparity_scaled.convertTo(disparity_scaled, CV_32F, -1. / 16);
         cv::reprojectImageTo3D(disparity_scaled, depth3d, disparity_to_depth4x4);
 
         // Assert types before continuing
@@ -85,7 +85,7 @@ public:
                     continue;
                 }
                 auto &point = point_cloud[num_points++];
-                point.x = -xyz[0], point.y = -xyz[1], point.z = -xyz[2];
+                point.x = xyz[0], point.y = xyz[1], point.z = xyz[2];
                 if (rect_type == CV_8UC3 || rect_type == CV_8SC3) {
                     point.b = bgr[0];
                     point.g = bgr[1];
