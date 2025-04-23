@@ -92,13 +92,13 @@ class PointCloudSoupRecorder:
 
         disparity = point_cloud_soup.disparity.img
         rectified = point_cloud_soup.rectified.img
-        disparity_scaled = disparity / np.float32(16)
+        disparity_scaled = -disparity / np.float32(16)
         if self.depth3d is None:
             self.depth3d = cv2.reprojectImageTo3D(disparity_scaled, point_cloud_soup.disparity_to_depth4x4)
         else:
             cv2.reprojectImageTo3D(disparity_scaled, point_cloud_soup.disparity_to_depth4x4, self.depth3d)
 
-        xyz = -self.depth3d
+        xyz = self.depth3d
         bgr = rectified
 
         x = xyz[:, :, 0]
