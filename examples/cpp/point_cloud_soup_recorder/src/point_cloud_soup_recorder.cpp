@@ -58,8 +58,12 @@ public:
         // Disparity is in 11.6 format
         cv::Mat disparity_to_depth4x4(4, 4, CV_32FC1);
         memcpy(disparity_to_depth4x4.data, soup.disparity_to_depth4x4.data(), sizeof(soup.disparity_to_depth4x4));
+        disparity_to_depth4x4.at<float>(3, 0) = -disparity_to_depth4x4.at<float>(3, 0);
+        disparity_to_depth4x4.at<float>(3, 1) = -disparity_to_depth4x4.at<float>(3, 1);
+        disparity_to_depth4x4.at<float>(3, 2) = -disparity_to_depth4x4.at<float>(3, 2);
+        disparity_to_depth4x4.at<float>(3, 3) = -disparity_to_depth4x4.at<float>(3, 3);
         auto disparity_scaled = nodar::zmq::cvMatFromStampedImage(soup.disparity);
-        disparity_scaled.convertTo(disparity_scaled, CV_32F, -1. / 16);
+        disparity_scaled.convertTo(disparity_scaled, CV_32F, 1. / 16);
         cv::reprojectImageTo3D(disparity_scaled, depth3d, disparity_to_depth4x4);
 
         // Assert types before continuing

@@ -84,9 +84,9 @@ To convert disparity images to 3D point clouds, we follow the standard stereo re
 
 ### Disparity Scaling
 
-The disparity is in Q12.4 format. We scale the disparity by `-1 / 16.0` to get the disparity in float32 format:
+The disparity is in Q12.4 format. We scale the disparity by `1 / 16.0` to get the disparity in float32 format:
 
-    disparity_scaled = -1 * disparity / 16.0
+    disparity_scaled = 1 * disparity / 16.0
 
 ### 3D Reprojection
 
@@ -95,8 +95,8 @@ matrix Q:
 
     points_3d = cv2.reprojectImageTo3D(disparity_scaled, Q)
 
-The negative sign used earlier conforms to how the Q matrix is defined. This ensures that the point cloud is generated
-in a consistent right-handed coordinate frame.
+A negative translation vector (`Tx < 0`) is used when creating the Q matrix to conform the definition in OpenCV. This
+ensures that the point cloud is generated in a consistent right-handed coordinate frame.
 
 This conversion scheme has been used in the following examples:
 
