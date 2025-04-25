@@ -78,7 +78,7 @@ where you can install the requirements, the `zmq_msgs` package, and the examples
     # Now you can run the example: 
     image_viewer
 
-### Note on Disparity to 3D Point Cloud conversion
+## Note on Disparity to 3D Point Cloud conversion
 
 To convert disparity images to 3D point clouds, we follow the standard stereo reconstruction pipeline:
 
