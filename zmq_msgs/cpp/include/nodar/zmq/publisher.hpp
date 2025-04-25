@@ -26,7 +26,7 @@ private:
     std::condition_variable condition;
     std::mutex buffer_guard;
     std::atomic_bool running;
-    Buffer* queued_buffer;
+    Buffer* queued_buffer = nullptr;
     bool buffer_is_queued = false;
     BufferPool buffer_pool;
 

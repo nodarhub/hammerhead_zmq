@@ -1,6 +1,7 @@
 # Introduction
 
-This repo contains several C++/CMake and Python examples demonstrating how to interact with Hammerhead using ZeroMQ (ZMQ).
+This repo contains several C++/CMake and Python examples demonstrating how to interact with Hammerhead using ZeroMQ (
+ZMQ).
 
 ## C++ Dependencies
 
@@ -59,12 +60,12 @@ The other examples that we provide, such as the `image_viewer` target, demonstra
 
 ## Python Usage
 
-We set up the python examples so that you can `cd` into the example folder and directly run the code: 
+We set up the python examples so that you can `cd` into the example folder and directly run the code:
 
     $ cd examples/python/image_viewer/image_viewer
     $ python image_viewer.py 
 
-Alternatively, we recommend that you create a virtual environment somewhere on your system, 
+Alternatively, we recommend that you create a virtual environment somewhere on your system,
 where you can install the requirements, the `zmq_msgs` package, and the examples of your choosing:
 
     cd ~/testing
@@ -77,5 +78,28 @@ where you can install the requirements, the `zmq_msgs` package, and the examples
     # Now you can run the example: 
     image_viewer
 
-        
+## Note on Disparity to 3D Point Cloud conversion
 
+To convert disparity images to 3D point clouds, we follow the standard stereo reconstruction pipeline:
+
+### Disparity Scaling
+
+The disparity is in Q12.4 format. We scale the disparity by `-1 / 16.0` to get the disparity in float32 format:
+
+    disparity_scaled = -1 * disparity / 16.0
+
+### 3D Reprojection
+
+The scaled disparity map is reprojected into 3D space using OpenCV’s cv2.reprojectImageTo3D() and a 4×4 reprojection
+matrix Q:
+
+    points_3d = cv2.reprojectImageTo3D(disparity_scaled, Q)
+
+The negative sign used earlier conforms to how the Q matrix is defined. This ensures that the point cloud is generated
+in a consistent right-handed coordinate frame.
+
+This conversion scheme has been used in the following examples:
+
+- examples/cpp/offline_point_cloud_generator
+- examples/cpp/point_cloud_soup_recorder
+- examples/python/point_cloud_soup_recorder

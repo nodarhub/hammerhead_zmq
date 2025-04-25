@@ -45,7 +45,7 @@ public:
                     continue;
                 }
                 auto &point = point_cloud[num_points++];
-                point.x = -xyz[0], point.y = xyz[1], point.z = xyz[2];
+                point.x = xyz[0], point.y = xyz[1], point.z = xyz[2];
                 point.b = bgr[0], point.g = bgr[1], point.r = bgr[2];
             }
         }
@@ -78,7 +78,7 @@ void processFiles(const std::vector<std::filesystem::path> &files, const std::fi
         }
 
         if (is_disparity && input_image.type() == CV_16UC1) {
-            input_image.convertTo(input_image, CV_32FC1, 1.0 / 16.0);
+            input_image.convertTo(input_image, CV_32FC1, -1.0 / 16.0);
         }
 
         const auto tiff = left_rect_dir / (file.stem().string() + ".tiff");
