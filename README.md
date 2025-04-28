@@ -90,13 +90,16 @@ The disparity is in Q12.4 format. We scale the disparity by `1 / 16.0` to get th
 
 ### 3D Reprojection
 
-The scaled disparity map is reprojected into 3D space using OpenCV’s cv2.reprojectImageTo3D() and a 4×4 reprojection
-matrix Q:
+The scaled disparity map is reprojected into 3D space using OpenCV’s `cv2.reprojectImageTo3D()` and a 4×4 reprojection
+matrix `Q`:
 
     points_3d = cv2.reprojectImageTo3D(disparity_scaled, Q)
 
-A negative translation vector (`Tx < 0`) is used when creating the Q matrix to conform the definition in OpenCV. This
-ensures that the point cloud is generated in a consistent right-handed coordinate frame.
+A negative translation vector (`Tx < 0`) is used when creating the `Q` matrix to conform the definition in OpenCV. This
+ensures that the point cloud is generated in a consistent right-handed coordinate frame. As a result, the entire last
+row of `Q` must be negated before passing to the `cv2.reprojectImageTo3D()` call:
+
+    Q[3, :] = -Q[3, :]
 
 This conversion scheme has been used in the following examples:
 
