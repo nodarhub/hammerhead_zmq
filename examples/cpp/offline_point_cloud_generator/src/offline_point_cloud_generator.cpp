@@ -21,12 +21,10 @@ public:
         point_cloud.resize(rows * cols);
 
         // Convert the input map to a point cloud
-        cv::Mat disparity_to_depth4x4;
-        details.projection.copyTo(disparity_to_depth4x4);
-        disparity_to_depth4x4.at<float>(3, 0) = -disparity_to_depth4x4.at<float>(3, 0);
-        disparity_to_depth4x4.at<float>(3, 1) = -disparity_to_depth4x4.at<float>(3, 1);
-        disparity_to_depth4x4.at<float>(3, 2) = -disparity_to_depth4x4.at<float>(3, 2);
-        disparity_to_depth4x4.at<float>(3, 3) = -disparity_to_depth4x4.at<float>(3, 3);
+        cv::Mat disparity_to_depth4x4 = details.projection.clone();
+        // Negate the last row of the Q-matrix
+        disparity_to_depth4x4.row(3) = -disparity_to_depth4x4.row(3);
+
         if (is_disparity) {
             cv::reprojectImageTo3D(input_image, depth3d, disparity_to_depth4x4);
         } else {
