@@ -21,11 +21,15 @@ public:
         point_cloud.resize(rows * cols);
 
         // Convert the input map to a point cloud
+        cv::Mat disparity_to_depth4x4 = details.projection.clone();
+        // Negate the last row of the Q-matrix
+        disparity_to_depth4x4.row(3) = -disparity_to_depth4x4.row(3);
+
         if (is_disparity) {
-            cv::reprojectImageTo3D(input_image, depth3d, details.projection);
+            cv::reprojectImageTo3D(input_image, depth3d, disparity_to_depth4x4);
         } else {
             const auto disparity = details.focal_length * details.baseline / input_image;
-            cv::reprojectImageTo3D(disparity, depth3d, details.projection);
+            cv::reprojectImageTo3D(disparity, depth3d, disparity_to_depth4x4);
         }
 
         auto xyz = reinterpret_cast<float *>(depth3d.data);
@@ -78,7 +82,7 @@ void processFiles(const std::vector<std::filesystem::path> &files, const std::fi
         }
 
         if (is_disparity && input_image.type() == CV_16UC1) {
-            input_image.convertTo(input_image, CV_32FC1, -1.0 / 16.0);
+            input_image.convertTo(input_image, CV_32FC1, 1.0 / 16.0);
         }
 
         const auto tiff = left_rect_dir / (file.stem().string() + ".tiff");
