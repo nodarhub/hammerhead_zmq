@@ -58,8 +58,7 @@ public:
         // Disparity is in 11.6 format
         cv::Mat disparity_to_depth4x4(4, 4, CV_32FC1);
         memcpy(disparity_to_depth4x4.data, soup.disparity_to_depth4x4.data(), sizeof(soup.disparity_to_depth4x4));
-        // Negate the last row of the Q-matrix
-        disparity_to_depth4x4.row(3) = -disparity_to_depth4x4.row(3);
+
         // Rotation disparity to raw cam
         cv::Mat rotation_disparity_to_raw_cam(3, 3, CV_32FC1);
         memcpy(rotation_disparity_to_raw_cam.data, soup.rotation_disparity_to_raw_cam.data(),
@@ -74,6 +73,9 @@ public:
         cv::Mat(rotation_world_to_raw_cam.t() * rotation_disparity_to_raw_cam)
             .convertTo(rotation_disparity_to_world_4x4(cv::Rect(0, 0, 3, 3)), CV_32F);
         cv::Mat disparity_to_rotated_depth4x4 = rotation_disparity_to_world_4x4 * disparity_to_depth4x4;
+
+        // Negate the last row of the Q-matrix
+        disparity_to_rotated_depth4x4.row(3) = -disparity_to_rotated_depth4x4.row(3);
 
         auto disparity_scaled = nodar::zmq::cvMatFromStampedImage(soup.disparity);
         disparity_scaled.convertTo(disparity_scaled, CV_32F, 1. / 16);
