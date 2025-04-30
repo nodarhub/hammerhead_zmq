@@ -98,7 +98,7 @@ struct ObstacleData {
         dst = utils::append(dst, getInfo());
         dst = utils::append(dst, time_arg);
         dst = utils::append(dst, frame_id_arg);
-        dst = utils::append(dst, obstacles_arg.size());
+        dst = utils::append(dst, static_cast<uint64_t>(obstacles_arg.size()));
 
         const auto obstacle_bytes{obstacleBytes(obstacles_arg.size())};
         memcpy(mem, obstacles_arg.data(), obstacle_bytes);

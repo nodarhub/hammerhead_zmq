@@ -2,6 +2,7 @@
 .vscode
 build
 cmake-build*
+obstacle_datas
 point_clouds
 point_clouds_rgb
 data

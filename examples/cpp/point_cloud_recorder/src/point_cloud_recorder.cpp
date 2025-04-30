@@ -66,7 +66,8 @@ void printUsage(const std::string &default_ip) {
                  "     ./point_cloud_recorder hammerhead_ip\n\n"
                  "e.g. ./point_cloud_recorder 192.168.1.9\n\n"
                  "In the meantime, we are going to assume that you are running this on the device running hammerhead,\n"
-                 "that is, we assume that you specified\n\n     ./point_cloud_recorder "
+                 "that is, we assume that you specified\n\n"
+                 "     ./point_cloud_recorder "
               << default_ip << "\n----------------------------------------" << std::endl;
 }
 

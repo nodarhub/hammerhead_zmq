@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(obstacle_data_generator LANGUAGES CXX)
+project(obstacle_data_recorder LANGUAGES CXX)
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release)
@@ -9,16 +9,16 @@ endif ()
 
 find_package(OpenCV 4 REQUIRED COMPONENTS core)
 
-add_executable(obstacle_data_generator
-        src/obstacle_data_generator.cpp
+add_executable(obstacle_data_recorder
+        src/obstacle_data_recorder.cpp
 )
 
-target_link_libraries(obstacle_data_generator
+target_link_libraries(obstacle_data_recorder
         PRIVATE
         hammerhead::zmq_msgs
 )
 
-set_target_properties(obstacle_data_generator PROPERTIES
+set_target_properties(obstacle_data_recorder PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
