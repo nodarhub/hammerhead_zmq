@@ -16,10 +16,10 @@ To build this example, follow the traditional CMake process:
 To run this example, you need to provide the IP address of the ZMQ source (the device running hammerhead):
 
     # Linux
-    ./obstacle_data_generator src_ip
+    ./obstacle_data_recorder src_ip
 
     # Windows
-    ./Release/obstacle_data_generator.exe src_ip
+    ./Release/obstacle_data_recorder.exe src_ip
 
 Note that if you specify an incorrect IP address or run this example when Hammerhead is not running, then ZMQ will
 attempt to subscribe, and nothing will happen. It will appear like the binary is just waiting.
