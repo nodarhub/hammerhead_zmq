@@ -28,28 +28,22 @@ inline void write_data(const std::string &filename, const nodar::zmq::ObstacleDa
 
 class ObstacleDataSink {
 public:
-    uint64_t last_frame_id{0};
+    uint64_t last_frame_id = 0;
 
     ObstacleDataSink(const std::filesystem::path &output_dir, const std::string &endpoint)
-        : output_dir{output_dir}, context{1}, socket{context, ZMQ_SUB} {
-        const int hwm{1};  // set maximum queue length to 1 message
+        : output_dir(output_dir), context(1), socket(context, ZMQ_SUB) {
+        const int hwm = 1;  // set maximum queue length to 1 message
         socket.set(zmq::sockopt::rcvhwm, hwm);
         socket.set(zmq::sockopt::subscribe, "");
         socket.connect(endpoint);
         std::cout << "Subscribing to " << endpoint << std::endl;
     }
 
-    void loopOnce(size_t frame_index) {
+    void loopOnce() {
         zmq::message_t msg;
-        const auto received_bytes{socket.recv(msg, zmq::recv_flags::none)};
+        const auto received_bytes = socket.recv(msg, zmq::recv_flags::none);
         const nodar::zmq::ObstacleData obstacleData{static_cast<uint8_t *>(msg.data())};
-        const auto frame_id{obstacleData.frame_id};
-        std::cout << "\rFrame # " << frame_id << ". " << std::flush;
-
-        // If the obstacle data was not received correctly, return
-        if (obstacleData.obstacles.empty()) {
-            return;
-        }
+        const auto &frame_id = obstacleData.frame_id;
 
         // Warn if we dropped a frame
         if ((last_frame_id != 0) and (frame_id != last_frame_id + 1)) {
@@ -57,13 +51,12 @@ public:
                       << ", last frame ID: " << last_frame_id << std::endl;
         }
         last_frame_id = frame_id;
+        std::cout << "\rFrame # " << frame_id << ". " << std::flush;
 
-        // Note that this frame index represents the number of frames received.
-        // The messages themselves have a frame_id that tracks how many frames have been produced.
-        // Due to networking issues, it could be that there are dropped frames, resulting in these numbers being
-        // different
-        const auto filename{output_dir / (std::to_string(frame_index) + ".txt")};
-        std::cout << "Writing " << filename << std::endl;
+        std::ostringstream filename_ss;
+        filename_ss << std::setw(9) << std::setfill('0') << frame_id << ".txt";
+        const auto filename = output_dir / filename_ss.str();
+        std::cout << "Writing " << filename << std::flush;
         write_data(filename, obstacleData);
     }
 
@@ -73,38 +66,33 @@ private:
     zmq::socket_t socket;
 };
 
-constexpr auto DEFAULT_IP = "127.0.0.1";
-
-void printUsage() {
+void printUsage(const std::string &default_ip) {
     std::cout << "You should specify the IP address of the device running hammerhead:\n\n"
                  "     ./obstacle_data_generator hammerhead_ip\n\n"
                  "e.g. ./obstacle_data_generator 192.168.1.9\n\n"
                  "In the meantime, we are going to assume that you are running this on the device running hammerhead,\n"
-                 "that is, we assume that you specified\n\n     ./obstacle_data_generator "
-              << DEFAULT_IP << "\n----------------------------------------" << std::endl;
+                 "that is, we assume that you specified\n\n"
+                 "     ./obstacle_data_generator "
+              << default_ip << "\n----------------------------------------" << std::endl;
 }
 
 int main(int argc, char *argv[]) {
-    constexpr auto TOPIC{nodar::zmq::OBSTACLE_TOPIC};
+    static constexpr auto default_ip = "127.0.0.1";
+    static constexpr auto topic = nodar::zmq::OBSTACLE_TOPIC;
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
     if (argc == 1) {
-        printUsage();
+        printUsage(default_ip);
     }
-    const auto ip{argc > 1 ? argv[1] : DEFAULT_IP};
-    const auto endpoint{std::string("tcp://") + ip + ":" + std::to_string(TOPIC.port)};
+    const auto ip{argc > 1 ? argv[1] : default_ip};
+    const auto endpoint{std::string("tcp://") + ip + ":" + std::to_string(topic.port)};
 
-    const auto HERE{std::filesystem::path(__FILE__).parent_path()};
-    const auto output_dir{HERE / "obstacle_datas"};
+    const auto HERE = std::filesystem::path(__FILE__).parent_path();
+    const auto output_dir = HERE / "obstacle_datas";
     std::filesystem::create_directories(output_dir);
 
-    ObstacleDataSink sink{output_dir, endpoint};
-    size_t frame_index{0};
+    ObstacleDataSink sink(output_dir, endpoint);
     while (running) {
-        // Note that this frame index represents the number of frames received.
-        // The messages themselves have a frame_id that tracks how many frames have been produced.
-        // Due to networking issues, it could be that there are dropped frames, resulting in these numbers being
-        // different
-        sink.loopOnce(frame_index++);
+        sink.loopOnce();
     }
 }
