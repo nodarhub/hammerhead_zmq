@@ -57,16 +57,17 @@ public:
 
         // Disparity is in 11.6 format
         cv::Mat disparity_to_depth4x4(4, 4, CV_32FC1);
-        memcpy(disparity_to_depth4x4.data, soup.disparity_to_depth4x4.data(), sizeof(soup.disparity_to_depth4x4));
+        memcpy(disparity_to_depth4x4.data, soup.disparity_to_depth4x4.data(),
+               soup.disparity_to_depth4x4.size() * sizeof(float));
 
         // Rotation disparity to raw cam
         cv::Mat rotation_disparity_to_raw_cam(3, 3, CV_32FC1);
         memcpy(rotation_disparity_to_raw_cam.data, soup.rotation_disparity_to_raw_cam.data(),
-               sizeof(soup.rotation_disparity_to_raw_cam));
+               soup.rotation_disparity_to_raw_cam.size() * sizeof(float));
         // Rotation world to raw cam
         cv::Mat rotation_world_to_raw_cam(3, 3, CV_32FC1);
         memcpy(rotation_world_to_raw_cam.data, soup.rotation_world_to_raw_cam.data(),
-               sizeof(soup.rotation_world_to_raw_cam));
+               soup.rotation_world_to_raw_cam.size() * sizeof(float));
 
         // Compute disparity_to_rotated_depth4x4 (rotated Q matrix)
         cv::Mat1f rotation_disparity_to_world_4x4 = cv::Mat::eye(4, 4, CV_32F);
