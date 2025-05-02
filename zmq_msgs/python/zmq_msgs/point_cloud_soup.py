@@ -51,13 +51,17 @@ class PointCloudSoup:
 
         self.time, self.frame_id, self.baseline, self.focal_length = struct.unpack_from('QQdd', buffer, offset)
         offset += struct.calcsize('QQdd')
-        self.disparity_to_depth4x4 = np.frombuffer(buffer, dtype=np.float32, count=16, offset=offset).reshape(4, 4)
+        self.disparity_to_depth4x4 = np.frombuffer(
+            buffer, dtype=np.float32, count=16, offset=offset
+        ).reshape(4, 4)
         offset += self.disparity_to_depth4x4.nbytes
-        self.rotation_disparity_to_raw_cam = np.frombuffer(buffer, dtype=np.float32, count=9, offset=offset).reshape(3,
-                                                                                                                     3)
+        self.rotation_disparity_to_raw_cam = np.frombuffer(
+            buffer, dtype=np.float32, count=9, offset=offset
+        ).reshape(3, 3)
         offset += self.rotation_disparity_to_raw_cam.nbytes
-        self.rotation_world_to_raw_cam = np.frombuffer(buffer, dtype=np.float32, count=9, offset=offset).reshape(3,
-                                                                                                                 3)
+        self.rotation_world_to_raw_cam = np.frombuffer(
+            buffer, dtype=np.float32, count=9, offset=offset
+        ).reshape(3, 3)
         offset += self.rotation_world_to_raw_cam.nbytes
         self.rectified = StampedImage()
         offset = self.rectified.read(buffer, offset)
