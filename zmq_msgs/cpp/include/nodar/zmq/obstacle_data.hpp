@@ -14,7 +14,12 @@ struct ObstacleData {
         float x;
         float z;
     };
+    struct Vec2int {
+        int x;
+        int z;
+    };
     static_assert(sizeof(Vec2) == 2 * sizeof(float), "The ObstacleData::Vec2 is assumed to be non-padded.");
+    static_assert(sizeof(Vec2int) == 2 * sizeof(int), "The ObstacleData::Vec2int is assumed to be non-padded.");
 
     struct BoundingBox {
         std::array<Vec2, 4> points;
@@ -25,8 +30,8 @@ struct ObstacleData {
     struct Obstacle {
         BoundingBox boundingBox;
         Vec2 velocity;
+        std::vector<Vec2int> occupancyData;
     };
-    static_assert(sizeof(Obstacle) == 10 * sizeof(float), "The ObstacleData::Obstacle is assumed to be non-padded.");
     static_assert(std::is_trivially_copyable<Obstacle>::value,
                   "The ObstacleData::Obstacle is assumed to be trivially copyable.");
 
@@ -87,7 +92,22 @@ struct ObstacleData {
 
         // Read obstacles
         obstacles.resize(num_obstacles);
-        memcpy(obstacles.data(), mem, obstacleBytes());
+        const uint8_t* current_mem = mem;
+        for (auto& obstacle : obstacles) {
+            // Read bounding box and velocity
+            memcpy(&obstacle.boundingBox, current_mem, sizeof(BoundingBox));
+            current_mem += sizeof(BoundingBox);
+            memcpy(&obstacle.velocity, current_mem, sizeof(Vec2));
+            current_mem += sizeof(Vec2);
+            
+            // Read occupancy data size and data
+            uint64_t occupancy_size;
+            memcpy(&occupancy_size, current_mem, sizeof(uint64_t));
+            current_mem += sizeof(uint64_t);
+            obstacle.occupancyData.resize(occupancy_size);
+            memcpy(obstacle.occupancyData.data(), current_mem, occupancy_size * sizeof(Vec2int));
+            current_mem += occupancy_size * sizeof(Vec2int);
+        }
     }
 
     static auto write(uint8_t *dst, uint64_t time_arg, uint64_t frame_id_arg,
@@ -100,9 +120,22 @@ struct ObstacleData {
         dst = utils::append(dst, frame_id_arg);
         dst = utils::append(dst, static_cast<uint64_t>(obstacles_arg.size()));
 
-        const auto obstacle_bytes{obstacleBytes(obstacles_arg.size())};
-        memcpy(mem, obstacles_arg.data(), obstacle_bytes);
-        return mem + obstacle_bytes;
+        // Write each obstacle's data
+        for (const auto& obstacle : obstacles_arg) {
+            // Write bounding box and velocity
+            memcpy(mem, &obstacle.boundingBox, sizeof(BoundingBox));
+            mem += sizeof(BoundingBox);
+            memcpy(mem, &obstacle.velocity, sizeof(Vec2));
+            mem += sizeof(Vec2);
+            
+            // Write occupancy data size and data
+            const uint64_t occupancy_size = obstacle.occupancyData.size();
+            memcpy(mem, &occupancy_size, sizeof(uint64_t));
+            mem += sizeof(uint64_t);
+            memcpy(mem, obstacle.occupancyData.data(), occupancy_size * sizeof(Vec2int));
+            mem += occupancy_size * sizeof(Vec2int);
+        }
+        return mem;
     }
 
     auto write(uint8_t *dst) const { return write(dst, time, frame_id, obstacles); }
