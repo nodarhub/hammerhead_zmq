@@ -60,7 +60,7 @@ class BoundingBox:
 class Obstacle:
     NUM_BYTES = BoundingBox.NUM_BYTES + Vec2.NUM_BYTES
 
-    def __init__(self, bounding_box=None, velocity=None, occupancy_data=None):
+    def __init__(self, bounding_box=None, velocity=None, num_occupied_cells=None, occupancy_data=None):
         if bounding_box is None:
             bounding_box = BoundingBox()
         if velocity is None:
@@ -69,20 +69,22 @@ class Obstacle:
             occupancy_data = []
         self.bounding_box = bounding_box
         self.velocity = velocity
+        self.num_occupied_cells = num_occupied_cells if num_occupied_cells is not None else 0
         self.occupancy_data = occupancy_data
 
     def to_bytes(self):
-        return self.bounding_box.to_bytes() + self.velocity.to_bytes() + b''.join(point.to_bytes() for point in self.occupancy_data)
+        return self.bounding_box.to_bytes() + self.velocity.to_bytes() + self.num_occupied_cells.to_bytes() + b''.join(point.to_bytes() for point in self.occupancy_data)
 
     @staticmethod
     def from_bytes(buffer, offset=0):
         bounding_box, offset = BoundingBox.from_bytes(buffer, offset)
         velocity, offset = Vec2.from_bytes(buffer, offset)
+        num_occupied_cells, offset = struct.unpack_from('Q', buffer, offset)
         occupancy_data = []
-        while offset < len(buffer):
+        for _ in range(num_occupied_cells):
             point, offset = Vec2int.from_bytes(buffer, offset)
             occupancy_data.append(point)
-        return Obstacle(bounding_box, velocity, occupancy_data), offset
+        return Obstacle(bounding_box, velocity, num_occupied_cells, occupancy_data), offset
 
 
 class ObstacleData:
