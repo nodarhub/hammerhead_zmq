@@ -94,12 +94,26 @@ class PointCloudSoupRecorder:
         rectified = point_cloud_soup.rectified.img
         disparity_scaled = disparity / np.float32(16)
         disparity_to_depth4x4 = point_cloud_soup.disparity_to_depth4x4.copy()
+
+        # Rotation disparity to raw cam
+        rotation_disparity_to_raw_cam = point_cloud_soup.rotation_disparity_to_raw_cam
+
+        # Rotation world to raw cam
+        rotation_world_to_raw_cam = point_cloud_soup.rotation_world_to_raw_cam
+
+        # Compute disparity_to_rotated_depth4x4 (rotated Q matrix)
+        rotation_disparity_to_world = rotation_world_to_raw_cam.T @ rotation_disparity_to_raw_cam
+        rotation_disparity_to_world_4x4 = np.eye(4, dtype=np.float32)
+        rotation_disparity_to_world_4x4[:3, :3] = rotation_disparity_to_world
+        disparity_to_rotated_depth4x4 = rotation_disparity_to_world_4x4 @ disparity_to_depth4x4
+
         # Negate the last row of the Q-matrix
-        disparity_to_depth4x4[3, :] *= -1
+        disparity_to_rotated_depth4x4[3, :] *= -1
+
         if self.depth3d is None:
-            self.depth3d = cv2.reprojectImageTo3D(disparity_scaled, disparity_to_depth4x4)
+            self.depth3d = cv2.reprojectImageTo3D(disparity_scaled, disparity_to_rotated_depth4x4)
         else:
-            cv2.reprojectImageTo3D(disparity_scaled, disparity_to_depth4x4, self.depth3d)
+            cv2.reprojectImageTo3D(disparity_scaled, disparity_to_rotated_depth4x4, self.depth3d)
 
         xyz = self.depth3d
         bgr = rectified
