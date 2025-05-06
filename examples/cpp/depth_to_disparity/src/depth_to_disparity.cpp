@@ -38,21 +38,42 @@ int main(int argc, char *argv[]) {
     std::filesystem::create_directories(output_dir);
 
     // Load the depth data
+    auto tiffs{getFiles(input_dir / "depth", ".tiff")};
     const auto exrs{getFiles(input_dir / "depth", ".exr")};
+
+    // If there are no tiffs, but there are exrs, we need to convert them to tiffs as a one-time upgrade
+    if (tiffs.empty() && !exrs.empty()) {
+        std::cout << "Legacy .exr files detected, converting .exr files to .tiff files..." << std::endl;
+        std::vector<int> compression_params = {cv::IMWRITE_TIFF_COMPRESSION, 1};
+
+        for (const auto &exr : tq::tqdm(exrs)) {
+            const auto depthImage{safeLoad(exr, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH, CV_32FC1, exr, "depth image")};
+
+            if (depthImage.empty()) {
+                continue;
+            }
+
+            const auto filePath{depth_dir / (exr.stem().string() + ".tiff")};
+            cv::imwrite(filePath, depthImage, compression_params);
+        }
+
+        // Reload the tiffs
+        tiffs = getFiles(input_dir / "depth", ".tiff");
+    }
+
     std::cout << "Found " << exrs.size() << " depth maps to convert to disparities" << std::endl;
 
-    for (const auto &exr : tq::tqdm(exrs)) {
-        // Safely load all the images.
-        const auto depth_image{safeLoad(exr, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH, CV_32FC1, exr, "depth image")};
+    for (const auto &tiff : tq::tqdm(tiffs)) {        // Safely load all the images.
+        const auto depth_image{safeLoad(tiff, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH, CV_32FC1, tiff, "depth image")};
         if (depth_image.empty()) {
             continue;
         }
 
         // Load the details
-        const auto details_filename{details_dir / (exr.stem().string() + ".csv")};
+        const auto details_filename{details_dir / (tiff.stem().string() + ".csv")};
         if (not std::filesystem::exists(details_filename)) {
             std::cerr << "Could not find the corresponding details for\n"
-                      << exr << ". This path does not exist:\n"
+                      << tiff << ". This path does not exist:\n"
                       << details_filename << std::endl;
             continue;
         }
@@ -68,7 +89,7 @@ int main(int argc, char *argv[]) {
         cv::Mat img_disparity{cv::Mat((16.0f * details.focal_length * details.baseline) / depth_image)};
         img_disparity.convertTo(img_disparity, CV_16UC1);
 
-        const auto file_path{output_dir / (exr.stem().string() + ".tiff")};
+        const auto file_path{output_dir / (tiff.stem().string() + ".tiff")};
         cv::imwrite(file_path, img_disparity, compression_params);
     }
     return 0;
