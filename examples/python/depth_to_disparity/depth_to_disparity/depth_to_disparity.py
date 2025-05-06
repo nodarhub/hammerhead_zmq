@@ -91,7 +91,7 @@ def main():
             depth_image = safe_load(exr, cv2.IMREAD_UNCHANGED, [np.float32, ], 1)
             if depth_image is None:
                 continue
-            file_path = os.path.join(output_dir, os.path.splitext(os.path.basename(exr))[0] + ".tiff")
+            file_path = os.path.join(depth_dir, os.path.splitext(os.path.basename(exr))[0] + ".tiff")
             cv2.imwrite(file_path, depth_image, [cv2.IMWRITE_TIFF_COMPRESSION, 1])
         tiffs = get_files(depth_dir, ".tiff")
     
