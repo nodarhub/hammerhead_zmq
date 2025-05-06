@@ -157,8 +157,23 @@ int main(int argc, char *argv[]) {
     } else if (std::filesystem::exists(depth_dir)) {
         auto depths = getFiles(depth_dir, ".tiff");
         if (depths.empty()) {
-            std::cerr << "No .tiff files found in the depth directory. Trying .exr..." << std::endl;
+            std::cerr << "No .tiff files found in the depth directory. Trying .exr and converting..." << std::endl;
             depths = getFiles(depth_dir, ".exr");
+            std::vector<int> compression_params = {cv::IMWRITE_TIFF_COMPRESSION, 1};
+
+            for (const auto &exr_depth : tq::tqdm(depths)) {
+                const auto depthImage{safeLoad(exr_depth, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH, CV_32FC1, "depth image")};
+    
+                if (depthImage.empty()) {
+                    continue;
+                }
+    
+                const auto filePath{depth_dir / (exr_depth.stem().string() + ".tiff")};
+                cv::imwrite(filePath, depthImage, compression_params);
+            }
+    
+            // Reload the tiffs
+            depths = getFiles(depth_dir, ".tiff");
         }
         std::cout << "Found " << depths.size() << " depth maps to convert to point clouds" << std::endl;
         processFiles(depths, left_rect_dir, details_dir, output_dir, point_cloud_writer, false);
