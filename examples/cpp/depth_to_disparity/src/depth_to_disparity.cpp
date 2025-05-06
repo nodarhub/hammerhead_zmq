@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
         std::vector<int> compression_params = {cv::IMWRITE_TIFF_COMPRESSION, 1};
 
         for (const auto &exr : tq::tqdm(exrs)) {
-            const auto depthImage{safeLoad(exr, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH, CV_32FC1, exr, "depth image")};
+            const auto depthImage{safeLoad(exr, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH, CV_32FC1, "depth image")};
 
             if (depthImage.empty()) {
                 continue;
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Found " << exrs.size() << " depth maps to convert to disparities" << std::endl;
 
     for (const auto &tiff : tq::tqdm(tiffs)) {        // Safely load all the images.
-        const auto depth_image{safeLoad(tiff, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH, CV_32FC1, tiff, "depth image")};
+        const auto depth_image{safeLoad(tiff, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH, CV_32FC1, "depth image")};
         if (depth_image.empty()) {
             continue;
         }

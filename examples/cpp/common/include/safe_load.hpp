@@ -4,12 +4,11 @@
 #include <iostream>
 #include <opencv2/imgcodecs.hpp>
 
-inline auto safeLoad(const std::filesystem::path &filename, int read_mode, int pixel_type,
-                     const std::filesystem::path &reference_exr, const char *image_type) {
+inline auto safeLoad(const std::filesystem::path &filename, int read_mode, int pixel_type, const char *image_type) {
     cv::Mat img;
     if (not std::filesystem::exists(filename)) {
         std::cerr << "Could not find the corresponding " << image_type << " for\n"
-                  << reference_exr << ". This path does not exist:\n"
+                  << filename << ". This path does not exist:\n"
                   << filename << std::endl;
     } else {
         try {
