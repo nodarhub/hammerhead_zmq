@@ -75,7 +75,7 @@ void processFiles(const std::vector<std::filesystem::path> &files, const std::fi
     for (const auto &file : tq::tqdm(files)) {
         auto input_image =
             safeLoad(file, is_disparity ? cv::IMREAD_ANYDEPTH : (cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH),
-                     is_disparity ? CV_16UC1 : CV_32FC1, file, is_disparity ? "disparity image" : "depth image");
+                     is_disparity ? CV_16UC1 : CV_32FC1, is_disparity ? "disparity image" : "depth image");
 
         if (input_image.empty()) {
             continue;
@@ -94,7 +94,7 @@ void processFiles(const std::vector<std::filesystem::path> &files, const std::fi
                       << left_rect_filename << std::endl;
             continue;
         }
-        const auto left_rect = safeLoad(left_rect_filename, cv::IMREAD_COLOR, CV_8UC3, file, "left rectified image");
+        const auto left_rect = safeLoad(left_rect_filename, cv::IMREAD_COLOR, CV_8UC3, "left rectified image");
         if (left_rect.empty()) {
             continue;
         }
@@ -155,7 +155,26 @@ int main(int argc, char *argv[]) {
         std::cout << "Found " << disparities.size() << " disparity maps to convert to point clouds" << std::endl;
         processFiles(disparities, left_rect_dir, details_dir, output_dir, point_cloud_writer, true);
     } else if (std::filesystem::exists(depth_dir)) {
-        const auto depths = getFiles(depth_dir, ".exr");
+        auto depths = getFiles(depth_dir, ".tiff");
+        if (depths.empty()) {
+            std::cerr << "No .tiff files found in the depth directory. Trying .exr and converting..." << std::endl;
+            depths = getFiles(depth_dir, ".exr");
+            std::vector<int> compression_params = {cv::IMWRITE_TIFF_COMPRESSION, 1};
+
+            for (const auto &exr_depth : tq::tqdm(depths)) {
+                const auto depthImage{safeLoad(exr_depth, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH, CV_32FC1, "depth image")};
+    
+                if (depthImage.empty()) {
+                    continue;
+                }
+    
+                const auto filePath{depth_dir / (exr_depth.stem().string() + ".tiff")};
+                cv::imwrite(filePath, depthImage, compression_params);
+            }
+    
+            // Reload the tiffs
+            depths = getFiles(depth_dir, ".tiff");
+        }
         std::cout << "Found " << depths.size() << " depth maps to convert to point clouds" << std::endl;
         processFiles(depths, left_rect_dir, details_dir, output_dir, point_cloud_writer, false);
     } else {
