@@ -12,7 +12,7 @@ find_package(OpenCV 4 REQUIRED COMPONENTS imgcodecs)
 add_library(common INTERFACE)
 
 target_sources(common INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/details.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/details_parameters.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/include/get_files.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/include/safe_load.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/include/tqdm.hpp
@@ -25,6 +25,7 @@ target_include_directories(common INTERFACE
 target_link_libraries(common
         INTERFACE
         opencv_imgcodecs
+        yaml-cpp::yaml-cpp
         )
 
 set_target_properties(common PROPERTIES

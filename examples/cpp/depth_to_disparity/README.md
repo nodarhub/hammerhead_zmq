@@ -12,7 +12,7 @@ To build this example, follow the traditional CMake process:
     cmake ..
     cmake --build . --config Release
 
-To run this example, you need to provide the path to a directory of data saved by Hammerhead. It is necessary to have both the `depth` and `details` folders in the data directory:
+To run this example, you need to provide the path to a directory of data saved by Hammerhead. It is necessary to have both the `depth` and `details` folders in the data directory. The `details` data have to be in `yaml` format.
 
     # Linux
     ./depth_to_disparity data_directory [output_directory]

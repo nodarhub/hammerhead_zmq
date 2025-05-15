@@ -1,9 +1,9 @@
+#include <details_parameters.hpp>
 #include <filesystem>
 #include <iostream>
 #include <opencv2/calib3d.hpp>
 #include <vector>
 
-#include "details.hpp"
 #include "get_files.hpp"
 #include "ply.hpp"
 #include "point.hpp"
@@ -12,7 +12,7 @@
 
 class PointCloudWriter {
 public:
-    void operator()(const std::string &ply_path, const Details &details, const cv::Mat &input_image,
+    void operator()(const std::string &ply_path, DetailsParameters &details, const cv::Mat &input_image,
                     const cv::Mat &left_rect, const bool &is_disparity) {
         // Allocate space for the point cloud
         std::vector<PointXYZRGB> point_cloud;
@@ -21,14 +21,14 @@ public:
         point_cloud.resize(rows * cols);
 
         // Convert the input map to a point cloud
-        cv::Mat disparity_to_depth4x4 = details.projection.clone();
+        cv::Mat disparity_to_depth4x4{cv::Size{4, 4}, CV_32FC1, details.projection.data()};
         // Negate the last row of the Q-matrix
         disparity_to_depth4x4.row(3) = -disparity_to_depth4x4.row(3);
 
         if (is_disparity) {
             cv::reprojectImageTo3D(input_image, depth3d, disparity_to_depth4x4);
         } else {
-            const auto disparity = details.focal_length * details.baseline / input_image;
+            const auto disparity = details.focalLength * details.baseline / input_image;
             cv::reprojectImageTo3D(disparity, depth3d, disparity_to_depth4x4);
         }
 
@@ -99,14 +99,34 @@ void processFiles(const std::vector<std::filesystem::path> &files, const std::fi
             continue;
         }
 
-        const auto details_filename = details_dir / (file.stem().string() + ".csv");
+        const auto details_filename = details_dir / (file.stem().string() + ".yaml");
         if (!std::filesystem::exists(details_filename)) {
             std::cerr << "Could not find the corresponding details for\n"
                       << file << ". This path does not exist:\n"
                       << details_filename << std::endl;
             continue;
         }
-        const Details details(details_filename);
+
+        if (details_filename.extension() != ".yaml") {
+            std::cerr << "The details file is not a .yaml file:\n"
+                      << details_filename << "\n"
+                      << "Please validate the data folder with the NodarViewer application." << std::endl;
+            continue;
+        }
+
+        DetailsParameters details{};
+        bool hasErrors{false};
+        if (!details.parse(details_filename, hasErrors)) {
+            std::cerr << "Could not parse the details file:\n" << details_filename << std::endl;
+            continue;
+        }
+
+        if (hasErrors) {
+            std::cerr << "The details file has errors:\n"
+                      << details_filename << "\n"
+                      << "Please validate the data folder with the NodarViewer application." << std::endl;
+            continue;
+        }
 
         const auto ply_path = output_dir / (file.stem().string() + ".ply");
         point_cloud_writer(ply_path, details, input_image, left_rect, is_disparity);
@@ -162,16 +182,17 @@ int main(int argc, char *argv[]) {
             std::vector<int> compression_params = {cv::IMWRITE_TIFF_COMPRESSION, 1};
 
             for (const auto &exr_depth : tq::tqdm(depths)) {
-                const auto depthImage{safeLoad(exr_depth, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH, CV_32FC1, "depth image")};
-    
+                const auto depthImage{
+                    safeLoad(exr_depth, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH, CV_32FC1, "depth image")};
+
                 if (depthImage.empty()) {
                     continue;
                 }
-    
+
                 const auto filePath{depth_dir / (exr_depth.stem().string() + ".tiff")};
                 cv::imwrite(filePath, depthImage, compression_params);
             }
-    
+
             // Reload the tiffs
             depths = getFiles(depth_dir, ".tiff");
         }
