@@ -12,18 +12,26 @@ struct Topic {
     uint16_t port;
 };
 
-constexpr std::array<Topic, 7> IMAGE_TOPICS{{{"nodar/left/image_raw", 9800},  //
-                                             {"nodar/right/image_raw", 9801},  //
-                                             {"nodar/left/image_rect", 9802},  //
-                                             {"nodar/right/image_rect", 9803},  //
-                                             {"nodar/disparity", 9804},  //
-                                             {"nodar/color_blended_depth/image_raw", 9805},  //
-                                             {"nodar/topbot_raw", 9813}}};
+constexpr Topic LEFT_RAW_TOPIC{"nodar/left/image_raw", 9800};
+constexpr Topic RIGHT_RAW_TOPIC{"nodar/right/image_raw", 9801};
+constexpr Topic LEFT_RECT_TOPIC{"nodar/left/image_rect", 9802};
+constexpr Topic RIGHT_RECT_TOPIC{"nodar/right/image_rect", 9803};
+constexpr Topic DISPARITY_TOPIC{"nodar/disparity", 9804};
+constexpr Topic COLOR_BLENDED_DEPTH_TOPIC{"nodar/color_blended_depth/image_raw", 9805};
+constexpr Topic TOPBOT_RAW_TOPIC{"nodar/topbot_raw", 9813};
+
+constexpr std::array<Topic, 7> IMAGE_TOPICS{{LEFT_RAW_TOPIC,  //
+                                             RIGHT_RAW_TOPIC,  //
+                                             LEFT_RECT_TOPIC,  //
+                                             RIGHT_RECT_TOPIC,  //
+                                             DISPARITY_TOPIC,  //
+                                             COLOR_BLENDED_DEPTH_TOPIC,  //
+                                             TOPBOT_RAW_TOPIC}};
 
 constexpr Topic SOUP_TOPIC{"nodar/point_cloud_soup", 9806};
 
-constexpr Topic CAMERA_EXPOSURE_TOPIC = {"nodar/set_exposure", 9807};
-constexpr Topic CAMERA_GAIN_TOPIC = {"nodar/set_gain", 9808};
+constexpr Topic CAMERA_EXPOSURE_TOPIC{"nodar/set_exposure", 9807};
+constexpr Topic CAMERA_GAIN_TOPIC{"nodar/set_gain", 9808};
 
 constexpr Topic POINT_CLOUD_TOPIC{"nodar/point_cloud", 9809};
 constexpr Topic POINT_CLOUD_RGB_TOPIC{"nodar/point_cloud_rgb", 9810};

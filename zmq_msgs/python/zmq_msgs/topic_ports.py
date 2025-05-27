@@ -4,15 +4,23 @@ class Topic:
         self.port = port
 
 
+LEFT_RAW_TOPIC = Topic("nodar/left/image_raw", 9800)
+RIGHT_RAW_TOPIC = Topic("nodar/right/image_raw", 9801)
+LEFT_RECT_TOPIC = Topic("nodar/left/image_rect", 9802)
+RIGHT_RECT_TOPIC = Topic("nodar/right/image_rect", 9803)
+DISPARITY_TOPIC = Topic("nodar/disparity", 9804)
+COLOR_BLENDED_DEPTH_TOPIC = Topic("nodar/color_blended_depth/image_raw", 9805)
+TOPBOT_RAW_TOPIC = Topic("nodar/topbot_raw", 9813)
+
 # Define the image topics as a list of Topic objects
 IMAGE_TOPICS = [
-    Topic("nodar/left/image_raw", 9800),
-    Topic("nodar/right/image_raw", 9801),
-    Topic("nodar/left/image_rect", 9802),
-    Topic("nodar/right/image_rect", 9803),
-    Topic("nodar/disparity", 9804),
-    Topic("nodar/color_blended_depth/image_raw", 9805),
-    Topic("nodar/topbot_raw", 9813)
+    LEFT_RAW_TOPIC,
+    RIGHT_RAW_TOPIC,
+    LEFT_RECT_TOPIC,
+    RIGHT_RECT_TOPIC,
+    DISPARITY_TOPIC,
+    COLOR_BLENDED_DEPTH_TOPIC,
+    TOPBOT_RAW_TOPIC
 ]
 
 # Define other topics as individual Topic objects
