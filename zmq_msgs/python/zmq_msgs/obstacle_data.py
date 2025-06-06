@@ -21,6 +21,12 @@ class Vec2:
         x, z = struct.unpack_from('ff', buffer, offset)
         return Vec2(x, z), offset + Vec2.NUM_BYTES
 
+    def __str__(self):
+        return f"({self.x:.2f}, {self.z:.2f})"
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class BoundingBox:
     NUM_BYTES = 4 * Vec2.NUM_BYTES
@@ -42,6 +48,12 @@ class BoundingBox:
             points.append(point)
         return BoundingBox(points), offset
 
+    def __str__(self):
+        return f"{self.points}"
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class Obstacle:
     NUM_BYTES = BoundingBox.NUM_BYTES + Vec2.NUM_BYTES
@@ -62,6 +74,12 @@ class Obstacle:
         bounding_box, offset = BoundingBox.from_bytes(buffer, offset)
         velocity, offset = Vec2.from_bytes(buffer, offset)
         return Obstacle(bounding_box, velocity), offset
+
+    def __str__(self):
+        return f"Obstacle(bounding_box={self.bounding_box}, velocity={self.velocity})"
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class ObstacleData:
@@ -103,3 +121,9 @@ class ObstacleData:
             buffer[offset:offset + Obstacle.NUM_BYTES] = obstacle.to_bytes()
             offset += Obstacle.NUM_BYTES
         return original_offset + self.msg_size()
+
+    def __str__(self):
+        return f"ObstacleData(time={self.time}, frame_id={self.frame_id}, obstacles={self.obstacles})"
+
+    def __repr__(self):
+        return self.__str__()
