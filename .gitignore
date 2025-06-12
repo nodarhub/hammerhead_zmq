@@ -1,5 +1,6 @@
 .idea
 .vscode
+.venv
 build
 cmake-build*
 obstacle_datas

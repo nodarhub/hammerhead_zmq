@@ -4,3 +4,6 @@
 [submodule "zmq_msgs/submodules/cppzmq"]
 	path = zmq_msgs/submodules/cppzmq
 	url = https://github.com/zeromq/cppzmq.git
+[submodule "submodules/yaml-cpp/yaml-cpp"]
+	path = submodules/yaml-cpp/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git

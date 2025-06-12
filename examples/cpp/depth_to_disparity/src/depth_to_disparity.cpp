@@ -1,10 +1,10 @@
-#include <details.hpp>
+#include <details_parameters.hpp>
 #include <filesystem>
 #include <get_files.hpp>
 #include <iostream>
-#include <vector>
 #include <safe_load.hpp>
 #include <tqdm.hpp>
+#include <vector>
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -63,14 +63,14 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Found " << exrs.size() << " depth maps to convert to disparities" << std::endl;
 
-    for (const auto &tiff : tq::tqdm(tiffs)) {        // Safely load all the images.
+    for (const auto &tiff : tq::tqdm(tiffs)) {  // Safely load all the images.
         const auto depth_image{safeLoad(tiff, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH, CV_32FC1, "depth image")};
         if (depth_image.empty()) {
             continue;
         }
 
         // Load the details
-        const auto details_filename{details_dir / (tiff.stem().string() + ".csv")};
+        const auto details_filename{details_dir / (tiff.stem().string() + ".yaml")};
         if (not std::filesystem::exists(details_filename)) {
             std::cerr << "Could not find the corresponding details for\n"
                       << tiff << ". This path does not exist:\n"
@@ -78,7 +78,26 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        const Details details{details_filename};
+        if (details_filename.extension() != ".yaml") {
+            std::cerr << "The details file is not a .yaml file:\n"
+                      << details_filename << "\n"
+                      << "Please validate the data folder with the NodarViewer application." << std::endl;
+            continue;
+        }
+
+        DetailsParameters details{};
+        bool hasErrors{false};
+        if (!details.parse(details_filename, hasErrors)) {
+            std::cerr << "Could not parse the details file:\n" << details_filename << std::endl;
+            continue;
+        }
+
+        if (hasErrors) {
+            std::cerr << "The details file has errors:\n"
+                      << details_filename << "\n"
+                      << "Please validate the data folder with the NodarViewer application." << std::endl;
+            continue;
+        }
 
         // Generate disparity and write it to disk as .tiff files
 
@@ -86,7 +105,7 @@ int main(int argc, char *argv[]) {
         compression_params.push_back(cv::IMWRITE_TIFF_COMPRESSION);
         compression_params.push_back(1);  // No compression
 
-        cv::Mat img_disparity{cv::Mat((16.0f * details.focal_length * details.baseline) / depth_image)};
+        cv::Mat img_disparity{cv::Mat((16.0f * details.focalLength * details.baseline) / depth_image)};
         img_disparity.convertTo(img_disparity, CV_16UC1);
 
         const auto file_path{output_dir / (tiff.stem().string() + ".tiff")};
