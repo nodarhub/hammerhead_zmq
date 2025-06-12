@@ -22,14 +22,23 @@ public:
 
         // Convert the input map to a point cloud
         cv::Mat disparity_to_depth4x4{cv::Size{4, 4}, CV_32FC1, details.projection.data()};
+        cv::Mat rotation_disparity_to_raw_cam{cv::Size{3, 3}, CV_32FC1, details.rotationDisparityToRawCam.data()};
+        cv::Mat rotation_world_to_raw_cam{cv::Size{3, 3}, CV_32FC1, details.rotationWorldToRawCam.data()};
+
+        // Compute disparity_to_rotated_depth4x4 (rotated Q matrix)
+        cv::Mat1f rotation_disparity_to_world_4x4 = cv::Mat::eye(4, 4, CV_32F);
+        cv::Mat(rotation_world_to_raw_cam.t() * rotation_disparity_to_raw_cam)
+            .convertTo(rotation_disparity_to_world_4x4(cv::Rect(0, 0, 3, 3)), CV_32F);
+        cv::Mat disparity_to_rotated_depth4x4 = rotation_disparity_to_world_4x4 * disparity_to_depth4x4;
+
         // Negate the last row of the Q-matrix
-        disparity_to_depth4x4.row(3) = -disparity_to_depth4x4.row(3);
+        disparity_to_rotated_depth4x4.row(3) = -disparity_to_rotated_depth4x4.row(3);
 
         if (is_disparity) {
-            cv::reprojectImageTo3D(input_image, depth3d, disparity_to_depth4x4);
+            cv::reprojectImageTo3D(input_image, depth3d, disparity_to_rotated_depth4x4);
         } else {
             const auto disparity = details.focalLength * details.baseline / input_image;
-            cv::reprojectImageTo3D(disparity, depth3d, disparity_to_depth4x4);
+            cv::reprojectImageTo3D(disparity, depth3d, disparity_to_rotated_depth4x4);
         }
 
         auto xyz = reinterpret_cast<float *>(depth3d.data);
