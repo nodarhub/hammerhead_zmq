@@ -46,7 +46,7 @@ struct DetailsParameters {
         bool noErrors{true};
 
         noErrors &= read_scalar_field(leftTime, LEFT_TIME, details);
-        noErrors &= read_scalar_field(leftTime, RIGHT_TIME, details);
+        noErrors &= read_scalar_field(rightTime, RIGHT_TIME, details);
         noErrors &= read_scalar_field(focalLength, FOCAL_LENGTH, details);
         noErrors &= read_scalar_field(baseline, BASELINE, details);
         noErrors &= read_scalar_field(metersAboveGround, METERS_ABOVE_GROUND, details);
