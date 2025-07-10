@@ -34,12 +34,21 @@ struct StampedImage {
 
     StampedImage() = default;
 
-    StampedImage(uint64_t time_arg, uint64_t frame_id_arg, uint32_t rows_arg, uint32_t cols_arg, uint32_t type_arg,
+    StampedImage(uint64_t time_arg,  //
+                 uint64_t frame_id_arg,  //
+                 uint32_t rows_arg,  //
+                 uint32_t cols_arg,  //
+                 uint32_t type_arg,  //
                  const uint8_t *data)
         : StampedImage(time_arg, frame_id_arg, rows_arg, cols_arg, type_arg, UNSPECIFIED, data) {}
 
-    StampedImage(uint64_t time_arg, uint64_t frame_id_arg, uint32_t rows_arg, uint32_t cols_arg, uint32_t type_arg,
-                 uint8_t cvt_to_bgr_code_arg, const uint8_t *data)
+    StampedImage(uint64_t time_arg,  //
+                 uint64_t frame_id_arg,  //
+                 uint32_t rows_arg,  //
+                 uint32_t cols_arg,  //
+                 uint32_t type_arg,  //
+                 uint8_t cvt_to_bgr_code_arg,  //
+                 const uint8_t *data)
         : time(time_arg),
           frame_id(frame_id_arg),
           rows(rows_arg),
@@ -119,8 +128,13 @@ struct StampedImage {
 
     [[nodiscard]] uint64_t msgSize() const { return msgSize(rows, cols, type); }
 
-    void update(uint64_t time_, uint64_t frame_id_, uint32_t rows_, uint32_t cols_, uint32_t type_,
-                uint8_t cvt_to_bgr_code_, const uint8_t *data_) {
+    void update(uint64_t time_,  //
+                uint64_t frame_id_,  //
+                uint32_t rows_,  //
+                uint32_t cols_,  //
+                uint32_t type_,  //
+                uint8_t cvt_to_bgr_code_,  //
+                const uint8_t *data_) {
         time = time_;
         frame_id = frame_id_;
         rows = rows_;
@@ -131,13 +145,24 @@ struct StampedImage {
         memcpy(img.data(), data_, dataSize());
     }
 
-    void update(uint64_t time_, uint64_t frame_id_, uint32_t rows_, uint32_t cols_, uint32_t type_,
+    void update(uint64_t time_,  //
+                uint64_t frame_id_,  //
+                uint32_t rows_,  //
+                uint32_t cols_,  //
+                uint32_t type_,  //
                 const uint8_t *data_) {
         update(time_, frame_id_, rows_, cols_, type_, UNSPECIFIED, data_);
     }
 
-    static auto write(uint8_t *dst, uint64_t time_, uint64_t frame_id_, uint32_t rows_, uint32_t cols_, uint32_t type_,
-                      uint8_t cvt_to_bgr_code_, const uint8_t *img) {
+    // Only write the image header
+    // Return a pointer to the end of the header (where the image data should start).
+    static auto write_header(uint8_t *dst,  //
+                             uint64_t time_,  //
+                             uint64_t frame_id_,  //
+                             uint32_t rows_,  //
+                             uint32_t cols_,  //
+                             uint32_t type_,  //
+                             uint8_t cvt_to_bgr_code_) {
         // The message has a header, followed by the image data
         auto header = dst;
         const auto data = header + HEADER_SIZE;
@@ -150,8 +175,34 @@ struct StampedImage {
         header = utils::append(header, cols_);
         header = utils::append(header, type_);
         header = utils::append(header, cvt_to_bgr_code_);
+        return data;
+    }
 
-        // Copy the image data
+    // Only write the image header, setting image_type to UNSPECIFIED.
+    // Return a pointer to the end of the header (where the image data should start).
+    static auto write_header(uint8_t *dst,  //
+                             uint64_t time_,  //
+                             uint64_t frame_id_,  //
+                             uint32_t rows_,  //
+                             uint32_t cols_,  //
+                             uint32_t type_) {
+        return write_header(dst, time_, frame_id_, rows_, cols_, type_, UNSPECIFIED);
+    }
+
+    // Write everything.
+    // Return a pointer to the end of the image data
+    static auto write(uint8_t *dst,  //
+                      uint64_t time_,  //
+                      uint64_t frame_id_,  //
+                      uint32_t rows_,  //
+                      uint32_t cols_,  //
+                      uint32_t type_,  //
+                      uint8_t cvt_to_bgr_code_,  //
+                      const uint8_t *img) {
+        // Write the image header
+        const auto data = write_header(dst, time_, frame_id_, rows_, cols_, type_, cvt_to_bgr_code_);
+
+        // Now write the image data
         const auto data_size = dataSize(rows_, cols_, type_);
         memcpy(data, img, data_size);
 
@@ -159,11 +210,26 @@ struct StampedImage {
         return data + data_size;
     }
 
-    static auto write(uint8_t *dst, uint64_t time_, uint64_t frame_id_, uint32_t rows_, uint32_t cols_, uint32_t type_,
+    // Write everything, setting image_type to UNSPECIFIED
+    // Return a pointer to the end of the image data
+    static auto write(uint8_t *dst,  //
+                      uint64_t time_,  //
+                      uint64_t frame_id_,  //
+                      uint32_t rows_,  //
+                      uint32_t cols_,  //
+                      uint32_t type_,  //
                       const uint8_t *img) {
         return write(dst, time_, frame_id_, rows_, cols_, type_, UNSPECIFIED, img);
     }
 
+    // Only write the image header, setting image_type to UNSPECIFIED.
+    // Return a pointer to the end of the header (where the image data should start).
+    auto write_header(uint8_t *dst) const {
+        return write_header(dst, time, frame_id, rows, cols, type, cvt_to_bgr_code);
+    }
+
+    // Write everything, setting image_type to UNSPECIFIED
+    // Return a pointer to the end of the image data
     auto write(uint8_t *dst) const { return write(dst, time, frame_id, rows, cols, type, cvt_to_bgr_code, img.data()); }
 };
 

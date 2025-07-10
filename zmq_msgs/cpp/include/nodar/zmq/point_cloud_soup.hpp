@@ -30,9 +30,15 @@ struct PointCloudSoup {
 
     PointCloudSoup() = default;
 
-    PointCloudSoup(uint64_t time, uint64_t frame_id, double baseline, double focal_length,
-                   std::array<float, 16> disparity_to_depth4x4, std::array<float, 9> rotation_disparity_to_raw_cam,
-                   std::array<float, 9> rotation_world_to_raw_cam, StampedImage rectified, StampedImage disparity)
+    PointCloudSoup(uint64_t time,  //
+                   uint64_t frame_id,  //
+                   double baseline,  //
+                   double focal_length,  //
+                   std::array<float, 16> disparity_to_depth4x4,  //
+                   std::array<float, 9> rotation_disparity_to_raw_cam,  //
+                   std::array<float, 9> rotation_world_to_raw_cam,  //
+                   StampedImage rectified,  //
+                   StampedImage disparity)
         : time(time),
           frame_id(frame_id),
           baseline(baseline),
@@ -88,12 +94,18 @@ struct PointCloudSoup {
         src += disparity.msgSize();
     }
 
-    static auto write(uint8_t *dst, uint64_t time_, uint64_t frame_id_, double baseline_, double focal_length_,
-                      const std::array<float, 16> &disparity_to_depth4x4_,
-                      const std::array<float, 9> &rotation_disparity_to_raw_cam_,
-                      const std::array<float, 9> &rotation_world_to_raw_cam_, uint32_t rows_, uint32_t cols_,
-                      uint32_t rectified_type_, const uint8_t *rectified_data_, uint32_t disparity_type_,
-                      const uint8_t *disparity_data_) {
+    // Only write the header.
+    // Return a pointer to the end of the header (where the stamped images start)
+    static auto write_header(uint8_t *dst,  //
+                             uint64_t time_,  //
+                             uint64_t frame_id_,  //
+                             double baseline_,  //
+                             double focal_length_,  //
+                             const std::array<float, 16> &disparity_to_depth4x4_,  //
+                             const std::array<float, 9> &rotation_disparity_to_raw_cam_,  //
+                             const std::array<float, 9> &rotation_world_to_raw_cam_,
+                             uint32_t rows_,  //
+                             uint32_t cols_) {
         dst = utils::append(dst, getInfo());
         dst = utils::append(dst, time_);
         dst = utils::append(dst, frame_id_);
@@ -108,24 +120,66 @@ struct PointCloudSoup {
 
         memcpy(dst, rotation_world_to_raw_cam_.data(), rotation_world_to_raw_cam_bytes);
         dst += rotation_world_to_raw_cam_bytes;
+        return dst;
+    }
 
+    static auto write(uint8_t *dst,  //
+                      uint64_t time_,  //
+                      uint64_t frame_id_,  //
+                      double baseline_,  //
+                      double focal_length_,  //
+                      const std::array<float, 16> &disparity_to_depth4x4_,  //
+                      const std::array<float, 9> &rotation_disparity_to_raw_cam_,  //
+                      const std::array<float, 9> &rotation_world_to_raw_cam_,
+                      uint32_t rows_,  //
+                      uint32_t cols_,  //
+                      uint32_t rectified_type_,  //
+                      const uint8_t *rectified_data_,  //
+                      uint32_t disparity_type_,  //
+                      const uint8_t *disparity_data_) {
+        dst = write_header(dst,  //
+                           time_,  //
+                           frame_id_,  //
+                           baseline_,  //
+                           focal_length_,  //
+                           disparity_to_depth4x4_,  //
+                           rotation_disparity_to_raw_cam_,  //
+                           rotation_world_to_raw_cam_,  //
+                           rows_,  //
+                           cols_);
         dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, rectified_type_, rectified_data_);
         dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, disparity_type_, disparity_data_);
         return dst;
     }
 
-    static auto write(uint8_t *dst, uint64_t time_, uint64_t frame_id_, double baseline_, double focal_length_,
-                      const std::array<float, 16> &disparity_to_depth4x4_,
-                      const std::array<float, 9> &rotation_disparity_to_raw_cam_,
-                      const std::array<float, 9> &rotation_world_to_raw_cam_, const StampedImage &rectified_,
+    static auto write(uint8_t *dst,  //
+                      uint64_t time_,  //
+                      uint64_t frame_id_,  //
+                      double baseline_,  //
+                      double focal_length_,  //
+                      const std::array<float, 16> &disparity_to_depth4x4_,  //
+                      const std::array<float, 9> &rotation_disparity_to_raw_cam_,  //
+                      const std::array<float, 9> &rotation_world_to_raw_cam_,  //
+                      const StampedImage &rectified_,  //
                       const StampedImage &disparity_) {
         assert(rectified_.rows == disparity_.rows &&
                "Rectified and disparity images must have the same number of rows");
         assert(rectified_.cols == disparity_.cols &&
                "Rectified and disparity images must have the same number of columns");
-        return write(dst, time_, frame_id_, baseline_, focal_length_, disparity_to_depth4x4_,
-                     rotation_disparity_to_raw_cam_, rotation_world_to_raw_cam_, rectified_.rows, rectified_.cols,
-                     rectified_.type, rectified_.img.data(), disparity_.type, disparity_.img.data());
+        return write(dst,  //
+                     time_,  //
+                     frame_id_,  //
+                     baseline_,  //
+                     focal_length_,  //
+                     disparity_to_depth4x4_,  //
+                     rotation_disparity_to_raw_cam_,  //
+                     rotation_world_to_raw_cam_,  //
+                     rectified_.rows,  //
+                     rectified_.cols,  //
+                     rectified_.type,  //
+                     rectified_.img.data(),  //
+                     disparity_.type,  //
+                     disparity_.img.data());
     }
 
     auto write(uint8_t *dst) const {
