@@ -53,14 +53,10 @@ def safe_load(filename, read_mode, valid_types, expected_num_channels):
         return None
 
 
-def disparity_to_ordered_pointcloud(disp_s16: np.ndarray, Q: np.ndarray, invalid_to_inf: bool = True) -> np.ndarray:
+def disparity_to_ordered_pointcloud(disp_s16: np.ndarray, Q: np.ndarray) -> np.ndarray:
     disp_f32 = disp_s16.astype(np.float32) / 16.0
     Q[3, :] = -Q[3, :]
-    xyz = cv2.reprojectImageTo3D(disp_f32, Q, handleMissingValues=invalid_to_inf)
-    if invalid_to_inf:
-        invalid = disp_s16 <= 0
-        xyz[invalid] = np.float32(np.inf)
-
+    xyz = cv2.reprojectImageTo3D(disp_f32, Q)
     return xyz
 
 
@@ -104,8 +100,7 @@ def main():
 
         xyz = disparity_to_ordered_pointcloud(
             disparity_image,
-            details.disparity_to_depth4x4,
-            invalid_to_inf=True,
+            details.disparity_to_depth4x4
         )
 
         stem = os.path.splitext(os.path.basename(tiff))[0]
