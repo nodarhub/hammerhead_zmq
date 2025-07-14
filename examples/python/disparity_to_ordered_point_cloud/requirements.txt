@@ -1,0 +1,5 @@
+numpy<2
+opencv-contrib-python>=4.5
+pyzmq>=26
+tqdm>=4
+pyyaml>=6.0,<7.0

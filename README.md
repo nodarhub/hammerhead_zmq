@@ -106,3 +106,4 @@ This conversion scheme has been used in the following examples:
 - examples/cpp/offline_point_cloud_generator
 - examples/cpp/point_cloud_soup_recorder
 - examples/python/point_cloud_soup_recorder
+- examples/python/disparity_to_ordered_point_cloud
