@@ -105,7 +105,8 @@ class StampedImage:
         if rows * cols > 1e8:
             print(
                 "According to the message, the image has the impossibly large of dimensions "
-                f"{rows} x {cols}. We are ignoring this message so that you don't run out of memory."
+                f"{rows} x {cols}. "
+                "We are ignoring this message so that you don't run out of memory."
             )
             return
 
@@ -132,9 +133,7 @@ class StampedImage:
         elif img.ndim == 3:
             rows, cols, channels = img.shape
         else:
-            print(
-                f"Cannot write this image, it has either less than 2 dimensions, or more than 3 dimensions"
-            )
+            print("Cannot write this image, it has either <2 dimensions, or >3 dimensions")
             return
         offset = self.info().write(buffer, original_offset)
         struct.pack_into(

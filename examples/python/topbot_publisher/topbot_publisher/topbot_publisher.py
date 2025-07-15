@@ -67,7 +67,8 @@ def is_valid_port(port):
         return False
     if port in get_reserved_ports():
         print(
-            "Invalid port number: Port number is reserved. Please choose a port number other than 98xx."
+            "Invalid port number: Port number is reserved. "
+            "Please choose a port number other than 98xx."
         )
         return False
     return True

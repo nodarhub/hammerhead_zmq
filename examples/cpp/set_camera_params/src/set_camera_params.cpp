@@ -47,7 +47,7 @@ void printUsage() {
                  "     ./set_gain hammerhead_ip\n\n"
                  "e.g. ./set_gain 192.168.1.9\n\n"
 #endif
-                 "In the meantime, we are going to assume that you are running this on the device running hammerhead,\n"
+                 "In the meantime, we assume that you are running this on the device running Hammerhead,\n"
                  "that is, we assume that you specified "
               << DEFAULT_IP << "\n----------------------------------------" << std::endl;
 }

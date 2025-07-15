@@ -47,7 +47,7 @@ class PointCloud:
     def write(self, buffer, original_offset):
         time, frame_id, points = self.time, self.frame_id, self.points
         if points.ndim != 2 or points.shape[1] != 3:
-            print(f"Cannot write point_cloud, it should be a numpy array of size N x 3")
+            print("Cannot write point_cloud, it should be a numpy array of size N x 3")
             return original_offset
         offset = self.info().write(buffer, original_offset)
         struct.pack_into("QQQ", buffer, offset, time, frame_id, len(points))

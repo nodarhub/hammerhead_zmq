@@ -46,7 +46,7 @@ class ZMQImageViewer:
         stamped_image.read(msg)
         img = stamped_image.img
         if img.dtype == np.int16:
-            # Highgui produces a strange-looking output for signed 16-bit images. Convert to unsigned
+            # Highgui looks strange with signed 16-bit images. Convert to unsigned
             img = img.astype(np.uint16)
         if img is None or img.size == 0:
             print("img is None or img.size == 0")
@@ -55,7 +55,8 @@ class ZMQImageViewer:
         frame_id = stamped_image.frame_id
         if self.last_frame_id != 0 and frame_id != self.last_frame_id + 1:
             print(
-                f"{frame_id - self.last_frame_id - 1} frames dropped. Current frame ID: {frame_id}, last frame ID: {self.last_frame_id}"
+                f"{frame_id - self.last_frame_id - 1} frames dropped. "
+                f"Current frame ID: {frame_id}, last frame ID: {self.last_frame_id}"
             )
         self.last_frame_id = frame_id
         print(
@@ -81,9 +82,9 @@ def print_usage(default_ip, default_output_dir):
         " as well as the port of the message that you want to listen to:\n\n"
         "     python image_viewer.py orin_ip port\n\n"
         "e.g. python image_viewer.py 192.168.1.9 9800\n\n"
-        "Alternatively, you can specify one of the image topic names provided in topic_ports.hpp of zmq_msgs:"
+        "Alternatively, you can specify one of the image names in topic_ports.hpp of zmq_msgs:"
         "e.g. python image_viewer.py 192.168.1.9 nodar/right/image_raw\n\n"
-        "In the meantime, we are going to assume that you are running this on the device running Hammerhead,\n"
+        "In the meantime, we assume that you are running this on the device running Hammerhead,\n"
         "and that you want the images on port 9800, that is, we assume that you specified\n\n"
         f"     python image_viewer.py {default_ip} {default_output_dir}\n\n"
         "Note that the list of topic/port mappings is in topic_ports.py in the zmq_msgs target.\n"
@@ -110,7 +111,8 @@ def main():
                     break
             else:
                 print(
-                    f"It seems like you specified a port number {port} that does not correspond to a port on which images are being published."
+                    f"It seems like you specified a port number {port} "
+                    "that does not correspond to a port on which images are being published."
                 )
                 return
         except ValueError:
@@ -121,7 +123,8 @@ def main():
                     break
             else:
                 print(
-                    f"It seems like you specified a topic name {topic_name} that does not correspond to a topic on which images are being published."
+                    f"It seems like you specified a topic name {topic_name} "
+                    "that does not correspond to a topic on which images are being published."
                 )
                 return
 

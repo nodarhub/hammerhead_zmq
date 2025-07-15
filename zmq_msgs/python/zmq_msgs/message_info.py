@@ -26,12 +26,14 @@ class MessageInfo:
             return True
         if self.major_version != other.major_version:
             print(
-                f"{expected_type} message major versions differ: {self.major_version} != {other.major_version}"
+                f"{expected_type} message major versions differ: "
+                f"{self.major_version} != {other.major_version}"
             )
             return True
         if self.minor_version != other.minor_version:
             print(
-                f"{expected_type} message minor versions differ: {self.minor_version} != {other.minor_version}"
+                f"{expected_type} message minor versions differ: "
+                f"{self.minor_version} != {other.minor_version}"
             )
             return True
         return False

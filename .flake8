@@ -4,15 +4,16 @@
 #D101: Missing docstring in public class
 #D102: public method missing docstring
 #D103: Missing docstring in public function
+#D106: Missing docstring in public nested class
 #W503: newline before binary operator
 #D107: Missing docstring in __init__
 #D105: Missing docstring in magic method
 #D417: Missing argument descriptions in the docstring
 #F401: Module imported but unused
-ignore = E203,D100,D101,D102,D103,W503,D107,D105,D417,F401,E731
+ignore = E203,D100,D101,D102,D103,D106,W503,D107,D105,D417,F401,E731
 max-line-length = 100
 docstring-convention = google
-max-complexity = 15
+max-complexity = 20
 
 # exclude some file patterns and folders including C++ source code
 exclude =

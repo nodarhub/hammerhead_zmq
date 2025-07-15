@@ -63,7 +63,8 @@ class PointCloudRecorder:
         frame_id = point_cloud.frame_id
         if self.last_frame_id != 0 and frame_id != self.last_frame_id + 1:
             print(
-                f"{frame_id - self.last_frame_id - 1} frames dropped. Current frame ID: {frame_id}, last frame ID: {self.last_frame_id}"
+                f"{frame_id - self.last_frame_id - 1} frames dropped. "
+                f"Current frame ID: {frame_id}, last frame ID: {self.last_frame_id}"
             )
         self.last_frame_id = frame_id
 
@@ -82,7 +83,7 @@ def print_usage(default_ip, default_output_dir):
         "as well as the folder where you want the data to be saved:\n\n"
         "     python point_cloud_recorder.py hammerhead_ip output_dir\n\n"
         "e.g. python point_cloud_recorder.py 192.168.1.9 point_clouds\n\n"
-        "If unspecified, then we assume that you are running this on the device running Hammerhead,\n"
+        "If unspecified, then we assume you are running this on the device running Hammerhead,\n"
         "along with the other defaults\n\n"
         f"     python point_cloud_recorder.py {default_ip} {default_output_dir}\n"
         "----------------------------------------"

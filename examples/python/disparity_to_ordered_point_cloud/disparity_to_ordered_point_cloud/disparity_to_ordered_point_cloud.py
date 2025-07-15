@@ -36,14 +36,16 @@ def safe_load(filename, read_mode, valid_types, expected_num_channels):
             return None
         if img.dtype not in valid_types:
             print(
-                f"Error loading {filename}. The image is supposed to have one of the types {valid_types}, "
+                f"Error loading {filename}. "
+                f"The image is supposed to have one of the types {valid_types}, "
                 f"not {img.dtype}"
             )
             return None
         num_channels = 1 if len(img.shape) == 2 else img.shape[2]
         if num_channels != expected_num_channels:
             print(
-                f"Error loading {filename}. The image is supposed to have {expected_num_channels} channels, "
+                f"Error loading {filename}. "
+                f"The image is supposed to have {expected_num_channels} channels, "
                 f"not {num_channels}"
             )
             return None
@@ -93,7 +95,8 @@ def main():
         )
         if not os.path.exists(details_filename):
             print(
-                f"Could not find the corresponding details for {tiff}. This path does not exist: {details_filename}"
+                f"Could not find the corresponding details for {tiff}. "
+                f"This path does not exist: {details_filename}"
             )
             continue
         details = Details(details_filename)

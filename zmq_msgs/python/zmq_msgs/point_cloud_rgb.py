@@ -54,16 +54,16 @@ class PointCloudRGB:
     def write(self, buffer, original_offset):
         time, frame_id, points, colors = self.time, self.frame_id, self.points, self.colors
         if points.ndim != 2 or points.shape[1] != 3:
-            print(f"Cannot write point_cloud, it should be a numpy array of size N x 3")
+            print("Cannot write point_cloud, it should be a numpy array of size N x 3")
             return
         if colors.ndim != 2 or colors.shape[1] != 3:
             print(
-                f"Cannot write point_cloud, the colors array should be a numpy array of size N x 3"
+                "Cannot write point_cloud, the colors array should be a numpy array of size N x 3"
             )
             return
         if len(points) != len(colors):
             print(
-                f"Cannot write point_cloud, the points and colors arrays should be the same length"
+                "Cannot write point_cloud, the points and colors arrays should be the same length"
             )
         offset = self.info().write(buffer, original_offset)
         struct.pack_into("QQIII", buffer, offset, time, frame_id, len(points))
