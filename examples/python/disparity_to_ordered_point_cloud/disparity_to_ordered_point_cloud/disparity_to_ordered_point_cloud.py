@@ -1,11 +1,19 @@
 import argparse
 import os
 import shutil
+import sys
 
 import cv2
 import numpy as np
-from details import Details
 from tqdm import tqdm
+
+try:
+    from zmq_msgs.details import Details
+except ImportError:
+    sys.path.append(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../zmq_msgs/python"))
+    )
+    from zmq_msgs.details import Details
 
 
 def parse_args():
@@ -100,9 +108,7 @@ def main():
             )
             continue
         details = Details(details_filename)
-
         xyz = disparity_to_ordered_pointcloud(disparity_image, details.disparity_to_depth4x4)
-
         stem = os.path.splitext(os.path.basename(tiff))[0]
 
         if split:
