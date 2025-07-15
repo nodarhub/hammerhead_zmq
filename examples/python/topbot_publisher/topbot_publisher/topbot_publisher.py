@@ -1,10 +1,11 @@
-import cv2
-import numpy as np
 import os
 import sys
 import time
-import zmq
 from datetime import datetime
+
+import cv2
+import numpy as np
+import zmq
 
 FRAME_RATE = 10
 
@@ -12,7 +13,9 @@ try:
     from zmq_msgs.image import StampedImage
     from zmq_msgs.topic_ports import get_reserved_ports
 except ImportError:
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../zmq_msgs/python')))
+    sys.path.append(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../zmq_msgs/python"))
+    )
     from zmq_msgs.image import StampedImage
     from zmq_msgs.topic_ports import get_reserved_ports
 
@@ -63,7 +66,9 @@ def is_valid_port(port):
         print("Invalid port number: Port number must be in the range [1024, 65535].")
         return False
     if port in get_reserved_ports():
-        print("Invalid port number: Port number is reserved. Please choose a port number other than 98xx.")
+        print(
+            "Invalid port number: Port number is reserved. Please choose a port number other than 98xx."
+        )
         return False
     return True
 
@@ -79,7 +84,7 @@ def parse_pixel_format(format_str):
 def main():
     if len(sys.argv) < 3 or len(sys.argv) > 4:
         print("Usage: topbot_publisher <topbot_data_directory> <port_number> [pixel_format]")
-        print("Supported pixel formats: " + ', '.join(PIXEL_FORMAT_MAP.keys()))
+        print("Supported pixel formats: " + ", ".join(PIXEL_FORMAT_MAP.keys()))
         return
 
     image_dir = sys.argv[1]
@@ -123,8 +128,12 @@ def main():
                 if img.dtype not in [np.uint8, np.uint16]:
                     print(f"[ERROR] Unsupported dtype in {file}: {img.dtype}")
                     continue
-            elif cvt_to_bgr_code in [cv2.COLOR_BayerBG2BGR, cv2.COLOR_BayerGB2BGR,
-                                     cv2.COLOR_BayerRG2BGR, cv2.COLOR_BayerGR2BGR]:
+            elif cvt_to_bgr_code in [
+                cv2.COLOR_BayerBG2BGR,
+                cv2.COLOR_BayerGB2BGR,
+                cv2.COLOR_BayerRG2BGR,
+                cv2.COLOR_BayerGR2BGR,
+            ]:
                 if img.ndim != 2:
                     print(f"[ERROR] Image {file} is expected to be single-channel for Bayer format")
                     continue

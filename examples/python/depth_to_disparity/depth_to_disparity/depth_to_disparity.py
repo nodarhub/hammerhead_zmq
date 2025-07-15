@@ -4,8 +4,8 @@ import sys
 
 import cv2
 import numpy as np
-from tqdm import tqdm
 import yaml
+from tqdm import tqdm
 
 os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "1"
 
@@ -88,9 +88,7 @@ def main():
         return
 
     input_dir = sys.argv[1]
-    output_dir = (
-        sys.argv[2] if len(sys.argv) > 2 else os.path.join(input_dir, "disparity")
-    )
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else os.path.join(input_dir, "disparity")
 
     # Directories that we read
     depth_dir = os.path.join(input_dir, "depth")
@@ -148,14 +146,10 @@ def main():
             continue
         details = Details(details_filename)
 
-        img_disparity = np.divide(
-            (16.0 * details.focal_length * details.baseline), depth_image
-        )
+        img_disparity = np.divide((16.0 * details.focal_length * details.baseline), depth_image)
         img_disparity = np.clip(img_disparity, 0, 65535).astype(np.uint16)
 
-        file_path = os.path.join(
-            output_dir, os.path.splitext(os.path.basename(tiff))[0] + ".tiff"
-        )
+        file_path = os.path.join(output_dir, os.path.splitext(os.path.basename(tiff))[0] + ".tiff")
         cv2.imwrite(file_path, img_disparity, [cv2.IMWRITE_TIFF_COMPRESSION, 1])
 
 

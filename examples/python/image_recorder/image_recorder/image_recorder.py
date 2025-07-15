@@ -8,7 +8,9 @@ try:
     from zmq_msgs.image import StampedImage
     from zmq_msgs.topic_ports import IMAGE_TOPICS
 except ImportError:
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../zmq_msgs/python')))
+    sys.path.append(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../zmq_msgs/python"))
+    )
     from zmq_msgs.image import StampedImage
     from zmq_msgs.topic_ports import IMAGE_TOPICS
 
@@ -38,9 +40,14 @@ class ZMQImageRecorder:
         frame_id = stamped_image.frame_id
         if self.last_frame_id != 0 and frame_id != self.last_frame_id + 1:
             print(
-                f"{frame_id - self.last_frame_id - 1} frames dropped. Current frame ID: {frame_id}, last frame ID: {self.last_frame_id}")
+                f"{frame_id - self.last_frame_id - 1} frames dropped. Current frame ID: {frame_id}, last frame ID: {self.last_frame_id}"
+            )
         self.last_frame_id = frame_id
-        print(f"\rFrame # {frame_id}, img.shape = {img.shape}, img.dtype = {img.dtype}", end="", flush=True)
+        print(
+            f"\rFrame # {frame_id}, img.shape = {img.shape}, img.dtype = {img.dtype}",
+            end="",
+            flush=True,
+        )
 
         # We recommend saving tiffs with no compression if the data rate is high.
         # Depending on the underlying image type, you might want to use stamped_image.cvt_to_bgr_code
@@ -50,17 +57,19 @@ class ZMQImageRecorder:
 
 
 def print_usage(default_ip, default_port, default_output_dir):
-    print("You should specify the IP address of the ZMQ source (the device running Hammerhead),\n"
-          "the topic name or port number, and the folder where you want the data to be saved:\n\n"
-          "     python image_recorder.py orin_ip port output_dir\n\n"
-          "e.g. python image_recorder.py 192.168.1.9 9800 images\n\n"
-          "Alternatively, you can specify one of the image topic names provided in topic_ports.hpp of zmq_msgs:"
-          "e.g. python image_recorder.py 192.168.1.9 nodar/right/image_raw recorded_images\n\n"
-          "If unspecified, then we assume that you are running this on the device running Hammerhead,\n"
-          "along with the other defaults\n\n"
-          f"     python image_recorder.py {default_ip} {default_port} {default_output_dir}\n\n"
-          "Note that the list of topic/port mappings is in topic_ports.hpp header in the zmq_msgs target.\n"
-          "----------------------------------------")
+    print(
+        "You should specify the IP address of the ZMQ source (the device running Hammerhead),\n"
+        "the topic name or port number, and the folder where you want the data to be saved:\n\n"
+        "     python image_recorder.py orin_ip port output_dir\n\n"
+        "e.g. python image_recorder.py 192.168.1.9 9800 images\n\n"
+        "Alternatively, you can specify one of the image topic names provided in topic_ports.hpp of zmq_msgs:"
+        "e.g. python image_recorder.py 192.168.1.9 nodar/right/image_raw recorded_images\n\n"
+        "If unspecified, then we assume that you are running this on the device running Hammerhead,\n"
+        "along with the other defaults\n\n"
+        f"     python image_recorder.py {default_ip} {default_port} {default_output_dir}\n\n"
+        "Note that the list of topic/port mappings is in topic_ports.hpp header in the zmq_msgs target.\n"
+        "----------------------------------------"
+    )
 
 
 def main():
@@ -83,7 +92,8 @@ def main():
                     break
             else:
                 print(
-                    f"It seems like you specified a port number {port} that does not correspond to a port on which images are being published.")
+                    f"It seems like you specified a port number {port} that does not correspond to a port on which images are being published."
+                )
                 return
         except ValueError:
             topic_name = sys.argv[2]
@@ -93,7 +103,8 @@ def main():
                     break
             else:
                 print(
-                    f"It seems like you specified a topic name {topic_name} that does not correspond to a topic on which images are being published.")
+                    f"It seems like you specified a topic name {topic_name} that does not correspond to a topic on which images are being published."
+                )
                 return
 
     output_dir = sys.argv[3] if len(sys.argv) >= 4 else default_output_dir

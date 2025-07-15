@@ -20,7 +20,7 @@ IMAGE_TOPICS = [
     RIGHT_RECT_TOPIC,
     DISPARITY_TOPIC,
     COLOR_BLENDED_DEPTH_TOPIC,
-    TOPBOT_RAW_TOPIC
+    TOPBOT_RAW_TOPIC,
 ]
 
 # Define other topics as individual Topic objects

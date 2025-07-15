@@ -9,14 +9,16 @@ try:
     from zmq_msgs.point_cloud_soup import PointCloudSoup
     from zmq_msgs.topic_ports import SOUP_TOPIC
 except ImportError:
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../zmq_msgs/python')))
+    sys.path.append(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../zmq_msgs/python"))
+    )
     from zmq_msgs.point_cloud_soup import PointCloudSoup
     from zmq_msgs.topic_ports import SOUP_TOPIC
 
 
 def write_ply_ascii(filename, points, colors):
     assert len(points) == len(colors), "Points and colors must be the same size"
-    with open(filename, 'w') as out:
+    with open(filename, "w") as out:
         out.write("ply\n")
         out.write("format ascii 1.0\n")
         out.write(f"element vertex {len(points)}\n")
@@ -34,23 +36,26 @@ def write_ply_ascii(filename, points, colors):
 def write_ply_binary(filename, points, colors):
     assert len(points) == len(colors), "Points and colors must be the same size"
     alpha = np.zeros((len(points), 1), dtype=np.uint8)
-    point_cloud = np.empty(len(points), dtype=[
-        ('x', np.float32),
-        ('y', np.float32),
-        ('z', np.float32),
-        ('red', np.uint8),
-        ('green', np.uint8),
-        ('blue', np.uint8),
-        ('alpha', np.uint8)
-    ])
-    point_cloud['x'] = points[:, 0]
-    point_cloud['y'] = points[:, 1]
-    point_cloud['z'] = points[:, 2]
-    point_cloud['blue'] = colors[:, 0]
-    point_cloud['green'] = colors[:, 1]
-    point_cloud['red'] = colors[:, 2]
-    point_cloud['alpha'] = alpha[:, 0]
-    with open(filename, 'wb') as out:
+    point_cloud = np.empty(
+        len(points),
+        dtype=[
+            ("x", np.float32),
+            ("y", np.float32),
+            ("z", np.float32),
+            ("red", np.uint8),
+            ("green", np.uint8),
+            ("blue", np.uint8),
+            ("alpha", np.uint8),
+        ],
+    )
+    point_cloud["x"] = points[:, 0]
+    point_cloud["y"] = points[:, 1]
+    point_cloud["z"] = points[:, 2]
+    point_cloud["blue"] = colors[:, 0]
+    point_cloud["green"] = colors[:, 1]
+    point_cloud["red"] = colors[:, 2]
+    point_cloud["alpha"] = alpha[:, 0]
+    with open(filename, "wb") as out:
         out.write(b"ply\n")
         out.write(b"format binary_little_endian 1.0\n")
         out.write(f"element vertex {len(points)}\n".encode())
@@ -87,7 +92,8 @@ class PointCloudSoupRecorder:
         frame_id = point_cloud_soup.frame_id
         if self.last_frame_id != 0 and frame_id != self.last_frame_id + 1:
             print(
-                f"{frame_id - self.last_frame_id - 1} frames dropped. Current frame ID: {frame_id}, last frame ID: {self.last_frame_id}")
+                f"{frame_id - self.last_frame_id - 1} frames dropped. Current frame ID: {frame_id}, last frame ID: {self.last_frame_id}"
+            )
         self.last_frame_id = frame_id
 
         disparity = point_cloud_soup.disparity.img
@@ -145,14 +151,16 @@ class PointCloudSoupRecorder:
 
 
 def print_usage(default_ip, default_output_dir):
-    print("You should specify the IP address of the device running Hammerhead,\n"
-          "as well as the folder where you want the data to be saved:\n\n"
-          "     python point_cloud_soup_recorder.py hammerhead_ip output_dir\n\n"
-          "e.g. python point_cloud_soup_recorder.py 192.168.1.9 point_clouds\n\n"
-          "If unspecified, then we assume that you are running this on the device running Hammerhead,\n"
-          "along with the other defaults\n\n"
-          f"     python point_cloud_soup_recorder.py {default_ip} {default_output_dir}\n"
-          "----------------------------------------")
+    print(
+        "You should specify the IP address of the device running Hammerhead,\n"
+        "as well as the folder where you want the data to be saved:\n\n"
+        "     python point_cloud_soup_recorder.py hammerhead_ip output_dir\n\n"
+        "e.g. python point_cloud_soup_recorder.py 192.168.1.9 point_clouds\n\n"
+        "If unspecified, then we assume that you are running this on the device running Hammerhead,\n"
+        "along with the other defaults\n\n"
+        f"     python point_cloud_soup_recorder.py {default_ip} {default_output_dir}\n"
+        "----------------------------------------"
+    )
 
 
 def main():
