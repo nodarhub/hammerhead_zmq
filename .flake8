@@ -1,0 +1,25 @@
+[flake8]
+#E203: spacing before ':'
+#D102: public method missing docstring
+#W503: newline before binary operator
+#D107: Missing docstring in __init__
+#D105: Missing docstring in magic method
+#D417: Missing argument descriptions in the docstring
+#F401: Module imported but unused
+ignore = E203,D102,W503,D107,D105,D417,F401,E731
+max-line-length = 100
+docstring-convention = google
+max-complexity = 15
+
+# exclude some file patterns and folders including C++ source code
+exclude =
+    __init__.py,
+    setup.py,
+    *.c,
+    *.cpp,
+    *.cu,
+    *.hpp,
+    *.h,
+    *.md,
+    LICENSE,
+    CMakeLists.txt
