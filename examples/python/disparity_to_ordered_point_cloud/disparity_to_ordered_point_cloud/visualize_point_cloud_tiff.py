@@ -24,9 +24,19 @@ def percentile_clamp_scale(channel):
     low, high = np.percentile(valid_vals, [10, 90])
     clamped = np.clip(channel, low, high)
     if low == high:
-        scaled = np.zeros_like(channel, dtype=np.uint8)
+        scaled = np.zeros_like(channel, dtype=channel.dtype)
     else:
-        scaled = ((clamped - low) / (high - low) * 255).astype(np.uint8)
+        # Clamp to [0, 1]
+        scaled = (clamped - low) / (high - low)
+
+        # Center at 0, stretch out the distribution, and then rescale.
+        scaled = 2 * scaled - 1
+        scaled = scaled**2
+        scaled = (scaled + 1) / 2
+
+        # Now convert to uint8 for viewing and 0 the invalid values
+        scaled = (scaled * 255).astype(np.uint8)
+        scaled[~valid_mask] = 0
     return scaled
 
 
