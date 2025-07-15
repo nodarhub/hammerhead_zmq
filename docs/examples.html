@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examples - Hammerhead ZMQ</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h2><a href="index.html" style="color: #fff; text-decoration: none;">Hammerhead ZMQ</a></h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="api.html" class="nav-link">API Reference</a></li>
+                <li><a href="#python-examples" class="nav-link">Python</a></li>
+                <li><a href="#cpp-examples" class="nav-link">C++</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <h1>Examples & Tutorials</h1>
+            <p class="hero-subtitle">Comprehensive examples demonstrating how to use Hammerhead ZMQ in Python and C++</p>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section id="python-examples" class="section">
+            <div class="container">
+                <h2>🐍 Python Examples</h2>
+                <p>Python examples provide easy-to-use scripts for common Hammerhead integration tasks. All examples can be installed as standalone packages.</p>
+                
+                <div class="example-grid">
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Image Viewer</h3>
+                            <span class="example-type">Visualization</span>
+                        </div>
+                        <p>Real-time OpenCV viewer for stereo images, disparity maps, and depth data published by Hammerhead.</p>
+                        
+                        <div class="example-details">
+                            <h4>Installation</h4>
+                            <pre><code class="language-bash">pip install -e examples/python/image_viewer</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash"># View raw left camera feed
+python image_viewer.py 192.168.1.100 nodar/left/image_raw
+
+# View disparity map
+python image_viewer.py 192.168.1.100 9804
+
+# View color-blended depth
+python image_viewer.py 192.168.1.100 nodar/color_blended_depth/image_raw</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Support for all image topics (raw, rectified, disparity, depth)</li>
+                                <li>Real-time display with OpenCV</li>
+                                <li>Automatic color space conversion</li>
+                                <li>Network connection with error handling</li>
+                            </ul>
+                            
+                            <h4>Valid Image Topics</h4>
+                            <ul class="topic-list">
+                                <li><code>nodar/left/image_raw</code> - Raw left camera</li>
+                                <li><code>nodar/right/image_raw</code> - Raw right camera</li>
+                                <li><code>nodar/left/image_rect</code> - Rectified left</li>
+                                <li><code>nodar/right/image_rect</code> - Rectified right</li>
+                                <li><code>nodar/disparity</code> - Disparity map</li>
+                                <li><code>nodar/color_blended_depth/image_raw</code> - Color depth</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Image Recorder</h3>
+                            <span class="example-type">Data Capture</span>
+                        </div>
+                        <p>Record images from any Hammerhead stream to disk as TIFF files with timestamps.</p>
+                        
+                        <div class="example-details">
+                            <h4>Installation</h4>
+                            <pre><code class="language-bash">pip install -e examples/python/image_recorder</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash"># Record left camera images
+python image_recorder.py 192.168.1.100 nodar/left/image_raw
+
+# Record disparity maps
+python image_recorder.py 192.168.1.100 nodar/disparity</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Saves images as numbered TIFF files</li>
+                                <li>Preserves original bit depth and format</li>
+                                <li>Automatic directory creation</li>
+                                <li>Progress tracking with tqdm</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Point Cloud Recorder</h3>
+                            <span class="example-type">3D Data</span>
+                        </div>
+                        <p>Subscribe to point cloud messages and save them as PLY files for use in CloudCompare and other 3D software.</p>
+                        
+                        <div class="example-details">
+                            <h4>Installation</h4>
+                            <pre><code class="language-bash">pip install -e examples/python/point_cloud_recorder</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash"># Record standard point clouds
+python point_cloud_recorder.py 192.168.1.100
+
+# Record RGB point clouds (higher bandwidth)
+python point_cloud_rgb_recorder.py 192.168.1.100</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Saves point clouds as PLY files</li>
+                                <li>Support for both standard and RGB point clouds</li>
+                                <li>Compatible with CloudCompare, MeshLab</li>
+                                <li>Automatic point cloud validation</li>
+                            </ul>
+                            
+                            <div class="warning-box">
+                                <strong>⚠️ Bandwidth Warning:</strong> Point cloud streaming requires significant network bandwidth. RGB point clouds require even more. Use with caution on limited networks.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Point Cloud Soup Recorder</h3>
+                            <span class="example-type">3D Data</span>
+                        </div>
+                        <p>Record unordered point cloud data from the "soup" stream for reduced bandwidth usage.</p>
+                        
+                        <div class="example-details">
+                            <h4>Installation</h4>
+                            <pre><code class="language-bash">pip install -e examples/python/point_cloud_soup_recorder</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash">python point_cloud_soup_recorder.py 192.168.1.100</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Lower bandwidth than ordered point clouds</li>
+                                <li>Faster processing for real-time applications</li>
+                                <li>Still maintains full 3D accuracy</li>
+                                <li>PLY output format</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Obstacle Data Recorder</h3>
+                            <span class="example-type">Detection</span>
+                        </div>
+                        <p>Record real-time obstacle detection data including bounding boxes and velocity vectors.</p>
+                        
+                        <div class="example-details">
+                            <h4>Installation</h4>
+                            <pre><code class="language-bash">pip install -e examples/python/obstacle_data_recorder</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash">python obstacle_data_recorder.py 192.168.1.100</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Saves obstacle data as text files</li>
+                                <li>Includes bounding box coordinates</li>
+                                <li>Records velocity vectors</li>
+                                <li>Header with parameter descriptions</li>
+                            </ul>
+                            
+                            <h4>Data Format</h4>
+                            <p>Obstacle data is in XZ plane (bird's eye view):</p>
+                            <ul>
+                                <li><strong>X axis:</strong> Left/right relative to camera</li>
+                                <li><strong>Z axis:</strong> Forward/backward from camera</li>
+                                <li><strong>No Y component:</strong> Height not included</li>
+                                <li><strong>Units:</strong> Meters for position, m/s for velocity</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Hammerhead Scheduler</h3>
+                            <span class="example-type">Control</span>
+                        </div>
+                        <p>Control Hammerhead's processing schedule to avoid resource conflicts with other intensive processes.</p>
+                        
+                        <div class="example-details">
+                            <h4>Installation</h4>
+                            <pre><code class="language-bash">pip install -e examples/python/hammerhead_scheduler</code></pre>
+                            
+                            <h4>Configuration Required</h4>
+                            <p>In Hammerhead's <code>master_config.ini</code>:</p>
+                            <pre><code class="language-ini">wait_for_scheduler = true
+wait_for_scheduler_timeout_ms = 5000</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash">python hammerhead_scheduler.py 192.168.1.100</code></pre>
+                            
+                            <h4>How It Works</h4>
+                            <ol>
+                                <li>Hammerhead processes a frame</li>
+                                <li>Sends scheduler request with frame number</li>
+                                <li>Waits for scheduler reply before next frame</li>
+                                <li>Times out after configured milliseconds if no reply</li>
+                            </ol>
+                            
+                            <h4>Use Cases</h4>
+                            <ul>
+                                <li>Coordinating with other intensive processes</li>
+                                <li>Custom frame rate control</li>
+                                <li>Synchronization with external systems</li>
+                                <li>Resource management on constrained systems</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Depth to Disparity Converter</h3>
+                            <span class="example-type">Processing</span>
+                        </div>
+                        <p>Convert depth images to disparity format for use with Hammerhead's processing pipeline.</p>
+                        
+                        <div class="example-details">
+                            <h4>Installation</h4>
+                            <pre><code class="language-bash">pip install -e examples/python/depth_to_disparity</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash">depth_to_disparity input_depth.tiff output_disparity.tiff</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Converts depth maps to Q12.4 disparity format</li>
+                                <li>Handles various input depth formats</li>
+                                <li>Preserves spatial accuracy</li>
+                                <li>Compatible with Hammerhead pipeline</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Disparity to Point Cloud</h3>
+                            <span class="example-type">Processing</span>
+                        </div>
+                        <p>Convert stored disparity images to ordered 3D point clouds using camera calibration data.</p>
+                        
+                        <div class="example-details">
+                            <h4>Installation</h4>
+                            <pre><code class="language-bash">pip install -e examples/python/disparity_to_ordered_point_cloud</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash">disparity_to_ordered_point_cloud disparity_dir output_dir</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Batch processing of disparity images</li>
+                                <li>Uses camera calibration parameters</li>
+                                <li>Maintains image structure in point cloud</li>
+                                <li>Supports camera details from YAML files</li>
+                            </ul>
+                            
+                            <h4>Required Files</h4>
+                            <ul>
+                                <li>Disparity images (TIFF format)</li>
+                                <li>Camera details YAML files</li>
+                                <li>Calibration parameters</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>TopBot Publisher</h3>
+                            <span class="example-type">Data Streaming</span>
+                        </div>
+                        <p>Publish images to Hammerhead's top/bottom camera topic for testing or data injection.</p>
+                        
+                        <div class="example-details">
+                            <h4>Installation</h4>
+                            <pre><code class="language-bash">pip install -e examples/python/topbot_publisher</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash">topbot_publisher image_directory</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Publishes to nodar/topbot_raw topic (port 9813)</li>
+                                <li>Supports various image formats</li>
+                                <li>Configurable frame rate</li>
+                                <li>Loop playback option</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cpp-examples" class="section bg-light">
+            <div class="container">
+                <h2>⚡ C++ Examples</h2>
+                <p>High-performance C++ implementations for real-time applications and system integration.</p>
+                
+                <div class="build-instructions">
+                    <h3>Building C++ Examples</h3>
+                    <pre><code class="language-bash"># Build all examples
+mkdir build && cd build
+cmake .. && cmake --build . --config Release
+
+# Build specific example
+cd examples/cpp/image_viewer
+mkdir build && cd build
+cmake .. && cmake --build . --config Release</code></pre>
+                </div>
+                
+                <div class="example-grid">
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Image Viewer</h3>
+                            <span class="example-type">Visualization</span>
+                        </div>
+                        <p>High-performance OpenCV viewer for real-time image streaming with minimal latency.</p>
+                        
+                        <div class="example-details">
+                            <h4>Build</h4>
+                            <pre><code class="language-bash">cd examples/cpp/image_viewer
+mkdir build && cd build
+cmake .. && cmake --build . --config Release</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash"># Linux
+./image_viewer 192.168.1.100 nodar/left/image_raw
+
+# Windows
+./Release/image_viewer.exe 192.168.1.100 9800</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Optimized for real-time performance</li>
+                                <li>Support for all image topic types</li>
+                                <li>Automatic color space handling</li>
+                                <li>Cross-platform (Linux/Windows)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Image Recorder</h3>
+                            <span class="example-type">Data Capture</span>
+                        </div>
+                        <p>High-speed image recording with efficient disk I/O for continuous data capture.</p>
+                        
+                        <div class="example-details">
+                            <h4>Build</h4>
+                            <pre><code class="language-bash">cd examples/cpp/image_recorder
+mkdir build && cd build
+cmake .. && cmake --build . --config Release</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash">./image_recorder 192.168.1.100 nodar/disparity output_dir</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>High-speed disk writing</li>
+                                <li>Buffered I/O for smooth recording</li>
+                                <li>Configurable output formats</li>
+                                <li>Progress monitoring</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Point Cloud Recorder</h3>
+                            <span class="example-type">3D Data</span>
+                        </div>
+                        <p>Efficient point cloud recording with optimized memory management for continuous 3D data capture.</p>
+                        
+                        <div class="example-details">
+                            <h4>Build</h4>
+                            <pre><code class="language-bash">cd examples/cpp/point_cloud_recorder
+mkdir build && cd build
+cmake .. && cmake --build . --config Release</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash"># Standard point clouds
+./point_cloud_recorder 192.168.1.100
+
+# RGB point clouds
+./point_cloud_rgb_recorder 192.168.1.100</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Optimized memory allocation</li>
+                                <li>Fast PLY file writing</li>
+                                <li>Support for RGB point clouds</li>
+                                <li>Real-time performance monitoring</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Point Cloud Soup Recorder</h3>
+                            <span class="example-type">3D Data</span>
+                        </div>
+                        <p>Optimized recorder for unordered point cloud data with reduced memory footprint.</p>
+                        
+                        <div class="example-details">
+                            <h4>Build</h4>
+                            <pre><code class="language-bash">cd examples/cpp/point_cloud_soup_recorder
+mkdir build && cd build
+cmake .. && cmake --build . --config Release</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash">./point_cloud_soup_recorder 192.168.1.100</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Lower memory usage than ordered clouds</li>
+                                <li>Faster processing pipeline</li>
+                                <li>Efficient point storage</li>
+                                <li>Real-time capable</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Obstacle Data Recorder</h3>
+                            <span class="example-type">Detection</span>
+                        </div>
+                        <p>High-performance obstacle data recording for real-time tracking applications.</p>
+                        
+                        <div class="example-details">
+                            <h4>Build</h4>
+                            <pre><code class="language-bash">cd examples/cpp/obstacle_data_recorder
+mkdir build && cd build
+cmake .. && cmake --build . --config Release</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash">./obstacle_data_recorder 192.168.1.100</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Real-time obstacle tracking</li>
+                                <li>Efficient data serialization</li>
+                                <li>Low-latency processing</li>
+                                <li>Configurable output formats</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Hammerhead Scheduler</h3>
+                            <span class="example-type">Control</span>
+                        </div>
+                        <p>Low-latency scheduler implementation for precise frame timing control.</p>
+                        
+                        <div class="example-details">
+                            <h4>Build</h4>
+                            <pre><code class="language-bash">cd examples/cpp/hammerhead_scheduler
+mkdir build && cd build
+cmake .. && cmake --build . --config Release</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash">./hammerhead_scheduler 192.168.1.100</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Microsecond-level timing control</li>
+                                <li>Low-latency communication</li>
+                                <li>Robust error handling</li>
+                                <li>Configurable scheduling policies</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Offline Point Cloud Generator</h3>
+                            <span class="example-type">Processing</span>
+                        </div>
+                        <p>High-performance batch processing of disparity images to generate point clouds.</p>
+                        
+                        <div class="example-details">
+                            <h4>Build</h4>
+                            <pre><code class="language-bash">cd examples/cpp/offline_point_cloud_generator
+mkdir build && cd build
+cmake .. && cmake --build . --config Release</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash">./offline_point_cloud_generator disparity_dir output_dir</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Batch processing of disparity images</li>
+                                <li>Multi-threaded processing</li>
+                                <li>Memory-efficient algorithms</li>
+                                <li>Progress tracking</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Depth to Disparity Converter</h3>
+                            <span class="example-type">Processing</span>
+                        </div>
+                        <p>High-speed conversion of depth images to Hammerhead-compatible disparity format.</p>
+                        
+                        <div class="example-details">
+                            <h4>Build</h4>
+                            <pre><code class="language-bash">cd examples/cpp/depth_to_disparity
+mkdir build && cd build
+cmake .. && cmake --build . --config Release</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash">./depth_to_disparity input_depth.tiff output_disparity.tiff</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Optimized conversion algorithms</li>
+                                <li>Support for various depth formats</li>
+                                <li>Bit-accurate Q12.4 output</li>
+                                <li>SIMD optimizations</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Camera Parameter Control</h3>
+                            <span class="example-type">Control</span>
+                        </div>
+                        <p>Real-time camera parameter adjustment for exposure, gain, and other settings.</p>
+                        
+                        <div class="example-details">
+                            <h4>Build</h4>
+                            <pre><code class="language-bash">cd examples/cpp/set_camera_params
+mkdir build && cd build
+cmake .. && cmake --build . --config Release</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash">./set_camera_params 192.168.1.100 exposure 1000
+./set_camera_params 192.168.1.100 gain 2.5</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Real-time parameter adjustment</li>
+                                <li>Multiple parameter support</li>
+                                <li>Validation and error checking</li>
+                                <li>Command-line interface</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>Recording Toggle</h3>
+                            <span class="example-type">Control</span>
+                        </div>
+                        <p>Simple utility to start/stop Hammerhead recording remotely.</p>
+                        
+                        <div class="example-details">
+                            <h4>Build</h4>
+                            <pre><code class="language-bash">cd examples/cpp/toggle_recording
+mkdir build && cd build
+cmake .. && cmake --build . --config Release</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash"># Start recording
+./toggle_recording 192.168.1.100 true
+
+# Stop recording
+./toggle_recording 192.168.1.100 false</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Simple on/off control</li>
+                                <li>Network error handling</li>
+                                <li>Status confirmation</li>
+                                <li>Scriptable interface</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <div class="example-header">
+                            <h3>TopBot Publisher</h3>
+                            <span class="example-type">Data Streaming</span>
+                        </div>
+                        <p>High-performance image publisher for top/bottom camera topic with precise timing.</p>
+                        
+                        <div class="example-details">
+                            <h4>Build</h4>
+                            <pre><code class="language-bash">cd examples/cpp/topbot_publisher
+mkdir build && cd build
+cmake .. && cmake --build . --config Release</code></pre>
+                            
+                            <h4>Usage</h4>
+                            <pre><code class="language-bash">./topbot_publisher image_directory frame_rate</code></pre>
+                            
+                            <h4>Features</h4>
+                            <ul>
+                                <li>Precise frame rate control</li>
+                                <li>Low-latency publishing</li>
+                                <li>Multiple image format support</li>
+                                <li>Memory-efficient streaming</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="integration-guide" class="section">
+            <div class="container">
+                <h2>Integration Guide</h2>
+                
+                <div class="integration-steps">
+                    <h3>Getting Started</h3>
+                    <ol>
+                        <li><strong>Choose Your Language:</strong> Python for rapid prototyping, C++ for performance</li>
+                        <li><strong>Install Dependencies:</strong> Follow platform-specific installation guides</li>
+                        <li><strong>Start with Image Viewer:</strong> Verify connectivity with basic image viewing</li>
+                        <li><strong>Explore Data Types:</strong> Try different message types based on your needs</li>
+                        <li><strong>Build Custom Applications:</strong> Use examples as templates for your specific use case</li>
+                    </ol>
+                    
+                    <h3>Common Workflows</h3>
+                    
+                    <div class="workflow">
+                        <h4>🎥 Image Processing Pipeline</h4>
+                        <ol>
+                            <li>Start with <strong>Image Viewer</strong> to verify camera feeds</li>
+                            <li>Use <strong>Image Recorder</strong> to capture datasets</li>
+                            <li>Process images with custom algorithms</li>
+                            <li>Convert results back to Hammerhead formats if needed</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="workflow">
+                        <h4>🌐 3D Reconstruction Workflow</h4>
+                        <ol>
+                            <li>Subscribe to disparity maps or point clouds</li>
+                            <li>Use <strong>Point Cloud Recorder</strong> for data collection</li>
+                            <li>Apply <strong>Disparity to Point Cloud</strong> for offline processing</li>
+                            <li>Integrate with 3D processing frameworks</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="workflow">
+                        <h4>🚗 Obstacle Detection Integration</h4>
+                        <ol>
+                            <li>Use <strong>Obstacle Data Recorder</strong> to understand data format</li>
+                            <li>Implement real-time processing of obstacle messages</li>
+                            <li>Integrate with path planning or control systems</li>
+                            <li>Add custom filtering or tracking algorithms</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="workflow">
+                        <h4>⚡ Real-time System Integration</h4>
+                        <ol>
+                            <li>Start with C++ examples for performance</li>
+                            <li>Use <strong>Hammerhead Scheduler</strong> for timing control</li>
+                            <li>Implement custom message processing</li>
+                            <li>Add system monitoring and error handling</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="tips-section">
+                    <h3>💡 Tips & Best Practices</h3>
+                    
+                    <div class="tip-grid">
+                        <div class="tip-card">
+                            <h4>🔧 Performance</h4>
+                            <ul>
+                                <li>Use C++ for real-time applications</li>
+                                <li>Monitor network bandwidth with point clouds</li>
+                                <li>Implement connection timeouts</li>
+                                <li>Consider message buffering for high-frequency data</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="tip-card">
+                            <h4>🛡️ Reliability</h4>
+                            <ul>
+                                <li>Always validate message types and versions</li>
+                                <li>Implement automatic reconnection logic</li>
+                                <li>Handle partial message reception</li>
+                                <li>Add logging for debugging network issues</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="tip-card">
+                            <h4>🌐 Networking</h4>
+                            <ul>
+                                <li>Test with different network conditions</li>
+                                <li>Use appropriate QoS settings if available</li>
+                                <li>Monitor for packet loss</li>
+                                <li>Consider compression for bandwidth-limited scenarios</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="tip-card">
+                            <h4>🔍 Debugging</h4>
+                            <ul>
+                                <li>Start with simple viewers before custom code</li>
+                                <li>Check Hammerhead configuration files</li>
+                                <li>Verify port availability and firewall settings</li>
+                                <li>Use network monitoring tools</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Hammerhead ZMQ Documentation. <a href="index.html">Back to Home</a> | <a href="api.html">API Reference</a></p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

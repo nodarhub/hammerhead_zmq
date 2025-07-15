@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference - Hammerhead ZMQ</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h2><a href="index.html" style="color: #fff; text-decoration: none;">Hammerhead ZMQ</a></h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="#message-types" class="nav-link">Message Types</a></li>
+                <li><a href="#ports" class="nav-link">Ports</a></li>
+                <li><a href="examples.html" class="nav-link">Examples</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <h1>API Reference</h1>
+            <p class="hero-subtitle">Complete documentation for Hammerhead ZMQ message types, data structures, and network protocols</p>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section id="message-types" class="section">
+            <div class="container">
+                <h2>Message Types</h2>
+                <p>All Hammerhead messages use a versioned protocol with the <code>MessageInfo</code> header structure.</p>
+                
+                <div class="api-section">
+                    <h3>MessageInfo Structure</h3>
+                    <p>Every message begins with a standard header containing version and type information:</p>
+                    
+                    <div class="api-details">
+                        <h4>C++ Definition</h4>
+                        <pre><code class="language-cpp">struct MessageInfo {
+    static constexpr uint8_t MAJOR_VERSION = 0;
+    static constexpr uint8_t MINOR_VERSION = 1;
+    
+    uint16_t message_type = 0;
+    uint8_t major_version = MAJOR_VERSION;
+    uint8_t minor_version = MINOR_VERSION;
+};</code></pre>
+                        
+                        <h4>Python Implementation</h4>
+                        <pre><code class="language-python">class MessageInfo:
+    def __init__(self, message_type=0):
+        self.message_type = message_type
+        self.major_version = 0
+        self.minor_version = 1</code></pre>
+                    </div>
+                </div>
+
+                <div class="api-section">
+                    <h3>StampedImage</h3>
+                    <p>Used for all image data including raw stereo images, rectified images, and disparity maps.</p>
+                    
+                    <div class="api-details">
+                        <h4>Structure</h4>
+                        <table class="api-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>time</code></td>
+                                    <td>uint64_t</td>
+                                    <td>Timestamp in microseconds</td>
+                                </tr>
+                                <tr>
+                                    <td><code>frame_id</code></td>
+                                    <td>uint64_t</td>
+                                    <td>Sequential frame identifier</td>
+                                </tr>
+                                <tr>
+                                    <td><code>cvt_to_bgr_code</code></td>
+                                    <td>uint8_t</td>
+                                    <td>OpenCV color conversion code</td>
+                                </tr>
+                                <tr>
+                                    <td><code>img</code></td>
+                                    <td>numpy.ndarray</td>
+                                    <td>Image data (Python) / cv::Mat (C++)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <h4>Python Usage</h4>
+                        <pre><code class="language-python">from zmq_msgs.image import StampedImage
+import zmq
+
+# Create ZMQ subscriber
+context = zmq.Context()
+socket = context.socket(zmq.SUB)
+socket.connect(f"tcp://{ip_address}:{port}")
+socket.setsockopt(zmq.SUBSCRIBE, b"")
+
+# Receive and decode image
+buffer = socket.recv()
+stamped_image = StampedImage()
+stamped_image.read(buffer)
+
+# Access image data
+cv2.imshow("Image", stamped_image.img)
+print(f"Frame ID: {stamped_image.frame_id}")
+print(f"Timestamp: {stamped_image.time}")</code></pre>
+                        
+                        <h4>Color Conversion Codes</h4>
+                        <ul>
+                            <li><code>BGR2BGR = 253</code> - No conversion needed</li>
+                            <li><code>INCONVERTIBLE = 254</code> - Cannot convert to BGR</li>
+                            <li><code>UNSPECIFIED = 255</code> - Conversion not specified</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="api-section">
+                    <h3>ObstacleData</h3>
+                    <p>Contains real-time obstacle detection information with bounding boxes and velocity vectors.</p>
+                    
+                    <div class="api-details">
+                        <h4>Structure Hierarchy</h4>
+                        
+                        <h5>Vec2</h5>
+                        <table class="api-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>x</code></td>
+                                    <td>float</td>
+                                    <td>X coordinate (meters)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>z</code></td>
+                                    <td>float</td>
+                                    <td>Z coordinate (meters)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <h5>BoundingBox</h5>
+                        <table class="api-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>points</code></td>
+                                    <td>Vec2[4]</td>
+                                    <td>Four corner points of bounding box</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <h5>Obstacle</h5>
+                        <table class="api-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>bounding_box</code></td>
+                                    <td>BoundingBox</td>
+                                    <td>Spatial extent of obstacle</td>
+                                </tr>
+                                <tr>
+                                    <td><code>velocity</code></td>
+                                    <td>Vec2</td>
+                                    <td>Velocity vector (m/s)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <h5>ObstacleData</h5>
+                        <table class="api-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>time</code></td>
+                                    <td>uint64_t</td>
+                                    <td>Timestamp in microseconds</td>
+                                </tr>
+                                <tr>
+                                    <td><code>frame_id</code></td>
+                                    <td>uint64_t</td>
+                                    <td>Sequential frame identifier</td>
+                                </tr>
+                                <tr>
+                                    <td><code>obstacles</code></td>
+                                    <td>Obstacle[]</td>
+                                    <td>Array of detected obstacles</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <h4>Python Usage</h4>
+                        <pre><code class="language-python">from zmq_msgs.obstacle_data import ObstacleData
+import zmq
+
+# Create ZMQ subscriber
+context = zmq.Context()
+socket = context.socket(zmq.SUB)
+socket.connect(f"tcp://{ip_address}:9812")
+socket.setsockopt(zmq.SUBSCRIBE, b"")
+
+# Receive and decode obstacle data
+buffer = socket.recv()
+obstacle_data = ObstacleData()
+obstacle_data.read(buffer)
+
+# Process obstacles
+for obstacle in obstacle_data.obstacles:
+    print(f"Bounding box: {obstacle.bounding_box.points}")
+    print(f"Velocity: ({obstacle.velocity.x:.2f}, {obstacle.velocity.z:.2f}) m/s")</code></pre>
+                        
+                        <h4>Coordinate System</h4>
+                        <p>Obstacle data is represented in the XZ plane (bird's eye view):</p>
+                        <ul>
+                            <li><strong>X axis</strong>: Left/right relative to camera</li>
+                            <li><strong>Z axis</strong>: Forward/backward from camera</li>
+                            <li><strong>No Y component</strong>: Height information not included</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="api-section">
+                    <h3>Point Cloud Messages</h3>
+                    <p>Hammerhead provides multiple point cloud formats depending on your application needs.</p>
+                    
+                    <div class="api-details">
+                        <h4>Point Cloud Types</h4>
+                        <table class="api-table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Port</th>
+                                    <th>Description</th>
+                                    <th>Use Case</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Point Cloud Soup</td>
+                                    <td>9806</td>
+                                    <td>Unordered 3D points</td>
+                                    <td>Fast processing, reduced bandwidth</td>
+                                </tr>
+                                <tr>
+                                    <td>Ordered Point Cloud</td>
+                                    <td>9809</td>
+                                    <td>Maintains image structure</td>
+                                    <td>Image-like processing, correspondence</td>
+                                </tr>
+                                <tr>
+                                    <td>RGB Point Cloud</td>
+                                    <td>9810</td>
+                                    <td>Points with color information</td>
+                                    <td>Visualization, high-quality reconstruction</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <h4>Point Cloud Processing</h4>
+                        <pre><code class="language-python"># Convert disparity to point cloud
+import cv2
+import numpy as np
+
+def disparity_to_pointcloud(disparity, Q):
+    """Convert disparity image to 3D point cloud"""
+    # Scale disparity from Q12.4 format
+    disparity_scaled = disparity.astype(np.float32) / 16.0
+    
+    # Important: Negate last row for correct coordinate frame
+    Q_corrected = Q.copy()
+    Q_corrected[3, :] = -Q_corrected[3, :]
+    
+    # Reproject to 3D
+    points_3d = cv2.reprojectImageTo3D(disparity_scaled, Q_corrected)
+    
+    return points_3d</code></pre>
+                    </div>
+                </div>
+
+                <div class="api-section">
+                    <h3>Control Messages</h3>
+                    <p>Messages for controlling camera parameters and system behavior.</p>
+                    
+                    <div class="api-details">
+                        <h4>SetBool</h4>
+                        <p>Simple boolean control message used for recording control and other on/off settings.</p>
+                        
+                        <table class="api-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>data</code></td>
+                                    <td>bool</td>
+                                    <td>Boolean value to set</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <h4>Camera Parameter Control</h4>
+                        <pre><code class="language-python"># Control camera exposure
+from zmq_msgs.set_bool import SetBool
+import zmq
+
+context = zmq.Context()
+socket = context.socket(zmq.PUB)
+socket.connect("tcp://192.168.1.100:9807")  # Exposure control port
+
+# Enable/disable recording
+recording_msg = SetBool(True)
+buffer = bytearray(recording_msg.msg_size())
+recording_msg.write(buffer, 0)
+socket.send(buffer)</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ports" class="section bg-light">
+            <div class="container">
+                <h2>Port Mapping</h2>
+                <p>Complete reference of all ZMQ ports used by Hammerhead for different data streams.</p>
+                
+                <div class="port-categories">
+                    <div class="port-category">
+                        <h3>Image Streams</h3>
+                        <table class="api-table">
+                            <thead>
+                                <tr>
+                                    <th>Port</th>
+                                    <th>Topic</th>
+                                    <th>Description</th>
+                                    <th>Message Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>9800</td>
+                                    <td>nodar/left/image_raw</td>
+                                    <td>Raw left camera feed</td>
+                                    <td>StampedImage</td>
+                                </tr>
+                                <tr>
+                                    <td>9801</td>
+                                    <td>nodar/right/image_raw</td>
+                                    <td>Raw right camera feed</td>
+                                    <td>StampedImage</td>
+                                </tr>
+                                <tr>
+                                    <td>9802</td>
+                                    <td>nodar/left/image_rect</td>
+                                    <td>Rectified left image</td>
+                                    <td>StampedImage</td>
+                                </tr>
+                                <tr>
+                                    <td>9803</td>
+                                    <td>nodar/right/image_rect</td>
+                                    <td>Rectified right image</td>
+                                    <td>StampedImage</td>
+                                </tr>
+                                <tr>
+                                    <td>9804</td>
+                                    <td>nodar/disparity</td>
+                                    <td>Disparity map (Q12.4 format)</td>
+                                    <td>StampedImage</td>
+                                </tr>
+                                <tr>
+                                    <td>9805</td>
+                                    <td>nodar/color_blended_depth/image_raw</td>
+                                    <td>Color-coded depth visualization</td>
+                                    <td>StampedImage</td>
+                                </tr>
+                                <tr>
+                                    <td>9813</td>
+                                    <td>nodar/topbot_raw</td>
+                                    <td>Top/bottom camera feed</td>
+                                    <td>StampedImage</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="port-category">
+                        <h3>3D Data Streams</h3>
+                        <table class="api-table">
+                            <thead>
+                                <tr>
+                                    <th>Port</th>
+                                    <th>Topic</th>
+                                    <th>Description</th>
+                                    <th>Message Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>9806</td>
+                                    <td>nodar/point_cloud_soup</td>
+                                    <td>Unordered point cloud</td>
+                                    <td>PointCloudSoup</td>
+                                </tr>
+                                <tr>
+                                    <td>9809</td>
+                                    <td>nodar/point_cloud</td>
+                                    <td>Ordered point cloud</td>
+                                    <td>PointCloud</td>
+                                </tr>
+                                <tr>
+                                    <td>9810</td>
+                                    <td>nodar/point_cloud_rgb</td>
+                                    <td>RGB point cloud</td>
+                                    <td>PointCloudRGB</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="port-category">
+                        <h3>Detection & Control</h3>
+                        <table class="api-table">
+                            <thead>
+                                <tr>
+                                    <th>Port</th>
+                                    <th>Topic</th>
+                                    <th>Description</th>
+                                    <th>Message Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>9807</td>
+                                    <td>nodar/set_exposure</td>
+                                    <td>Camera exposure control</td>
+                                    <td>Control</td>
+                                </tr>
+                                <tr>
+                                    <td>9808</td>
+                                    <td>nodar/set_gain</td>
+                                    <td>Camera gain control</td>
+                                    <td>Control</td>
+                                </tr>
+                                <tr>
+                                    <td>9811</td>
+                                    <td>nodar/recording</td>
+                                    <td>Recording on/off control</td>
+                                    <td>SetBool</td>
+                                </tr>
+                                <tr>
+                                    <td>9812</td>
+                                    <td>nodar/obstacle</td>
+                                    <td>Obstacle detection data</td>
+                                    <td>ObstacleData</td>
+                                </tr>
+                                <tr>
+                                    <td>9814</td>
+                                    <td>nodar/wait</td>
+                                    <td>Scheduler control</td>
+                                    <td>SetBool</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="port-usage">
+                    <h3>Usage Notes</h3>
+                    <ul>
+                        <li><strong>Connection</strong>: Use TCP connections: <code>tcp://&lt;ip_address&gt;:&lt;port&gt;</code></li>
+                        <li><strong>Subscription</strong>: All data ports use ZMQ PUB/SUB pattern</li>
+                        <li><strong>Control</strong>: Control ports may use REQ/REP or PUB/SUB depending on the command</li>
+                        <li><strong>Bandwidth</strong>: Point cloud streams require significant bandwidth; use carefully</li>
+                        <li><strong>Timeout</strong>: Implement connection timeouts for robust error handling</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="error-handling" class="section">
+            <div class="container">
+                <h2>Error Handling & Best Practices</h2>
+                
+                <div class="best-practices">
+                    <h3>Connection Management</h3>
+                    <pre><code class="language-python">import zmq
+import time
+
+def connect_with_timeout(ip_address, port, timeout_ms=5000):
+    """Connect to ZMQ socket with timeout"""
+    context = zmq.Context()
+    socket = context.socket(zmq.SUB)
+    socket.setsockopt(zmq.RCVTIMEO, timeout_ms)
+    socket.setsockopt(zmq.SUBSCRIBE, b"")
+    
+    try:
+        socket.connect(f"tcp://{ip_address}:{port}")
+        return socket, context
+    except zmq.error.ZMQError as e:
+        print(f"Connection failed: {e}")
+        context.term()
+        return None, None</code></pre>
+        
+                    <h3>Message Validation</h3>
+                    <pre><code class="language-python">def safe_message_read(buffer, message_class):
+    """Safely read message with validation"""
+    try:
+        message = message_class()
+        offset = message.read(buffer)
+        
+        if offset is None:
+            print("Message validation failed")
+            return None
+            
+        return message
+    except Exception as e:
+        print(f"Error reading message: {e}")
+        return None</code></pre>
+        
+                    <h3>Resource Cleanup</h3>
+                    <pre><code class="language-python">def cleanup_zmq_resources(socket, context):
+    """Properly cleanup ZMQ resources"""
+    try:
+        if socket:
+            socket.close()
+        if context:
+            context.term()
+    except Exception as e:
+        print(f"Cleanup error: {e}")</code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Hammerhead ZMQ Documentation. <a href="index.html">Back to Home</a></p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
