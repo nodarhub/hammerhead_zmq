@@ -70,6 +70,10 @@ def disparity_to_ordered_pointcloud(disp_s16: np.ndarray, Q: np.ndarray) -> np.n
     return xyz
 
 
+def write_ascii(filename, arr):
+    np.savetxt(filename, arr, fmt="%.6f")
+
+
 def main():
     args = parse_args()
     disparity_dir = args.disparity_dir
@@ -112,10 +116,10 @@ def main():
         stem = os.path.splitext(os.path.basename(tiff))[0]
 
         if split:
-            for idx, axis in enumerate("xyz"):
-                np.savetxt(os.path.join(output_dir, f"{stem}_x.txt"), xyz[..., 0], fmt="%.6f")
-                np.savetxt(os.path.join(output_dir, f"{stem}_y.txt"), xyz[..., 1], fmt="%.6f")
-                np.savetxt(os.path.join(output_dir, f"{stem}_z.txt"), xyz[..., 2], fmt="%.6f")
+            print(f"writing {stem}_x.txt")
+            write_ascii(os.path.join(output_dir, f"{stem}_x.txt"), xyz[..., 0])
+            write_ascii(os.path.join(output_dir, f"{stem}_y.txt"), xyz[..., 1])
+            write_ascii(os.path.join(output_dir, f"{stem}_z.txt"), xyz[..., 2])
         else:
             fname = os.path.join(output_dir, f"{stem}.tiff")
             cv2.imwrite(fname, xyz, [cv2.IMWRITE_TIFF_COMPRESSION, 1])
