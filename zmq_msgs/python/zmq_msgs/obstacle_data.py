@@ -7,18 +7,18 @@ except ImportError:
 
 
 class Vec2:
-    NUM_BYTES = struct.calcsize('ff')
+    NUM_BYTES = struct.calcsize("ff")
 
     def __init__(self, x=0.0, z=0.0):
         self.x = x
         self.z = z
 
     def to_bytes(self):
-        return struct.pack('ff', self.x, self.z)
+        return struct.pack("ff", self.x, self.z)
 
     @staticmethod
     def from_bytes(buffer, offset=0):
-        x, z = struct.unpack_from('ff', buffer, offset)
+        x, z = struct.unpack_from("ff", buffer, offset)
         return Vec2(x, z), offset + Vec2.NUM_BYTES
 
     def __str__(self):
@@ -38,7 +38,7 @@ class BoundingBox:
         self.points = points
 
     def to_bytes(self):
-        return b''.join(point.to_bytes() for point in self.points)
+        return b"".join(point.to_bytes() for point in self.points)
 
     @staticmethod
     def from_bytes(buffer, offset=0):
@@ -105,7 +105,7 @@ class ObstacleData:
         if msg_info.is_different(self.info(), "ObstacleData"):
             return original_offset
 
-        self.time, self.frame_id, num_obstacles = struct.unpack_from('QQQ', buffer, offset)
+        self.time, self.frame_id, num_obstacles = struct.unpack_from("QQQ", buffer, offset)
         self.obstacles = []
         offset = original_offset + ObstacleData.HEADER_SIZE
         for _ in range(num_obstacles):
@@ -115,15 +115,17 @@ class ObstacleData:
 
     def write(self, buffer, original_offset=0):
         offset = self.info().write(buffer, original_offset)
-        struct.pack_into('QQQ', buffer, offset, self.time, self.frame_id, len(self.obstacles))
+        struct.pack_into("QQQ", buffer, offset, self.time, self.frame_id, len(self.obstacles))
         offset = original_offset + ObstacleData.HEADER_SIZE
         for obstacle in self.obstacles:
-            buffer[offset:offset + Obstacle.NUM_BYTES] = obstacle.to_bytes()
+            buffer[offset : offset + Obstacle.NUM_BYTES] = obstacle.to_bytes()
             offset += Obstacle.NUM_BYTES
         return original_offset + self.msg_size()
 
     def __str__(self):
-        return f"ObstacleData(time={self.time}, frame_id={self.frame_id}, obstacles={self.obstacles})"
+        return (
+            f"ObstacleData(time={self.time}, frame_id={self.frame_id}, obstacles={self.obstacles})"
+        )
 
     def __repr__(self):
         return self.__str__()

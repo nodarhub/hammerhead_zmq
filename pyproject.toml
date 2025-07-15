@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm[toml]>=6.2", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hammerhead-zmq"
+description = "Python examples and utilities for interacting with Hammerhead"
+dynamic = ["version"]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26.0,<2.0.0",
+    "opencv-python>=4.8.0,<5.0.0",
+    "pyzmq",
+    "pyyaml",
+    "tqdm",
+]
+
+[tool.setuptools.packages.find]
+where = ["zmq_msgs/python", "examples/python"]
+include = [
+    "zmq_msgs*",
+    "depth_to_disparity*",
+    "disparity_to_ordered_point_cloud*",
+    "hammerhead_scheduler*",
+    "image_recorder*",
+    "image_viewer*",
+    "obstacle_data_recorder*",
+    "point_cloud_recorder*",
+    "point_cloud_soup_recorder*",
+    "topbot_publisher*",
+]
+
+[project.license]
+file = "LICENSE"
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "build",
+    "ipython",
+    "jupyter",
+    "matplotlib",
+    "mypy",
+    "pre-commit",
+    "pytest",
+]
+
+[project.scripts]
+depth_to_disparity = "depth_to_disparity.depth_to_disparity.depth_to_disparity:main"
+disparity_to_ordered_point_cloud = "disparity_to_ordered_point_cloud.disparity_to_ordered_point_cloud.disparity_to_ordered_point_cloud:main"
+hammerhead_scheduler = "hammerhead_scheduler.hammerhead_scheduler.hammerhead_scheduler:main"
+image_recorder = "image_recorder.image_recorder.image_recorder:main"
+image_viewer = "image_viewer.image_viewer.image_viewer:main"
+obstacle_data_recorder = "obstacle_data_recorder.obstacle_data_recorder.obstacle_data_recorder:main"
+point_cloud_recorder = "point_cloud_recorder.point_cloud_recorder.point_cloud_recorder:main"
+point_cloud_soup_recorder = "point_cloud_soup_recorder.point_cloud_soup_recorder.point_cloud_soup_recorder:main"
+topbot_publisher = "topbot_publisher.topbot_publisher.topbot_publisher:main"
+
+[tool.setuptools_scm]
+write_to = "version.py"

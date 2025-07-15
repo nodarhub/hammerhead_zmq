@@ -7,13 +7,15 @@ try:
     from zmq_msgs.obstacle_data import ObstacleData
     from zmq_msgs.topic_ports import OBSTACLE_TOPIC
 except ImportError:
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../zmq_msgs/python')))
+    sys.path.append(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../zmq_msgs/python"))
+    )
     from zmq_msgs.obstacle_data import ObstacleData
     from zmq_msgs.topic_ports import OBSTACLE_TOPIC
 
 
 def write_data(filename, obstacle_data):
-    with open(filename, 'w') as out:
+    with open(filename, "w") as out:
         out.write("x1,z1,x2,z2,x3,z3,x4,z4,vx,vz\n")
         for obstacle in obstacle_data.obstacles:
             for p in obstacle.bounding_box.points:
@@ -41,8 +43,10 @@ class ObstacleDataSink:
 
         # Warn if we dropped a frame
         if self.last_frame_id != 0 and frame_id != self.last_frame_id + 1:
-            print(f"{frame_id - self.last_frame_id - 1} frames dropped. "
-                  f"Current frame ID: {frame_id}, last frame ID: {self.last_frame_id}")
+            print(
+                f"{frame_id - self.last_frame_id - 1} frames dropped. "
+                f"Current frame ID: {frame_id}, last frame ID: {self.last_frame_id}"
+            )
         self.last_frame_id = frame_id
 
         filename = os.path.join(self.output_dir, f"{frame_id:09}.txt")
@@ -51,14 +55,16 @@ class ObstacleDataSink:
 
 
 def print_usage(default_ip, default_output_dir):
-    print("You should specify the IP address of the device running Hammerhead,\n"
-          "as well as the folder where you want the data to be saved:\n\n"
-          "     python obstacle_data_recorder.py hammerhead_ip output_dir\n\n"
-          "e.g. python obstacle_data_recorder.py 192.168.1.9 obstacle_datas\n\n"
-          "If unspecified, then we assume that you are running this on the device running Hammerhead,\n"
-          "along with the other defaults\n\n"
-          f"     python obstacle_data_recorder.py {default_ip} {default_output_dir}\n"
-          "----------------------------------------")
+    print(
+        "You should specify the IP address of the device running Hammerhead,\n"
+        "as well as the folder where you want the data to be saved:\n\n"
+        "     python obstacle_data_recorder.py hammerhead_ip output_dir\n\n"
+        "e.g. python obstacle_data_recorder.py 192.168.1.9 obstacle_datas\n\n"
+        "If unspecified, then we assume you are running this on the device running Hammerhead,\n"
+        "along with the other defaults\n\n"
+        f"     python obstacle_data_recorder.py {default_ip} {default_output_dir}\n"
+        "----------------------------------------"
+    )
 
 
 def main():

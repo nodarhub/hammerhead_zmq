@@ -99,32 +99,54 @@ class StampedImage:
         if msg_info.is_different(self.info(), "StampedImage"):
             return None
 
-        self.time, self.frame_id, rows, cols, cv_type, self.cvt_to_bgr_code = struct.unpack_from('QQIIIB', buffer,
-                                                                                                 offset)
+        self.time, self.frame_id, rows, cols, cv_type, self.cvt_to_bgr_code = struct.unpack_from(
+            "QQIIIB", buffer, offset
+        )
         if rows * cols > 1e8:
-            print("According to the message, the image has the impossibly large of dimensions "
-                  f"{rows} x {cols}. We are ignoring this message so that you don't run out of memory.")
+            print(
+                "According to the message, the image has the impossibly large of dimensions "
+                f"{rows} x {cols}. "
+                "We are ignoring this message so that you don't run out of memory."
+            )
             return
 
         # Convert opencv type to something more understandable
         channels, dtype = decode_cv_type(cv_type)
-        self.img = np.frombuffer(buffer, dtype=dtype, count=rows * cols * channels,
-                                 offset=original_offset + StampedImage.HEADER_SIZE).reshape(rows, cols, channels)
+        self.img = np.frombuffer(
+            buffer,
+            dtype=dtype,
+            count=rows * cols * channels,
+            offset=original_offset + StampedImage.HEADER_SIZE,
+        ).reshape(rows, cols, channels)
         return original_offset + self.msg_size()
 
     def write(self, buffer, original_offset):
-        time, frame_id, cvt_to_bgr_code, img = self.time, self.frame_id, self.cvt_to_bgr_code, self.img
+        time, frame_id, cvt_to_bgr_code, img = (
+            self.time,
+            self.frame_id,
+            self.cvt_to_bgr_code,
+            self.img,
+        )
         if img.ndim == 2:
             rows, cols = img.shape
             channels = 1
         elif img.ndim == 3:
             rows, cols, channels = img.shape
         else:
-            print(f"Cannot write this image, it has either less than 2 dimensions, or more than 3 dimensions")
+            print("Cannot write this image, it has either <2 dimensions, or >3 dimensions")
             return
         offset = self.info().write(buffer, original_offset)
-        struct.pack_into('QQIIIB', buffer, offset, time, frame_id, rows, cols, encode_cv_type(channels, img.dtype),
-                         cvt_to_bgr_code)
+        struct.pack_into(
+            "QQIIIB",
+            buffer,
+            offset,
+            time,
+            frame_id,
+            rows,
+            cols,
+            encode_cv_type(channels, img.dtype),
+            cvt_to_bgr_code,
+        )
         offset = original_offset + StampedImage.HEADER_SIZE
-        buffer[offset:offset + img.nbytes] = img.tobytes()
+        buffer[offset : offset + img.nbytes] = img.tobytes()
         return original_offset + self.msg_size()

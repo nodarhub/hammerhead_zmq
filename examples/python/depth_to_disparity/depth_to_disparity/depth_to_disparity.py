@@ -4,8 +4,8 @@ import sys
 
 import cv2
 import numpy as np
-from tqdm import tqdm
 import yaml
+from tqdm import tqdm
 
 os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "1"
 
@@ -62,15 +62,15 @@ def safe_load(filename, read_mode, valid_types, expected_num_channels):
             return None
         if img.dtype not in valid_types:
             print(
-                f"Error loading {filename}. The image is supposed to have one of the types {valid_types}, "
-                f"not {img.dtype}"
+                f"Error loading {filename}. "
+                f"The image is supposed to have one of the types {valid_types}, not {img.dtype}"
             )
             return None
         num_channels = 1 if len(img.shape) == 2 else img.shape[2]
         if num_channels != expected_num_channels:
             print(
-                f"Error loading {filename}. The image is supposed to have {expected_num_channels} channels, "
-                f"not {num_channels}"
+                f"Error loading {filename}. The image is supposed to have "
+                f"{expected_num_channels} channels, not {num_channels}"
             )
             return None
         return img
@@ -88,9 +88,7 @@ def main():
         return
 
     input_dir = sys.argv[1]
-    output_dir = (
-        sys.argv[2] if len(sys.argv) > 2 else os.path.join(input_dir, "disparity")
-    )
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else os.path.join(input_dir, "disparity")
 
     # Directories that we read
     depth_dir = os.path.join(input_dir, "depth")
@@ -143,19 +141,16 @@ def main():
         )
         if not os.path.exists(details_filename):
             print(
-                f"Could not find the corresponding details for {tiff}. This path does not exist: {details_filename}"
+                f"Could not find the corresponding details for {tiff}. "
+                f"This path does not exist: {details_filename}"
             )
             continue
         details = Details(details_filename)
 
-        img_disparity = np.divide(
-            (16.0 * details.focal_length * details.baseline), depth_image
-        )
+        img_disparity = np.divide((16.0 * details.focal_length * details.baseline), depth_image)
         img_disparity = np.clip(img_disparity, 0, 65535).astype(np.uint16)
 
-        file_path = os.path.join(
-            output_dir, os.path.splitext(os.path.basename(tiff))[0] + ".tiff"
-        )
+        file_path = os.path.join(output_dir, os.path.splitext(os.path.basename(tiff))[0] + ".tiff")
         cv2.imwrite(file_path, img_disparity, [cv2.IMWRITE_TIFF_COMPRESSION, 1])
 
 

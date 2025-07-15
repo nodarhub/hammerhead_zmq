@@ -90,9 +90,9 @@ void printUsage(const std::string &default_ip, const std::string &default_port) 
                  "and the folder where you want the data to be saved:\n\n"
                  "     ./image_recorder hammerhead_ip port output_dir\n\n"
                  "e.g. ./image_recorder 192.168.1.9 9800 recorded_images\n\n"
-                 "Alternatively, you can specify one of the image topic names provided in topic_ports.hpp of zmq_msgs:"
+                 "Alternatively, you can specify one of the image topic names in topic_ports.hpp of zmq_msgs:"
                  "e.g. ./image_viewer 192.168.1.9 nodar/right/image_raw\n\n"
-                 "In the meantime, we are going to assume that you are running this on the device running hammerhead,\n"
+                 "In the meantime, we assume that you are running this on the device running Hammerhead,\n"
                  "and that you want the images on port 9800, that is, we assume that you specified\n\n"
                  "     ./image_viewer " +
                      default_ip + " " + default_port + "\n\n"

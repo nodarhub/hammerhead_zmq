@@ -1,21 +1,21 @@
+import argparse
 import os
 import shutil
 
 import cv2
 import numpy as np
-from tqdm import tqdm
 from details import Details
-import argparse
+from tqdm import tqdm
 
 
 def parse_args():
-    p = argparse.ArgumentParser(
-        description="Convert disparity to ordered point cloud")
+    p = argparse.ArgumentParser(description="Convert disparity to ordered point cloud")
     p.add_argument("disparity_dir", help="Folder of .tiff disparity images")
     p.add_argument("details_dir", help="Folder of matching .yaml details files")
     p.add_argument("output_dir", help="Destination folder for ordered point clouds")
-    p.add_argument("--split", action="store_true",
-                   help="Save x, y, z as three separate *.txt files")
+    p.add_argument(
+        "--split", action="store_true", help="Save x, y, z as three separate *.txt files"
+    )
     return p.parse_args()
 
 
@@ -36,14 +36,16 @@ def safe_load(filename, read_mode, valid_types, expected_num_channels):
             return None
         if img.dtype not in valid_types:
             print(
-                f"Error loading {filename}. The image is supposed to have one of the types {valid_types}, "
+                f"Error loading {filename}. "
+                f"The image is supposed to have one of the types {valid_types}, "
                 f"not {img.dtype}"
             )
             return None
         num_channels = 1 if len(img.shape) == 2 else img.shape[2]
         if num_channels != expected_num_channels:
             print(
-                f"Error loading {filename}. The image is supposed to have {expected_num_channels} channels, "
+                f"Error loading {filename}. "
+                f"The image is supposed to have {expected_num_channels} channels, "
                 f"not {num_channels}"
             )
             return None
@@ -93,29 +95,21 @@ def main():
         )
         if not os.path.exists(details_filename):
             print(
-                f"Could not find the corresponding details for {tiff}. This path does not exist: {details_filename}"
+                f"Could not find the corresponding details for {tiff}. "
+                f"This path does not exist: {details_filename}"
             )
             continue
         details = Details(details_filename)
 
-        xyz = disparity_to_ordered_pointcloud(
-            disparity_image,
-            details.disparity_to_depth4x4
-        )
+        xyz = disparity_to_ordered_pointcloud(disparity_image, details.disparity_to_depth4x4)
 
         stem = os.path.splitext(os.path.basename(tiff))[0]
 
         if split:
             for idx, axis in enumerate("xyz"):
-                np.savetxt(
-                    os.path.join(output_dir, f"{stem}_x.txt"), xyz[..., 0], fmt="%.6f"
-                )
-                np.savetxt(
-                    os.path.join(output_dir, f"{stem}_y.txt"), xyz[..., 1], fmt="%.6f"
-                )
-                np.savetxt(
-                    os.path.join(output_dir, f"{stem}_z.txt"), xyz[..., 2], fmt="%.6f"
-                )
+                np.savetxt(os.path.join(output_dir, f"{stem}_x.txt"), xyz[..., 0], fmt="%.6f")
+                np.savetxt(os.path.join(output_dir, f"{stem}_y.txt"), xyz[..., 1], fmt="%.6f")
+                np.savetxt(os.path.join(output_dir, f"{stem}_z.txt"), xyz[..., 2], fmt="%.6f")
         else:
             fname = os.path.join(output_dir, f"{stem}.tiff")
             cv2.imwrite(fname, xyz, [cv2.IMWRITE_TIFF_COMPRESSION, 1])

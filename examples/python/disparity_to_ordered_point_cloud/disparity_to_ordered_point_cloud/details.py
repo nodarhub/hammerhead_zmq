@@ -1,5 +1,5 @@
-import yaml
 import numpy as np
+import yaml
 
 
 class Details:
