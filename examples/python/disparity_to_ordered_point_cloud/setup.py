@@ -20,6 +20,7 @@ setup(
     entry_points={
         "console_scripts": [
             f"{package_name} = {package_name}.{package_name}:main",
+            f"visualize_point_cloud_tiff = {package_name}.visualize_point_cloud_tiff:main",
         ],
     },
 )

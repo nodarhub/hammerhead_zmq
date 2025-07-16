@@ -56,6 +56,7 @@ obstacle_data_recorder = "obstacle_data_recorder.obstacle_data_recorder.obstacle
 point_cloud_recorder = "point_cloud_recorder.point_cloud_recorder.point_cloud_recorder:main"
 point_cloud_soup_recorder = "point_cloud_soup_recorder.point_cloud_soup_recorder.point_cloud_soup_recorder:main"
 topbot_publisher = "topbot_publisher.topbot_publisher.topbot_publisher:main"
+visualize_point_cloud_tiff = "disparity_to_ordered_point_cloud.disparity_to_ordered_point_cloud.visualize_point_cloud_tiff:main"
 
 [tool.setuptools_scm]
 write_to = "version.py"

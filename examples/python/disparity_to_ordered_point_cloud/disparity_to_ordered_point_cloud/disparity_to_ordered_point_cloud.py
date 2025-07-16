@@ -1,11 +1,19 @@
 import argparse
 import os
 import shutil
+import sys
 
 import cv2
 import numpy as np
-from details import Details
 from tqdm import tqdm
+
+try:
+    from zmq_msgs.details import Details
+except ImportError:
+    sys.path.append(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../zmq_msgs/python"))
+    )
+    from zmq_msgs.details import Details
 
 
 def parse_args():
@@ -55,11 +63,8 @@ def safe_load(filename, read_mode, valid_types, expected_num_channels):
         return None
 
 
-def disparity_to_ordered_pointcloud(disp_s16: np.ndarray, Q: np.ndarray) -> np.ndarray:
-    disp_f32 = disp_s16.astype(np.float32) / 16.0
-    Q[3, :] = -Q[3, :]
-    xyz = cv2.reprojectImageTo3D(disp_f32, Q)
-    return xyz
+def write_ascii(filename, arr):
+    np.savetxt(filename, arr, fmt="%.6f")
 
 
 def main():
@@ -79,7 +84,7 @@ def main():
     print(f"Found {len(tiffs)} disparity maps to convert to ordered point clouds.")
 
     for tiff in tqdm(tiffs):
-        disparity_image = safe_load(
+        disparity = safe_load(
             tiff,
             cv2.IMREAD_UNCHANGED,
             [
@@ -87,7 +92,7 @@ def main():
             ],
             1,
         )
-        if disparity_image is None:
+        if disparity is None:
             continue
 
         details_filename = os.path.join(
@@ -101,18 +106,32 @@ def main():
             continue
         details = Details(details_filename)
 
-        xyz = disparity_to_ordered_pointcloud(disparity_image, details.disparity_to_depth4x4)
+        disparity_to_depth4x4 = details.disparity_to_depth4x4
+        rotation_disparity_to_raw_cam = details.rotation_disparity_to_raw_cam
+        rotation_world_to_raw_cam = details.rotation_world_to_raw_cam
+
+        # Account for subpixel scaling
+        disparity_scaled = disparity / np.float32(16)
+
+        # Compute disparity_to_rotated_depth4x4 (rotated Q matrix)
+        rotation_disparity_to_world = rotation_world_to_raw_cam.T @ rotation_disparity_to_raw_cam
+        rotation_disparity_to_world_4x4 = np.eye(4, dtype=np.float32)
+        rotation_disparity_to_world_4x4[:3, :3] = rotation_disparity_to_world
+        disparity_to_rotated_depth4x4 = rotation_disparity_to_world_4x4 @ disparity_to_depth4x4
+
+        # Negate the last row of the Q-matrix
+        disparity_to_rotated_depth4x4[3, :] *= -1
+        xyz = cv2.reprojectImageTo3D(disparity_scaled, disparity_to_rotated_depth4x4)
 
         stem = os.path.splitext(os.path.basename(tiff))[0]
-
         if split:
-            for idx, axis in enumerate("xyz"):
-                np.savetxt(os.path.join(output_dir, f"{stem}_x.txt"), xyz[..., 0], fmt="%.6f")
-                np.savetxt(os.path.join(output_dir, f"{stem}_y.txt"), xyz[..., 1], fmt="%.6f")
-                np.savetxt(os.path.join(output_dir, f"{stem}_z.txt"), xyz[..., 2], fmt="%.6f")
+            write_ascii(os.path.join(output_dir, f"{stem}_x.txt"), xyz[..., 0])
+            write_ascii(os.path.join(output_dir, f"{stem}_y.txt"), xyz[..., 1])
+            write_ascii(os.path.join(output_dir, f"{stem}_z.txt"), xyz[..., 2])
         else:
-            fname = os.path.join(output_dir, f"{stem}.tiff")
-            cv2.imwrite(fname, xyz, [cv2.IMWRITE_TIFF_COMPRESSION, 1])
+            cv2.imwrite(
+                os.path.join(output_dir, f"{stem}.tiff"), xyz, [cv2.IMWRITE_TIFF_COMPRESSION, 1]
+            )
 
 
 if __name__ == "__main__":

@@ -4,8 +4,16 @@ import sys
 
 import cv2
 import numpy as np
-import yaml
 from tqdm import tqdm
+
+try:
+    from zmq_msgs.details import Details
+except ImportError:
+    sys.path.append(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../zmq_msgs/python"))
+    )
+    from zmq_msgs.details import Details
+
 
 os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "1"
 
@@ -26,23 +34,6 @@ def read_scalar(config: dict, key: str, expected_type: type):
             raise TypeError(f"Unsupported expected_type: {expected_type}")
     except (ValueError, TypeError) as e:
         raise ValueError(f"Field '{key}' must be a {expected_type.__name__}: {e}")
-
-
-class Details:
-    def __init__(self, filename):
-        self.disparity_to_depth4x4 = np.zeros((4, 4), dtype=np.float32)
-        with open(filename, "r") as details_file:
-            config = yaml.safe_load(details_file)
-
-            self.focal_length = read_scalar(config, "focal_length", float)
-            self.baseline = read_scalar(config, "baseline", float)
-
-    def __str__(self):
-        return (
-            "Details:\n"
-            + f"\tfocal_length                  : {self.focal_length}\n"
-            + f"\tbaseline                      : {self.baseline}\n"
-        )
 
 
 def get_files(dirname, ext):
@@ -94,7 +85,7 @@ def main():
     depth_dir = os.path.join(input_dir, "depth")
     details_dir = os.path.join(input_dir, "details")
 
-    # Remove old output directory if it exists
+    # Remove the old output directory if it exists
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
     os.makedirs(output_dir)
