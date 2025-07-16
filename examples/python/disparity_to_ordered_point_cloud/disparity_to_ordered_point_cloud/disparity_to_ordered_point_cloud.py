@@ -125,7 +125,6 @@ def main():
 
         stem = os.path.splitext(os.path.basename(tiff))[0]
         if split:
-            print(f"writing {stem}_x.txt")
             write_ascii(os.path.join(output_dir, f"{stem}_x.txt"), xyz[..., 0])
             write_ascii(os.path.join(output_dir, f"{stem}_y.txt"), xyz[..., 1])
             write_ascii(os.path.join(output_dir, f"{stem}_z.txt"), xyz[..., 2])
