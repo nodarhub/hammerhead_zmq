@@ -14,7 +14,7 @@ You will need:
     - Windows:
         - Generally, the easiest is to install the latest Community (a.k.a. *free*) version of Visual
           Studio: https://visualstudio.microsoft.com/vs/community/ . Note that unlike Visual Studio, Visual Studio Code
-          does not come bundled with compillers.
+          does not come bundled with compilers.
 2. CMake 3.11+:
     - Ubuntu >=20:
         - `sudo apt install cmake`
