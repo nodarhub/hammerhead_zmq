@@ -17,8 +17,7 @@
             <ul class="nav-menu">
                 <li><a href="index.html" class="nav-link">Home</a></li>
                 <li><a href="api.html" class="nav-link">API Reference</a></li>
-                <li><a href="#python-examples" class="nav-link">Python</a></li>
-                <li><a href="#cpp-examples" class="nav-link">C++</a></li>
+                <li><a href="examples.html" class="nav-link">Examples</a></li>
             </ul>
         </div>
     </nav>
@@ -62,8 +61,6 @@ python image_viewer.py 192.168.1.100 nodar/color_blended_depth/image_raw</code><
                             <ul>
                                 <li>Support for all image topics (raw, rectified, disparity, depth)</li>
                                 <li>Real-time display with OpenCV</li>
-                                <li>Automatic color space conversion</li>
-                                <li>Network connection with error handling</li>
                             </ul>
                             
                             <h4>Valid Image Topics</h4>
@@ -128,12 +125,11 @@ python point_cloud_rgb_recorder.py 192.168.1.100</code></pre>
                             <ul>
                                 <li>Saves point clouds as PLY files</li>
                                 <li>Support for both standard and RGB point clouds</li>
-                                <li>Compatible with CloudCompare, MeshLab</li>
-                                <li>Automatic point cloud validation</li>
+                                <li>Compatible with CloudCompare and other 3D visualization software</li>
                             </ul>
                             
                             <div class="warning-box">
-                                <strong>⚠️ Bandwidth Warning:</strong> Point cloud streaming requires significant network bandwidth. RGB point clouds require even more. Use with caution on limited networks.
+                                <strong>⚠️ Bandwidth Warning:</strong> Point cloud streaming requires significant network bandwidth. RGB point clouds require even more.
                             </div>
                         </div>
                     </div>
@@ -356,15 +352,12 @@ cmake .. && cmake --build . --config Release</code></pre>
                             <ul>
                                 <li>Optimized for real-time performance</li>
                                 <li>Support for all image topic types</li>
-                                <li>Automatic color space handling</li>
-                                <li>Cross-platform (Linux/Windows)</li>
                             </ul>
                         </div>
                     </div>
                     
                     <div class="example-card">
                         <div class="example-header">
-                            <h3>Image Recorder</h3>
                             <span class="example-type">Data Capture</span>
                         </div>
                         <p>High-speed image recording with efficient disk I/O for continuous data capture.</p>
