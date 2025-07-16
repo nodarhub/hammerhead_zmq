@@ -1,17 +1,59 @@
-This example shows how to convert `.exr` depth images to `.tiff` disparity images.
-The disparity data is needed to generate point clouds in the Nodar Viewer.
+# Depth to Disparity Converter
 
-WARNING: The depth maps recorded by Hammerhead are in the TIFF format, but previously were recorded as EXR. 
-This example converts those images into lossless `.tiff` images.
-To do that, this example assumes that you have a version of OpenCV installed with EXR support.
-This seems to be the case for the OpenCV version in apt on many Ubuntu X86-64 installations.
-However, the OpenCV version in apt on the Orin does not seem to have EXR support.
+Convert EXR depth images to TIFF disparity images for use with the Nodar Viewer.
 
-To run this example, you need to provide the path to a directory of data saved by Hammerhead.
-It is necessary to have both the `depth` and `details` folders in the data directory. The `details` data have to be in `yaml` format.
+## Installation
 
-    cd examples/python/depth_to_disparity/depth_to_disparity
-    OPENCV_IO_ENABLE_OPENEXR=1 python3 depth_to_disparity data_directory [output_directory]
+```bash
+pip install -e examples/python/depth_to_disparity
+```
 
-Note that by default, the output_directory will be a `disparity` folder in your `data_directory`.
-If you already have this directory, then the files inside it will be overridden.
+## Usage
+
+```bash
+cd examples/python/depth_to_disparity/depth_to_disparity
+OPENCV_IO_ENABLE_OPENEXR=1 python3 depth_to_disparity <data_directory> [output_directory]
+```
+
+### Parameters
+
+- `data_directory`: Path to directory containing `depth` and `details` folders from Hammerhead
+- `output_directory`: Optional output directory (defaults to `disparity` folder in data_directory)
+
+### Examples
+
+```bash
+# Convert depth images with default output location
+OPENCV_IO_ENABLE_OPENEXR=1 python3 depth_to_disparity /path/to/hammerhead/data
+
+# Convert depth images to specific output directory
+OPENCV_IO_ENABLE_OPENEXR=1 python3 depth_to_disparity /path/to/hammerhead/data /path/to/output
+```
+
+## Output
+
+- **Format**: TIFF disparity images (.tiff)
+- **Location**: `disparity` folder in data directory (or specified output directory)
+- **Naming**: Maintains original depth image naming convention
+
+## Features
+
+- Convert EXR depth images to lossless TIFF disparity format
+- Compatible with Nodar Viewer for point cloud generation
+- Preserves depth information accuracy
+- Batch processing of entire directories
+
+## Requirements
+
+- OpenCV with EXR support enabled
+- Both `depth` and `details` folders in input directory
+- Details data must be in YAML format
+
+## Troubleshooting
+
+- **EXR support missing**: Install OpenCV with EXR support or use `OPENCV_IO_ENABLE_OPENEXR=1`
+- **Missing details folder**: Ensure both `depth` and `details` folders exist in data directory
+- **File overwrite warning**: Existing files in output directory will be overwritten
+- **Orin compatibility**: Default OpenCV on Orin may lack EXR support - use x86-64 system
+
+Press `Ctrl+C` to stop conversion.

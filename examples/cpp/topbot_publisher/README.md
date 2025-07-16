@@ -1,31 +1,69 @@
-This example shows how to publish the left and right stereo images stacked vertically (also called topbot images) from
-the disk to Hammerhead.
+# Topbot Publisher
 
-To build this example, follow the traditional CMake process from the root of the repository:
+Publish vertically stacked stereo images (which we refer to as `topbot` images) from disk to Hammerhead.
 
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build . --config Release
+## Build
 
-To run this example, you need to provide the path to the topbot data directory, 
-the port number to publish the images to, and optionally, the pixel format:
+```bash
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+```
 
-    # Linux
-    ./topbot_publisher <topbot_data_directory> <port_number> [pixel_format]
+## Usage
 
-    # Windows
-    ./Release/topbot_publisher.exe <topbot_data_directory> <port_number> [pixel_format]
+```bash
+# Linux
+./topbot_publisher <topbot_data_directory> <port_number> [pixel_format]
 
-Note that the images inside the `topbot_data_directory` should be sequentially numbered. 
-The images should be in the `.tiff` format.
+# Windows
+./Release/topbot_publisher.exe <topbot_data_directory> <port_number> [pixel_format]
+```
 
-Supported pixel formats:
+### Parameters
 
-- BGR
-- Bayer_RGGB
-- Bayer_GRBG
-- Bayer_BGGR
-- Bayer_GBRG
+- `topbot_data_directory`: Path to directory containing sequentially numbered topbot images
+- `port_number`: Port number to publish the images to
+- `pixel_format`: Optional pixel format (default: BGR)
 
-Note that if the `pixel_format` is not provided, the default pixel format is `BGR`.
+### Examples
+
+```bash
+# Publish topbot images with default BGR format
+./topbot_publisher /path/to/topbot/data 9800
+
+# Publish topbot images with Bayer format
+./topbot_publisher /path/to/topbot/data 9800 Bayer_RGGB
+```
+
+## Features
+
+- High-performance C++ implementation for real-time streaming
+- Publish pre-recorded stereo image pairs to Hammerhead
+- Sequential playback of numbered image sequences
+- ZMQ-based communication for minimal latency
+- Multiple pixel format support
+
+## Supported Pixel Formats
+
+- `BGR` (default)
+- `Bayer_RGGB`
+- `Bayer_GRBG`
+- `Bayer_BGGR`
+- `Bayer_GBRG`
+
+## Requirements
+
+- Images must be sequentially numbered
+- Images must be in TIFF format
+- Directory should contain only topbot image files
+- Sufficient network bandwidth for real-time streaming
+
+## Troubleshooting
+
+- **Images not found**: Ensure the directory contains sequentially numbered TIFF files
+- **Connection issues**: Verify port number and network connectivity
+- **File format errors**: Ensure all images are valid TIFF files
+
+Press `Ctrl+C` to stop publishing.
