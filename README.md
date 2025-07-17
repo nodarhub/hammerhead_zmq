@@ -38,6 +38,19 @@ The Hammerhead system is a high-performance stereo vision processing unit that p
 
 ## Quick Start
 
+### Repository Setup
+
+```bash
+# Get the Hammerhead ZMQ repository
+git clone git@github.com:nodarhub/hammerhead_zmq.git
+
+# If you received the HDK with version X.X.X, you can check out the corresponding tag (skip this step if you want the latest version):
+git checkout X.X.X
+
+# Make sure that the submodules are up to date
+git submodule update --init --recursive
+```
+
 ### Python Installation & Usage
 
 ```bash
