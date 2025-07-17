@@ -12,8 +12,6 @@
 - [Installation](#installation)
 - [Project Structure](#project-structure)
 - [Examples & Tutorials](#examples-tutorials)
-- [C++ Integration](#c-integration)
-- [Python Integration](#python-integration)
 - [3D Coordinate System & Point Cloud Conversion](#3d-coordinate-system-point-cloud-conversion)
 - [API Reference](#api-reference)
 - [Best Practices & Tips](#best-practices-tips)
