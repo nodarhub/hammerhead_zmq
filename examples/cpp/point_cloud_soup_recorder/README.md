@@ -1,32 +1,68 @@
-Nodar generates high resolution point clouds; much higher than what you would find on a traditional lidar. 
-Because of this, we need to be very careful about how data is passed on the network. 
-In particular, instead of passing a traditional point cloud, 
-we supply a much smaller representation called a `PointCloudSoup` from which a point cloud can be reconstructed on the client machine. 
-The class, as well as functions to read and write the class are provided in the header `point_cloud_soup.hpp`.   
+# Point Cloud Soup Recorder
 
-This example shows how to use that header. 
-Specifically, it shows how to subscribe to `PointCloudSoup` messages being sent by Hammerhead, 
-and construct point clouds on your machine. 
-In this example, those point clouds are then saved as `.ply` files in the `point_clouds` folder. 
-You can then open the `.ply` files in other programs, such as CloudCompare. 
+Reconstruct high-resolution point clouds from Hammerhead's `PointCloudSoup` messages, and record as PLY files.
 
-To build this example, follow the traditional CMake process:
+## Build
 
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build . --config Release
+```bash
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+```
 
-To run this example, you need to provide the IP address of the ZMQ source (the device running hammerhead):
+## Usage
 
-    # Linux
-    ./point_cloud_soup_recorder src_ip
+```bash
+# Linux
+./point_cloud_soup_recorder <src_ip>
 
-    # Windows
-    ./Release/point_cloud_soup_recorder.exe src_ip
+# Windows
+./Release/point_cloud_soup_recorder.exe <src_ip>
+```
 
-Note that if you specify an incorrect IP address or run this example when Hammerhead is not running, 
-then ZMQ will attempt to subscribe, and nothing will happen. 
-It will appear like the binary is just waiting.
+### Parameters
 
-To kill this example, just press CTRL+C.
+- `src_ip`: IP address of the ZMQ source (the device running Hammerhead)
+
+### Examples
+
+```bash
+# Record point clouds from local device
+./point_cloud_soup_recorder 127.0.0.1
+
+# Record point clouds from remote device
+./point_cloud_soup_recorder 192.168.1.100
+```
+
+## Output
+
+- **Format**: PLY files (.ply)
+- **Location**: `point_clouds` folder
+- **Naming**: Sequential numbering based on received messages
+
+## Features
+
+- High-performance C++ implementation for optimal processing speed
+- Subscribe to PointCloudSoup messages from Hammerhead
+- Reconstruct full point clouds from compact soup representation
+- Generate PLY files compatible with CloudCompare and other tools
+- Handle high-resolution point clouds efficiently with minimal memory usage
+
+## PointCloudSoup Format
+
+Nodar generates extremely high-resolution point clouds that require efficient network transmission. The PointCloudSoup format:
+- Provides a compact representation of point cloud data
+- Allows reconstruction of full point clouds on client machines
+- Reduces network bandwidth requirements significantly
+- Maintains high fidelity of 3D spatial information
+
+The `point_cloud_soup.hpp` header provides the class and functions for reading and writing PointCloudSoup data.
+
+## Troubleshooting
+
+- **No point clouds generated**: Check IP address and ensure Hammerhead is running
+- **Connection hanging**: ZMQ will wait indefinitely for connection - verify network connectivity
+- **Large file sizes**: Point clouds are high-resolution - ensure adequate storage space
+
+Press `Ctrl+C` to stop recording.

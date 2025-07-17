@@ -1,28 +1,64 @@
-# Introduction
+# Hammerhead Scheduler
 
-This example demonstrates how to schedule hammerhead using ZMQ.
-Specifically, under normal conditions, hammerhead runs without external input.
-However, if the machine running hammerhead is running other intensive processes,
-then you may want to schedule when hammerhead runs in order to avoid resource allocation issues.
-This example demonstrates how to do that.
+Control Hammerhead's processing schedule to avoid resource conflicts with other intensive processes.
 
-## How it works
+## Installation
 
-In the hammerhead `master_config.ini` file, there is the parameter `wait_for_scheduler`.  
-When enabled, hammerhead will process a frame and then send a scheduler request with the frame number
-indicating that hammerhead will stop and wait until a reply from a scheduler is received.
-To avoid deadlocking, the `master_config.ini` also exposes `wait_for_scheduler_timeout_ms`,
-which tells hammerhead how many milliseconds to wait on a scheduler before giving up and moving to the next frame.
+```bash
+pip install -e examples/python/hammerhead_scheduler
+```
 
-## Quick Start
+## Usage
 
-This example implements a basic scheduler that can interact with hammerhead.
-To run this example, you should provide the IP address of the device running hammerhead:
+```bash
+python hammerhead_scheduler.py <src_ip>
+```
 
-    cd examples/python/hammerhead_scheduler/hammerhead_scheduler
-    python3 hammerhead_scheduler src_ip
+### Parameters
 
-Note that if you specify an incorrect IP address or run this example when Hammerhead is not running, 
-then nothing will happen. It will appear like the binary is just waiting.
+- `src_ip`: IP address of the device running Hammerhead
 
-To kill this example, just press CTRL+C.
+### Examples
+
+```bash
+# Control Hammerhead processing schedule
+python hammerhead_scheduler.py 192.168.1.100
+```
+
+## Configuration Required
+
+In Hammerhead's `master_config.ini` file, set:
+
+```ini
+wait_for_scheduler = true
+wait_for_scheduler_timeout_ms = 5000
+```
+
+## How It Works
+
+1. Hammerhead processes a frame
+2. Sends scheduler request with frame number
+3. Waits for scheduler reply before next frame
+4. Times out after configured milliseconds if no reply
+
+## Features
+
+- Microsecond-level timing control
+- Prevents resource conflicts with other processes
+- Configurable timeout protection
+- Frame-by-frame processing control
+
+## Use Cases
+
+- Coordinating with other intensive processes
+- Custom frame rate control
+- Synchronization with external systems
+- Resource management on constrained systems
+
+## Troubleshooting
+
+- **No scheduler activity**: Check that `wait_for_scheduler = true` in `master_config.ini`
+- **Timeout errors**: Adjust `wait_for_scheduler_timeout_ms` value
+- **Connection issues**: Verify network connectivity and IP address
+
+Press `Ctrl+C` to stop the scheduler.

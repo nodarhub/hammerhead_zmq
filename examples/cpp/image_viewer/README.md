@@ -1,49 +1,66 @@
-This example is a simple OpenCV viewer for images published by Hammerhead with ZMQ.
+# Image Viewer
 
-To build this example, follow the traditional CMake process:
+Real-time OpenCV viewer for stereo images, disparity maps, and depth data published by Hammerhead.
 
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build . --config Release
+## Build
 
-To run this example, you need to provide the IP address of the ZMQ source (the device running Hammerhead),
-as well as the topic name or port number:
+```bash
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+```
 
-    # Linux
-    ./image_viewer src_ip image_topic_or_port
+## Usage
 
-    # Windows 
-    ./Release/image_viewer.exe src_ip image_topic_or_port
+```bash
+# Linux
+./image_viewer <src_ip> <image_topic_or_port>
 
-The file `topic_ports.hpp` defines the `topic->port` mappings.
-For example, in that file, you will find the entry
+# Windows
+./Release/image_viewer.exe <src_ip> <image_topic_or_port>
+```
 
-    "nodar/right/image_raw", 9801
+### Parameters
 
-which indicates that the raw right images will be sent on port 9801.
-If you run this example on the device running Hammerhead,
-then the following command would open an image viewer for the raw right images:
+- `src_ip`: IP address of the device running Hammerhead
+- `image_topic_or_port`: Topic name or port number (see Available Topics below)
 
-    ./image_viewer 127.0.0.1 9801 
+### Examples
 
-Alternatively, you can specify the topic name:
+```bash
+# View raw left camera
+./image_viewer 192.168.1.100 nodar/left/image_raw
 
-    ./image_viewer 127.0.0.1 nodar/right/image_raw
+# View disparity map
+./image_viewer 192.168.1.100 9804
 
-Note that the parameter `image_topic` should be one of the `IMAGE_TOPICS` in `topic_ports.hpp`. Furthermore:
+# View color-blended depth
+./image_viewer 192.168.1.100 nodar/color_blended_depth/image_raw
+```
 
-- On Windows, replace `./image_viewer` with `./Release/image_viewer.exe` in the above commands.
-- If you specify an incorrect IP address or run this example when Hammerhead is not running, then ZMQ will attempt to
-  subscribe, and nothing will happen. It will appear like the binary is just waiting.
+## Available Camera Topics
 
-To kill this example, just press CTRL+C.
+| Topic | Port | Description |
+|-------|------|-------------|
+| `nodar/left/image_raw` | 9800 | Raw left camera |
+| `nodar/right/image_raw` | 9801 | Raw right camera |
+| `nodar/left/image_rect` | 9802 | Rectified left image |
+| `nodar/right/image_rect` | 9803 | Rectified right image |
+| `nodar/disparity` | 9804 | Disparity map |
+| `nodar/color_blended_depth/image_raw` | 9805 | Color-coded depth visualization |
 
-Some currently valid image topic names are:
+## Features
 
-    nodar/color_blended_depth/image_raw
-    nodar/disparity
-    nodar/left/image_raw
-    nodar/left/image_rect
-    nodar/right/image_raw
-    nodar/right/image_rect
+- Optimized for real-time performance
+- Support for all image topic types
+- Automatic color space handling
+- Cross-platform (Linux/Windows)
+
+## Troubleshooting
+
+- **No display appears**: Check that Hammerhead is running and the IP address is correct
+- **Connection timeout**: Verify network connectivity and firewall settings
+- **Invalid topic**: Use one of the topics listed in the Available Topics section
+
+Press `Ctrl+C` to exit the viewer.

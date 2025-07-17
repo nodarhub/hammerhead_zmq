@@ -1,28 +1,68 @@
-This example shows how to subscribe to `PointCloud` messages being sent by Hammerhead, 
-and then save them as `.ply` files in the `point_clouds` folder. 
-You can then open the `.ply` files in other programs, such as CloudCompare. 
-Note that due to the amount of bandwidth required, 
-you should think twice before enabling point cloud streaming in hammerhead.
+# Point Cloud Recorder
 
-To build this example, follow the traditional CMake process:
+Subscribe to point cloud messages and save them as PLY files for use in CloudCompare and other 3D software.
 
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build . --config Release
+## Build
 
-To run this example, you need to provide the IP address of the ZMQ source (the device running hammerhead):
+```bash
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+```
 
-    # Linux
-    ./point_cloud_recorder src_ip
+## Usage
 
-    # Windows
-    ./Release/point_cloud_recorder.exe src_ip
+```bash
+# Linux - Record standard point clouds
+./point_cloud_recorder <src_ip>
 
-Note that if you specify an incorrect IP address or run this example when Hammerhead is not running, then ZMQ will
-attempt to subscribe, and nothing will happen. It will appear like the binary is just waiting.
+# Linux - Record RGB point clouds (higher bandwidth)
+./point_cloud_rgb_recorder <src_ip>
 
-To kill this example, just press CTRL+C.
+# Windows - Record standard point clouds
+./Release/point_cloud_recorder.exe <src_ip>
 
-There is an additional example `point_cloud_rgb_recorder` demonstrating how to receive RGB point clouds. 
-However, the bandwidth requirements are even higher. Use with caution.
+# Windows - Record RGB point clouds (higher bandwidth)
+./Release/point_cloud_rgb_recorder.exe <src_ip>
+```
+
+### Parameters
+
+- `src_ip`: IP address of the device running Hammerhead
+
+### Examples
+
+```bash
+# Record point clouds from Hammerhead device
+./point_cloud_recorder 192.168.1.100
+
+# Record RGB point clouds with color information
+./point_cloud_rgb_recorder 192.168.1.100
+```
+
+## Output
+
+- **Format**: PLY files saved in `point_clouds/` directory
+- **Naming**: Sequential numbering (e.g., `cloud_000001.ply`)
+- **Compatible with**: CloudCompare, MeshLab, other 3D software
+
+## Features
+
+- Optimized memory allocation
+- Fast PLY file writing
+- Support for RGB point clouds
+- Real-time performance monitoring
+- Progress tracking with timestamps
+
+## Bandwidth Warning
+
+**Important**: Point cloud streaming requires significant network bandwidth. RGB point clouds require even more. Use with caution on limited networks.
+
+## Troubleshooting
+
+- **No files created**: Check that Hammerhead is running and point cloud streaming is enabled
+- **Connection timeout**: Verify network connectivity and firewall settings
+- **High bandwidth usage**: Consider using point cloud soup recorder for reduced bandwidth
+
+Press `Ctrl+C` to stop recording.

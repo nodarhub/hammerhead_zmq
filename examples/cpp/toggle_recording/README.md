@@ -1,24 +1,58 @@
-This example demonstrates how to toggle recording in Hammerhead using ZMQ. Currently, we expose this using a
-Request-Reply pattern. The topic names and ports used for this communication are defined in
-the `topic_ports.hpp` header.
+# Toggle Recording
 
-To build this example, follow the traditional CMake process:
+Toggle recording in Hammerhead using ZMQ Request-Reply pattern.
 
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build . --config Release
+## Build
 
-This will build the binary `toggle_recording`. To run the examples, you need to provide the IP
-address of the ZMQ source (the device running hammerhead):
+```bash
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+```
 
-    # Linux
-    ./toggle_recording src_ip
+## Usage
 
-    # Windows
-    ./Release/toggle_recording src_ip
+```bash
+# Linux
+./toggle_recording <src_ip>
 
-Note that if you specify an incorrect IP address or run this example when Hammerhead is not running, then ZMQ will
-attempt to subscribe, and nothing will happen. It will appear like the binary is just waiting.
+# Windows
+./Release/toggle_recording.exe <src_ip>
+```
 
-To kill this example, just press CTRL+C.
+### Parameters
+
+- `src_ip`: IP address of the ZMQ source (the device running Hammerhead)
+
+### Examples
+
+```bash
+# Toggle recording on/off
+./toggle_recording 192.168.1.100
+```
+
+## Features
+
+- High-performance C++ implementation for real-time recording control
+- Request-Reply pattern for reliable recording state changes
+- Interactive recording start/stop control
+- Immediate response to recording commands
+- Minimal latency for recording control
+
+## How It Works
+
+The application uses a Request-Reply pattern to communicate with Hammerhead:
+1. Sends recording toggle request to Hammerhead
+2. Receives confirmation of recording state change
+3. Provides interactive control for starting/stopping recording
+
+The topic names and ports used for this communication are defined in the `topic_ports.hpp` header.
+
+## Troubleshooting
+
+- **No response**: Check IP address and ensure Hammerhead is running
+- **Connection hanging**: ZMQ will wait indefinitely for connection - verify network connectivity
+- **Recording not toggled**: Ensure Hammerhead is configured to accept recording control commands
+
+Press `Ctrl+C` to stop recording control.
