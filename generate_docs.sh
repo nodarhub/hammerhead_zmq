@@ -6,6 +6,13 @@ HERE="$(
 
 set -e
 
+PUSH_TO_S3=false
+for arg in "$@"; do
+  if [[ "$arg" == "--push-to-s3" ]]; then
+    PUSH_TO_S3=true
+  fi
+done
+
 echo "Script running from: $HERE"
 
 DOCS_DIR="$HERE/docs"
@@ -55,4 +62,7 @@ mkdocs build --config-file "$HERE/mkdocs.yml"
 echo "MkDocs site generated in $HERE/site/"
 
 # Upload to S3
-#aws s3 sync "$HERE/site/" s3://zmq.nodarsensor.net --delete
+if $PUSH_TO_S3; then
+  echo "Uploading to S3..."
+  aws s3 sync "$HERE/site/" s3://zmq.nodarsensor.net --delete
+fi
