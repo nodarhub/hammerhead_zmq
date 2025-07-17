@@ -50,3 +50,6 @@ echo "Running mkdocs build..."
 mkdocs build --config-file "$HERE/mkdocs.yml"
 
 echo "MkDocs site generated in $HERE/site/"
+
+# Upload to S3
+aws s3 sync "$HERE/site/" s3://nodar-public/files/zmq-website/ --delete
