@@ -26,9 +26,7 @@ cp -r "$HERE/images/"* "$DOCS_DIR/images/" || true
 # Create LICENSE page
 echo "# License" > "$DOCS_DIR/license.md"
 echo "" >> "$DOCS_DIR/license.md"
-echo "\`\`\`" >> "$DOCS_DIR/license.md"
 cat "$HERE/LICENSE" >> "$DOCS_DIR/license.md"
-echo "\`\`\`" >> "$DOCS_DIR/license.md"
 
 echo "Copying Python example READMEs..."
 find "$HERE/examples/python" -name README.md | while read -r f; do
