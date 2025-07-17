@@ -32,7 +32,7 @@ cmake --build . --config Release
 ./obstacle_data_recorder 127.0.0.1
 
 # Record obstacle data from remote device
-./obstacle_data_recorder 192.168.1.100
+./obstacle_data_recorder 10.10.1.10
 ```
 
 ## Output

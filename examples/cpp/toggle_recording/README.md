@@ -33,7 +33,7 @@ cmake --build . --config Release
 ./toggle_recording 127.0.0.1
 
 # Use the network IP address if running on a different device
-./toggle_recording 192.168.1.100
+./toggle_recording 10.10.1.10
 ```
 
 ## Features

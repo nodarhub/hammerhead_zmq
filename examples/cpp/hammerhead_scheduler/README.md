@@ -33,7 +33,7 @@ cmake --build . --config Release
 ./hammerhead_scheduler 127.0.0.1
 
 # Use the network IP address if running on a different device
-./hammerhead_scheduler 192.168.1.100
+./hammerhead_scheduler 10.10.1.10
 ```
 
 ## Configuration Required

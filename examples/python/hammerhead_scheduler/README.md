@@ -26,7 +26,7 @@ python hammerhead_scheduler.py <src_ip>
 python hammerhead_scheduler.py 127.0.0.1
 
 # Use the network IP address if running on a different device
-python hammerhead_scheduler.py 192.168.1.100
+python hammerhead_scheduler.py 10.10.1.10
 ```
 
 ## Configuration Required

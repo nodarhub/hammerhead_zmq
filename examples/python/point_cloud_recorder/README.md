@@ -30,10 +30,10 @@ python point_cloud_rgb_recorder.py <src_ip>
 python point_cloud_recorder.py 127.0.0.1
 
 # Use the network IP address if running on a different device
-python point_cloud_recorder.py 192.168.1.100
+python point_cloud_recorder.py 10.10.1.10
 
 # Record RGB point clouds with color information
-python point_cloud_rgb_recorder.py 192.168.1.100
+python point_cloud_rgb_recorder.py 10.10.1.10
 ```
 
 ## Output

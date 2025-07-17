@@ -27,13 +27,13 @@ python image_viewer.py <src_ip> <image_topic_or_port>
 python image_viewer.py 127.0.0.1 nodar/left/image_raw
 
 # Use the network IP address if running on a different device
-python image_viewer.py 192.168.1.100 nodar/left/image_raw
+python image_viewer.py 10.10.1.10 nodar/left/image_raw
 
 # View disparity map
-python image_viewer.py 192.168.1.100 9804
+python image_viewer.py 10.10.1.10 9804
 
 # View color-blended depth
-python image_viewer.py 192.168.1.100 nodar/color_blended_depth/image_raw
+python image_viewer.py 10.10.1.10 nodar/color_blended_depth/image_raw
 ```
 
 ## Available Camera Topics

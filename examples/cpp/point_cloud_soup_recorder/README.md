@@ -32,7 +32,7 @@ cmake --build . --config Release
 ./point_cloud_soup_recorder 127.0.0.1
 
 # Record point clouds from remote device
-./point_cloud_soup_recorder 192.168.1.100
+./point_cloud_soup_recorder 10.10.1.10
 ```
 
 ## Output

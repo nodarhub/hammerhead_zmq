@@ -25,7 +25,7 @@ python obstacle_data_recorder.py <src_ip>
 python obstacle_data_recorder.py 127.0.0.1
 
 # Record obstacle data from remote device
-python obstacle_data_recorder.py 192.168.1.100
+python obstacle_data_recorder.py 10.10.1.10
 ```
 
 ## Output

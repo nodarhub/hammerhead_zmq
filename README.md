@@ -44,14 +44,14 @@ The Hammerhead system is a high-performance stereo vision processing unit that p
 # Install the package
 pip install -e .
 
-# View live stereo images from Hammerhead device at 192.168.1.100
-python examples/python/image_viewer/image_viewer/image_viewer.py 192.168.1.100 nodar/left/image_raw
+# View live stereo images from Hammerhead device at 10.10.1.10
+python examples/python/image_viewer/image_viewer/image_viewer.py 10.10.1.10 nodar/left/image_raw
 
 # Record point clouds to PLY files
-python examples/python/point_cloud_recorder/point_cloud_recorder/point_cloud_recorder.py 192.168.1.100
+python examples/python/point_cloud_recorder/point_cloud_recorder/point_cloud_recorder.py 10.10.1.10
 
 # Record obstacle detection data
-python examples/python/obstacle_data_recorder/obstacle_data_recorder/obstacle_data_recorder.py 192.168.1.100
+python examples/python/obstacle_data_recorder/obstacle_data_recorder/obstacle_data_recorder.py 10.10.1.10
 ```
 
 ### C++ Build & Usage
@@ -62,10 +62,10 @@ mkdir build && cd build
 cmake .. && cmake --build . --config Release
 
 # View live images
-./examples/cpp/image_viewer/image_viewer 192.168.1.100 nodar/left/image_raw
+./examples/cpp/image_viewer/image_viewer 10.10.1.10 nodar/left/image_raw
 
 # Record point clouds
-./examples/cpp/point_cloud_recorder/point_cloud_recorder 192.168.1.100
+./examples/cpp/point_cloud_recorder/point_cloud_recorder 10.10.1.10
 ```
 
 ## Message Types & Ports

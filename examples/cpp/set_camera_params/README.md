@@ -35,10 +35,10 @@ cmake --build . --config Release
 ./set_exposure 127.0.0.1
 
 # Use the network IP address if running on a different device
-./set_exposure 192.168.1.100
+./set_exposure 10.10.1.10
 
 # Set camera gain
-./set_gain 192.168.1.100
+./set_gain 10.10.1.10
 ```
 
 ## Output

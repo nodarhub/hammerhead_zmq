@@ -34,13 +34,13 @@ cmake --build . --config Release
 ./image_viewer 127.0.0.1 nodar/left/image_raw
 
 # Use the network IP address if running on a different device
-./image_viewer 192.168.1.100 nodar/left/image_raw
+./image_viewer 10.10.1.10 nodar/left/image_raw
 
 # View disparity map
-./image_viewer 192.168.1.100 9804
+./image_viewer 10.10.1.10 9804
 
 # View color-blended depth
-./image_viewer 192.168.1.100 nodar/color_blended_depth/image_raw
+./image_viewer 10.10.1.10 nodar/color_blended_depth/image_raw
 ```
 
 ## Available Camera Topics

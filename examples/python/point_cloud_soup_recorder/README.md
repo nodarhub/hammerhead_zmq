@@ -25,7 +25,7 @@ python point_cloud_soup_recorder.py <src_ip>
 python point_cloud_soup_recorder.py 127.0.0.1
 
 # Record point clouds from remote device
-python point_cloud_soup_recorder.py 192.168.1.100
+python point_cloud_soup_recorder.py 10.10.1.10
 ```
 
 ## Output
