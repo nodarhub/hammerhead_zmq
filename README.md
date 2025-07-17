@@ -54,31 +54,56 @@ git submodule update --init --recursive
 ### Python Installation & Usage
 
 ```bash
-# Install the package
+# Make a virtual environment (here we use ~/venvs/nodarenv, but you can choose any location)
+mkdir -p ~/venvs && cd ~/venvs
+python3 -m venv nodarenv
+
+# Source the enviroment and install the package (from the root of the repository)
+source ~/venvs/nodarenv/bin/activate
 pip install -e .
 
-# View live stereo images from Hammerhead device at 10.10.1.10
+# View live left raw image from Hammerhead device at 10.10.1.10
 python examples/python/image_viewer/image_viewer/image_viewer.py 10.10.1.10 nodar/left/image_raw
 
-# Record point clouds to PLY files
+# Record point clouds to PLY files from Hammerhead device at 10.10.1.10
 python examples/python/point_cloud_recorder/point_cloud_recorder/point_cloud_recorder.py 10.10.1.10
 
-# Record obstacle detection data
+# Record obstacle detection data from Hammerhead device at 10.10.1.10
 python examples/python/obstacle_data_recorder/obstacle_data_recorder/obstacle_data_recorder.py 10.10.1.10
 ```
 
-### C++ Build & Usage
+### C++ Installation & Usage
 
+#### Installing dependencies
+
+##### Ubuntu:
+```bash
+# Install build tools
+sudo apt install build-essential cmake
+
+# Install OpenCV (optional but recommended)
+sudo apt install libopencv-dev
+```
+
+##### Windows:
+- **Visual Studio Community** - [Download](https://visualstudio.microsoft.com/vs/community/)
+- **CMake 3.11+** - [Download](https://github.com/Kitware/CMake/releases/)
+- **OpenCV 4.6.0+** - [Download](https://opencv.org/releases/)
+
+#### Building the Examples & Usage
 ```bash
 # Build all examples
 mkdir build && cd build
 cmake .. && cmake --build . --config Release
 
-# View live images
+# View live left raw image from Hammerhead device at 10.10.1.10
 ./examples/cpp/image_viewer/image_viewer 10.10.1.10 nodar/left/image_raw
 
-# Record point clouds
+# Record point clouds to PLY files from Hammerhead device at 10.10.1.10
 ./examples/cpp/point_cloud_recorder/point_cloud_recorder 10.10.1.10
+
+# Record obstacle detection data from Hammerhead device at 10.10.1.10
+./examples/cpp/obstacle_data_recorder/obstacle_data_recorder 10.10.1.10
 ```
 
 ## Message Types & Ports
@@ -111,46 +136,6 @@ Hammerhead publishes data using structured message types over predefined ZMQ por
 | 9811 | `nodar/recording` | Recording on/off control | `SetBool` |
 | 9812 | `nodar/obstacle` | Obstacle detection data | `ObstacleData` |
 | 9814 | `nodar/wait` | Scheduler control | `SetBool` |
-
-## Installation
-
-### Python Dependencies
-
-```bash
-# Install core dependencies
-pip install -r requirements.txt
-
-# Install ZMQ message types
-pip install -e zmq_msgs/python
-
-# Install specific examples (optional)
-pip install -e examples/python/image_viewer
-pip install -e examples/python/point_cloud_recorder
-```
-
-**Python Requirements:**
-- Python 3.10+
-- NumPy ≥1.26.0
-- OpenCV ≥4.8.0
-- PyZMQ
-- PyYAML
-- tqdm
-
-### C++ Dependencies
-
-**Ubuntu:**
-```bash
-# Install build tools
-sudo apt install build-essential cmake
-
-# Install OpenCV (optional but recommended)
-sudo apt install libopencv-dev
-```
-
-**Windows:**
-- **Visual Studio Community** - [Download](https://visualstudio.microsoft.com/vs/community/)
-- **CMake 3.11+** - [Download](https://github.com/Kitware/CMake/releases/)
-- **OpenCV 4.6.0+** - [Download](https://opencv.org/releases/)
 
 ## Project Structure
 
@@ -228,46 +213,6 @@ High-performance C++ implementations for real-time applications and system integ
 2. Implement real-time processing of obstacle messages
 3. Integrate with path planning or control systems
 4. Add custom filtering or tracking algorithms
-
-## C++ Integration
-
-To use the message types in a new project, you can copy `zmq_msgs/cpp` folder into your project, and then modify your
-`CMakeLists.txt` to link to this target:
-
-```cmake
-add_subdirectory(zmq_msgs/cpp)
-target_link_libraries(
-        my_target
-        PRIVATE
-        hammerhead::zmq_msgs
-)
-```
-
-Refer to the extensive examples for some practical examples.
-
-## Python Integration
-
-We set up the python examples so that you can `cd` into the example folder and directly run the code:
-
-```bash
-$ cd examples/python/image_viewer/image_viewer
-$ python image_viewer.py 
-```
-
-Alternatively, we recommend that you create a virtual environment somewhere on your system,
-where you can install the requirements, the `zmq_msgs` package, and the examples of your choosing:
-
-```bash
-cd ~/testing
-python3 -m venv nodarenv
-source nodarenv/bin/activate
-python -m pip install -r /path/to/hammerhead_zmq/requirements.txt
-python -m pip install /path/to/hammerhead_zmq/zmq_msgs/python
-python -m pip install /path/to/hammerhead_zmq/examples/python/image_viewer
-
-# Now you can run the example: 
-image_viewer
-```
 
 ## 3D Coordinate System & Point Cloud Conversion
 
