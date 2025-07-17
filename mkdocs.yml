@@ -1,0 +1,68 @@
+site_name: Hammerhead ZMQ
+docs_dir: docs
+site_dir: site
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - toc.integrate
+    - palette.toggle
+  palette:
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  logo: images/shark.svg
+  favicon: images/shark.svg
+
+extra:
+  generator: false
+
+nav:
+  - Home: index.md
+  - License: license.md
+  - Python Examples:
+      - Image Viewer: examples/python/image_viewer.md
+      - Image Recorder: examples/python/image_recorder.md
+      - Point Cloud Recorder: examples/python/point_cloud_recorder.md
+      - Point Cloud Soup Recorder: examples/python/point_cloud_soup_recorder.md
+      - Obstacle Data Recorder: examples/python/obstacle_data_recorder.md
+      - Depth to Disparity: examples/python/depth_to_disparity.md
+      - Disparity to Point Cloud: examples/python/disparity_to_ordered_point_cloud.md
+      - Hammerhead Scheduler: examples/python/hammerhead_scheduler.md
+      - Topbot Publisher: examples/python/topbot_publisher.md
+  - C++ Examples:
+      - Image Viewer: examples/cpp/image_viewer.md
+      - Image Recorder: examples/cpp/image_recorder.md
+      - Point Cloud Recorder: examples/cpp/point_cloud_recorder.md
+      - Point Cloud Soup Recorder: examples/cpp/point_cloud_soup_recorder.md
+      - Obstacle Data Recorder: examples/cpp/obstacle_data_recorder.md
+      - Depth to Disparity: examples/cpp/depth_to_disparity.md
+      - Offline Point Cloud Generator: examples/cpp/offline_point_cloud_generator.md
+      - Hammerhead Scheduler: examples/cpp/hammerhead_scheduler.md
+      - Camera Parameter Control: examples/cpp/set_camera_params.md
+      - Toggle Recording: examples/cpp/toggle_recording.md
+      - Topbot Publisher: examples/cpp/topbot_publisher.md
+      - Legacy Obstacle Converter: examples/cpp/legacy_obstacle_data_converter.md
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - tables
+  - admonition
+  - codehilite
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.tabbed
+  - pymdownx.details

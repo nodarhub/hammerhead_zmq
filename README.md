@@ -1,4 +1,4 @@
-# Hammerhead ZMQ Client Library
+# Hammerhead ZMQ
 
 > A comprehensive Python and C++ client library for interfacing with the Hammerhead stereo vision system via ZeroMQ
 
@@ -8,15 +8,15 @@
 
 - [Overview](#overview)
 - [Quick Start](#quick-start)
-- [Message Types & Ports](#message-types--ports)
+- [Message Types & Ports](#message-types-ports)
 - [Installation](#installation)
 - [Project Structure](#project-structure)
-- [Examples & Tutorials](#examples--tutorials)
+- [Examples & Tutorials](#examples-tutorials)
 - [C++ Integration](#c-integration)
 - [Python Integration](#python-integration)
-- [3D Coordinate System & Point Cloud Conversion](#3d-coordinate-system--point-cloud-conversion)
+- [3D Coordinate System & Point Cloud Conversion](#3d-coordinate-system-point-cloud-conversion)
 - [API Reference](#api-reference)
-- [Best Practices & Tips](#best-practices--tips)
+- [Best Practices & Tips](#best-practices-tips)
 
 ## Overview
 
