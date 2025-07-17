@@ -29,6 +29,9 @@ theme:
 extra_css:
   - css/hide-footer.css
 
+extra_javascript:
+  - js/logo-click.js
+
 extra:
   generator: false
 

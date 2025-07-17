@@ -46,9 +46,10 @@ done
 sed -i 's|/README.md|.md|g' "$DOCS_DIR/index.md"
 sed -i 's|LICENSE|license.md|g' "$DOCS_DIR/index.md"
 
-# Copy the hide footer
-mkdir -p "$DOCS_DIR/css"
+# Copy the hide footer and logo click script
+mkdir -p "$DOCS_DIR/css" "$DOCS_DIR/js"
 cp "$HERE/hide-footer.css" "$DOCS_DIR/css/hide-footer.css"
+cp "$HERE/logo-click.js" "$DOCS_DIR/js/logo-click.js"
 
 echo "Running mkdocs build..."
 mkdocs build --config-file "$HERE/mkdocs.yml"
@@ -56,4 +57,4 @@ mkdocs build --config-file "$HERE/mkdocs.yml"
 echo "MkDocs site generated in $HERE/site/"
 
 # Upload to S3
-# aws s3 sync "$HERE/site/" s3://zmq.nodarsensor.net --delete
+#aws s3 sync "$HERE/site/" s3://zmq.nodarsensor.net --delete
