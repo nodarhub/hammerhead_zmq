@@ -46,10 +46,14 @@ done
 sed -i 's|/README.md|.md|g' "$DOCS_DIR/index.md"
 sed -i 's|LICENSE|license.md|g' "$DOCS_DIR/index.md"
 
+# Copy the hide footer
+mkdir -p "$DOCS_DIR/css"
+cp "$HERE/hide-footer.css" "$DOCS_DIR/css/hide-footer.css"
+
 echo "Running mkdocs build..."
 mkdocs build --config-file "$HERE/mkdocs.yml"
 
 echo "MkDocs site generated in $HERE/site/"
 
 # Upload to S3
-aws s3 sync "$HERE/site/" s3://zmq.nodarsensor.net --delete
+# aws s3 sync "$HERE/site/" s3://zmq.nodarsensor.net --delete

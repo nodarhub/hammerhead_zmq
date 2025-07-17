@@ -1,4 +1,4 @@
-site_name: Hammerhead ZMQ
+﻿site_name: Hammerhead ZMQ
 docs_dir: docs
 site_dir: site
 theme:
@@ -25,6 +25,9 @@ theme:
         name: Switch to dark mode
   logo: images/shark.svg
   favicon: images/shark.svg
+
+extra_css:
+  - css/hide-footer.css
 
 extra:
   generator: false
