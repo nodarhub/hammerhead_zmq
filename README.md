@@ -70,9 +70,7 @@ cmake .. && cmake --build . --config Release
 
 ## Message Types & Ports
 
-Hammerhead publishes data using structured message types over predefined ZMQ ports defined in
-[topic_ports.hpp](zmq_msgs/cpp/include/nodar/zmq/topic_ports.hpp)
-and [topic_ports.py](zmq_msgs/python/zmq_msgs/topic_ports.py):
+Hammerhead publishes data using structured message types over predefined ZMQ ports:
 
 ### Image Streams
 | Port | Topic | Description | Message Type |
