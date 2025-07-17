@@ -44,10 +44,12 @@ cmake --build . --config Release
 ## Data Format
 
 The obstacle data is represented in the XZ plane, where each obstacle is defined by:
+
 - Bounding box coordinates
 - Velocity vector (no vertical Y-axis component)
 
 Each generated file contains:
+
 - Header with parameter order information
 - Obstacle bounding box data
 - Velocity vector data
@@ -55,7 +57,7 @@ Each generated file contains:
 ## Features
 
 - High-performance C++ implementation for real-time processing
-- Subscribe to ObstacleData messages from Hammerhead
+- Subscribe to `ObstacleData` messages from Hammerhead
 - Automatic text file generation with headers
 - Real-time obstacle data recording
 - XZ plane representation for 2D obstacle tracking

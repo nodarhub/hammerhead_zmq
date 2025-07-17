@@ -35,6 +35,10 @@ cmake --build . --config Release
 
 ```bash
 # Record point clouds from Hammerhead device
+# Use 127.0.0.1 if running on the same device as Hammerhead
+./point_cloud_recorder 127.0.0.1
+
+# Use the network IP address if running on a different device
 ./point_cloud_recorder 192.168.1.100
 
 # Record RGB point clouds with color information
@@ -45,7 +49,7 @@ cmake --build . --config Release
 
 - **Format**: PLY files saved in `point_clouds/` directory
 - **Naming**: Sequential numbering (e.g., `cloud_000001.ply`)
-- **Compatible with**: CloudCompare, MeshLab, other 3D software
+- **Compatible with**: CloudCompare and other 3D visualization software
 
 ## Features
 
@@ -57,7 +61,7 @@ cmake --build . --config Release
 
 ## Bandwidth Warning
 
-**Important**: Point cloud streaming requires significant network bandwidth. RGB point clouds require even more. Use with caution on limited networks.
+**Important**: Point cloud streaming requires significant network bandwidth. RGB point clouds require even more.
 
 ## Troubleshooting
 

@@ -59,21 +59,12 @@ cmake --build . --config Release
 - High-performance C++ implementation for minimal latency
 - Subscribe to any image topic published by Hammerhead
 - Support for both topic names and port numbers
-- Automatic image format handling
 - Real-time recording with optimized memory usage
-
-## Valid Image Topics
-
-- `nodar/color_blended_depth/image_raw`
-- `nodar/disparity`
-- `nodar/left/image_raw`
-- `nodar/left/image_rect`
-- `nodar/right/image_raw`
-- `nodar/right/image_rect`
 
 ## Topic to Port Mapping
 
 The file `topic_ports.hpp` defines the `topic->port` mappings. For example:
+
 - `"nodar/right/image_raw"` maps to port `9801`
 
 ## Troubleshooting

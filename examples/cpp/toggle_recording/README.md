@@ -29,6 +29,10 @@ cmake --build . --config Release
 
 ```bash
 # Toggle recording on/off
+# Use 127.0.0.1 if running on the same device as Hammerhead
+./toggle_recording 127.0.0.1
+
+# Use the network IP address if running on a different device
 ./toggle_recording 192.168.1.100
 ```
 
@@ -43,6 +47,7 @@ cmake --build . --config Release
 ## How It Works
 
 The application uses a Request-Reply pattern to communicate with Hammerhead:
+
 1. Sends recording toggle request to Hammerhead
 2. Receives confirmation of recording state change
 3. Provides interactive control for starting/stopping recording

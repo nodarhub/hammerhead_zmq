@@ -30,6 +30,10 @@ cmake --build . --config Release
 
 ```bash
 # View raw left camera
+# Use 127.0.0.1 if running on the same device as Hammerhead
+./image_viewer 127.0.0.1 nodar/left/image_raw
+
+# Use the network IP address if running on a different device
 ./image_viewer 192.168.1.100 nodar/left/image_raw
 
 # View disparity map
@@ -54,8 +58,6 @@ cmake --build . --config Release
 
 - Optimized for real-time performance
 - Support for all image topic types
-- Automatic color space handling
-- Cross-platform (Linux/Windows)
 
 ## Troubleshooting
 

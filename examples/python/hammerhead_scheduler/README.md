@@ -22,6 +22,10 @@ python hammerhead_scheduler.py <src_ip>
 
 ```bash
 # Control Hammerhead processing schedule
+# Use 127.0.0.1 if running on the same device as Hammerhead
+python hammerhead_scheduler.py 127.0.0.1
+
+# Use the network IP address if running on a different device
 python hammerhead_scheduler.py 192.168.1.100
 ```
 
@@ -30,7 +34,7 @@ python hammerhead_scheduler.py 192.168.1.100
 In Hammerhead's `master_config.ini` file, set:
 
 ```ini
-wait_for_scheduler = true
+wait_for_scheduler = 1
 wait_for_scheduler_timeout_ms = 5000
 ```
 
@@ -57,7 +61,7 @@ wait_for_scheduler_timeout_ms = 5000
 
 ## Troubleshooting
 
-- **No scheduler activity**: Check that `wait_for_scheduler = true` in `master_config.ini`
+- **No scheduler activity**: Check that `wait_for_scheduler = 1` in `master_config.ini`
 - **Timeout errors**: Adjust `wait_for_scheduler_timeout_ms` value
 - **Connection issues**: Verify network connectivity and IP address
 

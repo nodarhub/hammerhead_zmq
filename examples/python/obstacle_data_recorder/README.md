@@ -37,17 +37,19 @@ python obstacle_data_recorder.py 192.168.1.100
 ## Data Format
 
 The obstacle data is represented in the XZ plane, where each obstacle is defined by:
+
 - Bounding box coordinates
 - Velocity vector (no vertical Y-axis component)
 
 Each generated file contains:
+
 - Header with parameter order information
 - Obstacle bounding box data
 - Velocity vector data
 
 ## Features
 
-- Subscribe to ObstacleData messages from Hammerhead
+- Subscribe to `ObstacleData` messages from Hammerhead
 - Automatic text file generation with headers
 - Real-time obstacle data recording
 - XZ plane representation for 2D obstacle tracking

@@ -26,6 +26,10 @@ python point_cloud_rgb_recorder.py <src_ip>
 
 ```bash
 # Record point clouds from Hammerhead device
+# Use 127.0.0.1 if running on the same device as Hammerhead
+python point_cloud_recorder.py 127.0.0.1
+
+# Use the network IP address if running on a different device
 python point_cloud_recorder.py 192.168.1.100
 
 # Record RGB point clouds with color information
@@ -36,19 +40,18 @@ python point_cloud_rgb_recorder.py 192.168.1.100
 
 - **Format**: PLY files saved in `point_clouds/` directory
 - **Naming**: Sequential numbering (e.g., `cloud_000001.ply`)
-- **Compatible with**: CloudCompare, MeshLab, other 3D software
+- **Compatible with**: CloudCompare and other 3D visualization software
 
 ## Features
 
 - Saves point clouds as PLY files
 - Support for both standard and RGB point clouds
-- Compatible with CloudCompare, MeshLab
-- Automatic point cloud validation
+- Compatible with CloudCompare and other 3D visualization software
 - Progress tracking with timestamps
 
 ## Bandwidth Warning
 
-**Important**: Point cloud streaming requires significant network bandwidth. RGB point clouds require even more. Use with caution on limited networks.
+**Important**: Point cloud streaming requires significant network bandwidth. RGB point clouds require even more.
 
 ## Troubleshooting
 

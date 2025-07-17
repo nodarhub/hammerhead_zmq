@@ -23,6 +23,10 @@ python image_viewer.py <src_ip> <image_topic_or_port>
 
 ```bash
 # View raw left camera
+# Use 127.0.0.1 if running on the same device as Hammerhead
+python image_viewer.py 127.0.0.1 nodar/left/image_raw
+
+# Use the network IP address if running on a different device
 python image_viewer.py 192.168.1.100 nodar/left/image_raw
 
 # View disparity map
@@ -47,8 +51,6 @@ python image_viewer.py 192.168.1.100 nodar/color_blended_depth/image_raw
 
 - Support for all image topics (raw, rectified, disparity, depth)
 - Real-time display with OpenCV
-- Automatic color space conversion
-- Network connection with error handling
 
 ## Troubleshooting
 

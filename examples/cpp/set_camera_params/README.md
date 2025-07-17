@@ -31,6 +31,10 @@ cmake --build . --config Release
 
 ```bash
 # Set camera exposure
+# Use 127.0.0.1 if running on the same device as Hammerhead
+./set_exposure 127.0.0.1
+
+# Use the network IP address if running on a different device
 ./set_exposure 192.168.1.100
 
 # Set camera gain

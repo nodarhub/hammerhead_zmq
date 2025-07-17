@@ -44,25 +44,26 @@ cmake --build . --config Release
 ## Features
 
 - High-performance C++ implementation for optimal processing speed
-- Subscribe to PointCloudSoup messages from Hammerhead
+- Subscribe to `PointCloudSoup` messages from Hammerhead
 - Reconstruct full point clouds from compact soup representation
 - Generate PLY files compatible with CloudCompare and other tools
 - Handle high-resolution point clouds efficiently with minimal memory usage
 
-## PointCloudSoup Format
+## `PointCloudSoup` Format
 
-Nodar generates extremely high-resolution point clouds that require efficient network transmission. The PointCloudSoup format:
+Nodar generates extremely high-resolution point clouds that require efficient network transmission. The `PointCloudSoup` format:
+
 - Provides a compact representation of point cloud data
 - Allows reconstruction of full point clouds on client machines
 - Reduces network bandwidth requirements significantly
 - Maintains high fidelity of 3D spatial information
 
-The `point_cloud_soup.hpp` header provides the class and functions for reading and writing PointCloudSoup data.
+The `point_cloud_soup.hpp` header provides the class and functions for reading and writing `PointCloudSoup` data.
 
 ## Troubleshooting
 
 - **No point clouds generated**: Check IP address and ensure Hammerhead is running
 - **Connection hanging**: ZMQ will wait indefinitely for connection - verify network connectivity
-- **Large file sizes**: Point clouds are high-resolution - ensure adequate storage space
+- **Large file sizes**: Point clouds are high resolution - ensure adequate storage space
 
 Press `Ctrl+C` to stop recording.

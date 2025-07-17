@@ -51,17 +51,7 @@ python image_recorder.py 127.0.0.1 nodar/right/image_raw output_dir
 
 - Subscribe to any image topic published by Hammerhead
 - Support for both topic names and port numbers
-- Automatic image format handling
 - Real-time recording with minimal latency
-
-## Valid Image Topics
-
-- `nodar/color_blended_depth/image_raw`
-- `nodar/disparity`
-- `nodar/left/image_raw`
-- `nodar/left/image_rect`
-- `nodar/right/image_raw`
-- `nodar/right/image_rect`
 
 ## Troubleshooting
 

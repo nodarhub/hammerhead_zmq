@@ -1,6 +1,6 @@
 # Topbot Publisher
 
-Publish vertically stacked stereo images (topbot format) from disk to Hammerhead.
+Publish vertically stacked stereo images (which we refer to as `topbot` images) from disk to Hammerhead.
 
 ## Build
 
@@ -37,28 +37,13 @@ cmake --build . --config Release
 ./topbot_publisher /path/to/topbot/data 9800 Bayer_RGGB
 ```
 
-## Output
-
-- **Format**: ZMQ published images
-- **Location**: Published to specified port
-- **Naming**: Sequential playback of numbered images
-
 ## Features
 
 - High-performance C++ implementation for real-time streaming
 - Publish pre-recorded stereo image pairs to Hammerhead
-- Support for vertically stacked stereo image format
 - Sequential playback of numbered image sequences
 - ZMQ-based communication for minimal latency
 - Multiple pixel format support
-
-## Topbot Format
-
-The topbot format consists of:
-- Left and right stereo images stacked vertically
-- Single image file containing both camera views
-- Sequential numbering for temporal ordering
-- TIFF format for lossless image quality
 
 ## Supported Pixel Formats
 
@@ -77,9 +62,8 @@ The topbot format consists of:
 
 ## Troubleshooting
 
-- **Images not found**: Ensure directory contains sequentially numbered TIFF files
+- **Images not found**: Ensure the directory contains sequentially numbered TIFF files
 - **Connection issues**: Verify port number and network connectivity
-- **Playback timing**: Adjust system performance for real-time streaming requirements
 - **File format errors**: Ensure all images are valid TIFF files
 
 Press `Ctrl+C` to stop publishing.
