@@ -60,8 +60,7 @@ nav:
       - Legacy Obstacle Converter: examples/cpp/legacy_obstacle_data_converter.md
 
 markdown_extensions:
-  - toc:
-      permalink: true
+  - toc
   - tables
   - admonition
   - codehilite
