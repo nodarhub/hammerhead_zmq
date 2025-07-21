@@ -53,7 +53,7 @@ sed -i 's|LICENSE|license.md|g' "$DOCS_DIR/index.md"
 
 # Copy the hide footer and logo click script
 mkdir -p "$DOCS_DIR/css" "$DOCS_DIR/js"
-cp "$HERE/hide-footer.css" "$DOCS_DIR/css/hide-footer.css"
+cp "$HERE/main.css" "$DOCS_DIR/css/main.css"
 cp "$HERE/logo-click.js" "$DOCS_DIR/js/logo-click.js"
 
 echo "Running mkdocs build..."

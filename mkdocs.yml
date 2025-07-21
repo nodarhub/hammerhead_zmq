@@ -27,7 +27,7 @@ theme:
   favicon: images/shark.svg
 
 extra_css:
-  - css/hide-footer.css
+  - css/main.css
 
 extra_javascript:
   - js/logo-click.js
