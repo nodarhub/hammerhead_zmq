@@ -11,29 +11,39 @@ pip install -e examples/python/topbot_publisher
 ## Usage
 
 ```bash
-python topbot_publisher <topbot_data_directory> <port_number>
+python topbot_publisher <topbot_data_directory> <port_number> [pixel_format]
 ```
 
 ### Parameters
 
 - `topbot_data_directory`: Path to directory containing sequentially numbered topbot images
 - `port_number`: Port number to publish the images to
+- `pixel_format`: Optional pixel format (default: BGR)
 
 ### Examples
 
 ```bash
-# Publish topbot images to port 9800
+# Publish topbot images with default BGR format
 python topbot_publisher /path/to/topbot/data 9800
 
-# Publish topbot images to custom port
-python topbot_publisher /path/to/topbot/data 9850
+# Publish topbot images with Bayer format
+python topbot_publisher /path/to/topbot/data 9800 Bayer_RGGB
 ```
+
+## Supported Pixel Formats
+
+- `BGR` (default)
+- `Bayer_RGGB`
+- `Bayer_GRBG`
+- `Bayer_BGGR`           
+- `Bayer_GBRG`
 
 ## Features
 
 - Publish pre-recorded stereo image pairs to Hammerhead
-- Sequential playback of numbered image sequences
+- Single-pass playback of numbered image sequences (no looping)
 - ZMQ-based communication for real-time streaming
+- Multiple pixel format support
 
 ## Requirements
 
