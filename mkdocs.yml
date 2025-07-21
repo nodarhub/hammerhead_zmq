@@ -58,7 +58,6 @@ nav:
       - Offline Point Cloud Generator: examples/cpp/offline_point_cloud_generator.md
       - Hammerhead Scheduler: examples/cpp/hammerhead_scheduler.md
       - Camera Parameter Control: examples/cpp/set_camera_params.md
-      - Toggle Recording: examples/cpp/toggle_recording.md
       - Topbot Publisher: examples/cpp/topbot_publisher.md
       - Legacy Obstacle Converter: examples/cpp/legacy_obstacle_data_converter.md
 
@@ -66,8 +65,9 @@ markdown_extensions:
   - toc
   - tables
   - admonition
-  - codehilite
   - pymdownx.superfences
-  - pymdownx.highlight
-  - pymdownx.tabbed
+  - pymdownx.highlight:
+      use_pygments: false
+  - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.details

@@ -189,7 +189,6 @@ High-performance C++ implementations for real-time applications and system integ
 #### Control Examples
 - **[Hammerhead Scheduler](examples/cpp/hammerhead_scheduler/README.md)** - Control Hammerhead's processing schedule
 - **[Camera Parameter Control](examples/cpp/set_camera_params/README.md)** - Real-time camera parameter adjustment
-- **[Recording Toggle](examples/cpp/toggle_recording/README.md)** - Simple utility to start/stop Hammerhead recording
 - **[Topbot Publisher](examples/cpp/topbot_publisher/README.md)** - Publish images to Hammerhead's top/bottom camera topic
 
 ### Common Integration Workflows
@@ -303,6 +302,7 @@ for obstacle in obstacle_data.obstacles:
 ```
 
 **Coordinate System:** Obstacle data is represented in the XZ plane (bird's eye view):
+
 - **X axis**: Left/right relative to camera
 - **Z axis**: Forward/backward from camera
 - **No Y component**: Height information not included
