@@ -1,4 +1,5 @@
 import os
+import signal
 import sys
 
 import cv2
@@ -70,6 +71,14 @@ def write_ply_binary(filename, points, colors):
         out.write(point_cloud.tobytes())
 
 
+# Global variable for signal handling
+running = True
+
+def signal_handler(signum, frame):
+    global running
+    print("\nSIGINT or SIGTERM received.", file=sys.stderr)
+    running = False
+
 class PointCloudSoupRecorder:
     def __init__(self, endpoint, output_dir, ascii=False):
         self.context = zmq.Context(1)
@@ -96,6 +105,7 @@ class PointCloudSoupRecorder:
                 f"Current frame ID: {frame_id}, last frame ID: {self.last_frame_id}"
             )
         self.last_frame_id = frame_id
+        print(f"\rFrame # {frame_id}. ", end="", flush=True)
 
         disparity = point_cloud_soup.disparity.img
         rectified = point_cloud_soup.rectified.img
@@ -136,10 +146,13 @@ class PointCloudSoupRecorder:
         bgr = bgr[::downsample, :]
 
         total = disparity.size
-        print(f"{len(xyz)} / {total} number of points used")
-        print(f"{np.sum(valid)} / {total} valid points")
+        # Debug info
+        if False:
+            print(f"{len(xyz)} / {total} number of points used")
+            print(f"{np.sum(valid)} / {total} valid points")
+        
         filename = os.path.join(self.output_dir, f"{frame_id:09}.ply")
-        print(f"\rWriting {filename}", flush=True)
+        print(f"Writing {filename}", end="", flush=True)
         if bgr.dtype == np.uint16 or bgr.dtype == np.int16:
             bgr = (bgr / 257).astype(np.uint8)
         if self.ascii:
@@ -149,33 +162,44 @@ class PointCloudSoupRecorder:
         return
 
 
-def print_usage(default_ip, default_output_dir):
+def print_usage(default_ip):
     print(
-        "You should specify the IP address of the device running Hammerhead,\n"
-        "as well as the folder where you want the data to be saved:\n\n"
-        "     python point_cloud_soup_recorder.py hammerhead_ip output_dir\n\n"
-        "e.g. python point_cloud_soup_recorder.py 192.168.1.9 point_clouds\n\n"
-        "If unspecified, then we assume you are running this on the device running Hammerhead,\n"
-        "along with the other defaults\n\n"
-        f"     python point_cloud_soup_recorder.py {default_ip} {default_output_dir}\n"
+        "You should specify the IP address of the device running hammerhead:\n\n"
+        "     python point_cloud_soup_recorder.py [hammerhead_ip] [output_directory]\n\n"
+        "e.g. python point_cloud_soup_recorder.py 10.10.1.10 /tmp/ply_output\n\n"
+        "In the meantime, we assume that you are running this on the device running Hammerhead,\n"
+        "that is, we assume that you specified\n\n"
+        f"     python point_cloud_soup_recorder.py {default_ip}\n"
         "----------------------------------------"
     )
 
 
 def main():
+    global running
     default_ip = "127.0.0.1"
     topic = SOUP_TOPIC
-    default_output_dir = "point_clouds"
-    if len(sys.argv) < 3:
-        print_usage(default_ip, default_output_dir)
+    
+    # Setup signal handlers
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
+    if len(sys.argv) == 1:
+        print_usage(default_ip)
+    
     ip = sys.argv[1] if len(sys.argv) > 1 else default_ip
     endpoint = f"tcp://{ip}:{topic.port}"
 
-    output_dir = sys.argv[2] if len(sys.argv) >= 3 else default_output_dir
+    if len(sys.argv) > 2:
+        output_dir = sys.argv[2]
+    else:
+        # Similar to C++ version using current file path
+        here = os.path.dirname(os.path.abspath(__file__))
+        output_dir = os.path.join(here, "point_clouds")
+    
+    os.makedirs(output_dir, exist_ok=True)
+    
     point_cloud_soup_recorder = PointCloudSoupRecorder(endpoint, output_dir)
-    index = 0
-    while True:
-        index += 1
+    while running:
         point_cloud_soup_recorder.loop_once()
 
 
