@@ -9,7 +9,6 @@
 - [Overview](#overview)
 - [Quick Start](#quick-start)
 - [Message Types & Ports](#message-types-ports)
-- [Installation](#installation)
 - [Project Structure](#project-structure)
 - [Examples & Tutorials](#examples-tutorials)
 - [3D Coordinate System & Point Cloud Conversion](#3d-coordinate-system-point-cloud-conversion)
