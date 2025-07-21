@@ -1,35 +1,61 @@
-This example is a simple OpenCV viewer for images published by Hammerhead with ZMQ.
-To run this example, you need to provide the IP address of the ZMQ source (the device running Hammerhead),
-as well as the topic name or port number:
+# Image Viewer
 
-    python image_viewer.py src_ip image_topic_or_port
+Real-time OpenCV viewer for stereo images, disparity maps, and depth data published by Hammerhead.
 
-The file `zmq_msgs/topic_ports.py` defines the `topic->port` mappings.
-For example, in that file, you will find the entry
+## Installation
 
-    "nodar/right/image_raw", 9801
+```bash
+pip install -e examples/python/image_viewer
+```
 
-which indicates that the raw right images will be sent on port 9801.
-If you run this example on the device running Hammerhead,
-then the following command would open an image viewer for the raw right images:
+## Usage
 
-    python image_viewer.py  127.0.0.1 9801 
+```bash
+python image_viewer.py <src_ip> <image_topic_or_port>
+```
 
-Alternatively, you can specify the topic name:
+### Parameters
 
-    python image_viewer.py 127.0.0.1 nodar/right/image_raw
+- `src_ip`: IP address of the device running Hammerhead
+- `image_topic_or_port`: Topic name or port number (see Available Topics below)
 
-Note that the parameter `image_topic` should be one of the `IMAGE_TOPICS` in `topic_ports.py`.
-Furthermore, if you specify an incorrect IP address or run this example when Hammerhead is not running,
-then ZMQ will attempt to subscribe, and nothing will happen. It will appear like the binary is just waiting.
+### Examples
 
-To kill this example, just press CTRL+C.
+```bash
+# View raw left camera
+# Use 127.0.0.1 if running on the same device as Hammerhead
+python image_viewer.py 127.0.0.1 nodar/left/image_raw
 
-Some currently valid image topic names are:
+# Use the network IP address if running on a different device
+python image_viewer.py 10.10.1.10 nodar/left/image_raw
 
-    nodar/color_blended_depth/image_raw
-    nodar/disparity
-    nodar/left/image_raw
-    nodar/left/image_rect
-    nodar/right/image_raw
-    nodar/right/image_rect
+# View disparity map
+python image_viewer.py 10.10.1.10 9804
+
+# View color-blended depth
+python image_viewer.py 10.10.1.10 nodar/color_blended_depth/image_raw
+```
+
+## Available Camera Topics
+
+| Topic | Port | Description |
+|-------|------|-------------|
+| `nodar/left/image_raw` | 9800 | Raw left camera |
+| `nodar/right/image_raw` | 9801 | Raw right camera |
+| `nodar/left/image_rect` | 9802 | Rectified left image |
+| `nodar/right/image_rect` | 9803 | Rectified right image |
+| `nodar/disparity` | 9804 | Disparity map |
+| `nodar/color_blended_depth/image_raw` | 9805 | Color-coded depth visualization |
+
+## Features
+
+- Support for all image topics (raw, rectified, disparity, depth)
+- Real-time display with OpenCV
+
+## Troubleshooting
+
+- **No display appears**: Check that Hammerhead is running and the IP address is correct
+- **Connection timeout**: Verify network connectivity and firewall settings
+- **Invalid topic**: Use one of the topics listed in the Available Topics section
+
+Press `Ctrl+C` to exit the viewer.

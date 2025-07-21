@@ -1,35 +1,62 @@
-This example demonstrates how to record images published by Hammerhead with ZMQ.
-To run this example, you need to provide the IP address of the ZMQ source (the device running Hammerhead),
-the topic name or port number, and the folder where you want the data to be saved:
+# Image Recorder
 
-    python image_recorder.py src_ip image_topic_or_port output_dir
+Record images from Hammerhead with ZMQ.
 
-The file `zmq_msgs/topic_ports.py` defines the `topic->port` mappings.
-For example, in that file, you will find the entry
+## Installation
 
-    "nodar/right/image_raw", 9801
+```bash
+pip install -e examples/python/image_recorder
+```
 
-which indicates that the raw right images will be sent on port 9801.
-If you run this example on the device running Hammerhead,
-then the following command would save the raw right images in the `raw_right_images` folder::
+## Usage
 
-    python image_recorder.py 127.0.0.1 9801 raw_right_images
+```bash
+python image_recorder.py <src_ip> <image_topic_or_port> <output_dir>
+```
 
-Alternatively, you can specify the topic name:
+### Parameters
 
-    python image_recorder.py 127.0.0.1 nodar/right/image_raw output_dir
+- `src_ip`: IP address of the ZMQ source (the device running Hammerhead)
+- `image_topic_or_port`: Topic name or port number for the image stream
+- `output_dir`: Folder where the images will be saved
 
-Note that the parameter `image_topic` should be one of the `IMAGE_TOPICS` in `topic_ports.py`.
-Furthermore, if you specify an incorrect IP address or run this example when Hammerhead is not running,
-then ZMQ will attempt to subscribe, and nothing will happen. It will appear like the binary is just waiting.
+### Examples
 
-To kill this example, just press CTRL+C.
+```bash
+# Record raw right images using port number
+python image_recorder.py 127.0.0.1 9801 raw_right_images
 
-Some currently valid image topic names are:
+# Record raw right images using topic name
+python image_recorder.py 127.0.0.1 nodar/right/image_raw output_dir
+```
 
-    nodar/color_blended_depth/image_raw
-    nodar/disparity
-    nodar/left/image_raw
-    nodar/left/image_rect
-    nodar/right/image_raw
-    nodar/right/image_rect
+## Available Camera Topics
+
+| Topic | Port | Description |
+|-------|------|-------------|
+| `nodar/left/image_raw` | 9800 | Raw left camera |
+| `nodar/right/image_raw` | 9801 | Raw right camera |
+| `nodar/left/image_rect` | 9802 | Rectified left image |
+| `nodar/right/image_rect` | 9803 | Rectified right image |
+| `nodar/disparity` | 9804 | Disparity map |
+| `nodar/color_blended_depth/image_raw` | 9805 | Color-coded depth visualization |
+
+## Output
+
+- **Format**: Image files
+- **Location**: Specified output directory
+- **Naming**: Sequential numbering based on received images
+
+## Features
+
+- Subscribe to any image topic published by Hammerhead
+- Support for both topic names and port numbers
+- Real-time recording with minimal latency
+
+## Troubleshooting
+
+- **No images received**: Check IP address and ensure Hammerhead is running
+- **Invalid topic**: Verify topic name exists in `topic_ports.py`
+- **Connection hanging**: ZMQ will wait indefinitely for connection - check network connectivity
+
+Press `Ctrl+C` to stop recording.

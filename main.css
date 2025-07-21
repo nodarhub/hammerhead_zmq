@@ -1,0 +1,12 @@
+footer {
+  display: none !important;
+}
+
+/* Make logo clickable to go home */
+.logo {
+  cursor: pointer;
+}
+
+.logo:hover {
+  opacity: 0.8;
+}

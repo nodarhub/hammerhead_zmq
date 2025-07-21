@@ -1,29 +1,71 @@
-This example shows how to subscribe to `ObstacleData` messages being sent by Hammerhead,
-and then save them as `.txt` files in the `obstacle_datas` folder.
-The header of each generated file contains information about the order of parameters.
+# Obstacle Data Recorder
 
-The obstacle data is represented in the XZ plane,
-where each obstacle is defined by a bounding box and a velocity vector.
-Because this data is only in the XZ plane, there is no concept of *top* and *bottom* planes.
-Similarly, the velocity vector does not have any vertical component (along what we would call the Y-axis).
+Record obstacle detection data from Hammerhead and save as text files.
 
-To build this example, follow the traditional CMake process:
+## Build
 
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build . --config Release
+```bash
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+```
 
-To run this example, you need to provide the IP address of the ZMQ source (the device running Hammerhead):
+## Usage
 
-    # Linux
-    ./obstacle_data_recorder src_ip
+```bash
+# Linux
+./obstacle_data_recorder <src_ip>
 
-    # Windows
-    ./Release/obstacle_data_recorder.exe src_ip
+# Windows
+./Release/obstacle_data_recorder.exe <src_ip>
+```
 
-Note that if you specify an incorrect IP address or run this example when Hammerhead is not running,
-then ZMQ will attempt to subscribe, and nothing will happen.
-It will appear like the binary is just waiting.
+### Parameters
 
-To kill this example, just press CTRL+C.
+- `src_ip`: IP address of the ZMQ source (the device running Hammerhead)
+
+### Examples
+
+```bash
+# Record obstacle data from local device
+./obstacle_data_recorder 127.0.0.1
+
+# Record obstacle data from remote device
+./obstacle_data_recorder 10.10.1.10
+```
+
+## Output
+
+- **Format**: Text files (.txt)
+- **Location**: `obstacle_datas` folder
+- **Naming**: Sequential numbering with timestamp information
+
+## Data Format
+
+The obstacle data is represented in the XZ plane, where each obstacle is defined by:
+
+- Bounding box coordinates
+- Velocity vector (no vertical Y-axis component)
+
+Each generated file contains:
+
+- Header with parameter order information
+- Obstacle bounding box data
+- Velocity vector data
+
+## Features
+
+- High-performance C++ implementation for real-time processing
+- Subscribe to `ObstacleData` messages from Hammerhead
+- Automatic text file generation with headers
+- Real-time obstacle data recording
+- XZ plane representation for 2D obstacle tracking
+
+## Troubleshooting
+
+- **No data received**: Check IP address and ensure Hammerhead is running
+- **Connection hanging**: ZMQ will wait indefinitely for connection - verify network connectivity
+- **Empty files**: Ensure Hammerhead is actively detecting obstacles
+
+Press `Ctrl+C` to stop recording.

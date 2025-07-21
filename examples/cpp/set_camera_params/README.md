@@ -1,20 +1,71 @@
-This example demonstrates how to modify the camera parameters in Hammerhead using ZMQ. Currently, we expose controls for the exposure and gain using a Request-Reply pattern. The topic names and ports used for this communication are defined in the `topic_ports.hpp` header.
+# Set Camera Parameters
 
-To build this example, follow the traditional CMake process:
+Modify camera parameters in Hammerhead using ZMQ Request-Reply pattern.
 
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build . --config Release
+## Build
 
-This will build 2 binaries: `set_exposure` and `set_gain`. To run either of these examples, you need to provide the IP address of the ZMQ source (the device running hammerhead):
+```bash
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+```
 
-    # Linux
-    ./set_exposure src_ip
+## Usage
 
-    # Windows
-    ./Release/set_exposure src_ip
+```bash
+# Linux
+./set_exposure <src_ip>
+./set_gain <src_ip>
 
-Note that if you specify an incorrect IP address or run this example when Hammerhead is not running, then ZMQ will attempt to subscribe, and nothing will happen. It will appear like the binary is just waiting.
+# Windows
+./Release/set_exposure.exe <src_ip>
+./Release/set_gain.exe <src_ip>
+```
 
-To kill this example, just press CTRL+C.
+### Parameters
+
+- `src_ip`: IP address of the ZMQ source (the device running Hammerhead)
+
+### Examples
+
+```bash
+# Set camera exposure
+# Use 127.0.0.1 if running on the same device as Hammerhead
+./set_exposure 127.0.0.1
+
+# Use the network IP address if running on a different device
+./set_exposure 10.10.1.10
+
+# Set camera gain
+./set_gain 10.10.1.10
+```
+
+## Output
+
+This example provides interactive control for:
+- Camera exposure settings
+- Camera gain settings
+
+## Features
+
+- High-performance C++ implementation for real-time parameter control
+- Request-Reply pattern for reliable parameter setting
+- Interactive exposure control
+- Interactive gain control
+- Real-time parameter adjustment
+
+## Available Controls
+
+- **Exposure**: Adjust camera exposure settings
+- **Gain**: Modify camera gain parameters
+
+The topic names and ports used for this communication are defined in the `topic_ports.hpp` header.
+
+## Troubleshooting
+
+- **No response**: Check IP address and ensure Hammerhead is running
+- **Connection hanging**: ZMQ will wait indefinitely for connection - verify network connectivity
+- **Parameter not applied**: Ensure Hammerhead is configured to accept parameter changes
+
+Press `Ctrl+C` to stop parameter control.

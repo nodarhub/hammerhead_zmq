@@ -1,18 +1,62 @@
-This example shows how to subscribe to `PointCloud` messages being sent by Hammerhead, 
-and then save them as `.ply` files in the `point_clouds` folder. 
-You can then open the `.ply` files in other programs, such as CloudCompare. 
-Note that due to the amount of bandwidth required, 
-you should think twice before enabling point cloud streaming in Hammerhead.
+# Point Cloud Recorder
 
-To run this example, you need to provide the IP address of the ZMQ source (the device running Hammerhead):
+Subscribe to point cloud messages and save them as PLY files for use in CloudCompare and other 3D software.
 
-    python point_cloud_recorder.py src_ip
+## Installation
 
-Note that if you specify an incorrect IP address or run this example when Hammerhead is not running, 
-then ZMQ will attempt to subscribe, and nothing will happen. 
-It will appear like the binary is just waiting.
+```bash
+pip install -e examples/python/point_cloud_recorder
+```
 
-To kill this example, just press CTRL+C.
+## Usage
 
-There is an additional example `point_cloud_rgb_recorder` demonstrating how to receive RGB point clouds. 
-However, the bandwidth requirements are even higher. Use with caution.
+```bash
+# Record standard point clouds
+python point_cloud_recorder.py <src_ip>
+
+# Record RGB point clouds (higher bandwidth)
+python point_cloud_rgb_recorder.py <src_ip>
+```
+
+### Parameters
+
+- `src_ip`: IP address of the device running Hammerhead
+
+### Examples
+
+```bash
+# Record point clouds from Hammerhead device
+# Use 127.0.0.1 if running on the same device as Hammerhead
+python point_cloud_recorder.py 127.0.0.1
+
+# Use the network IP address if running on a different device
+python point_cloud_recorder.py 10.10.1.10
+
+# Record RGB point clouds with color information
+python point_cloud_rgb_recorder.py 10.10.1.10
+```
+
+## Output
+
+- **Format**: PLY files saved in `point_clouds/` directory
+- **Naming**: Sequential numbering (e.g., `cloud_000001.ply`)
+- **Compatible with**: CloudCompare and other 3D visualization software
+
+## Features
+
+- Saves point clouds as PLY files
+- Support for both standard and RGB point clouds
+- Compatible with CloudCompare and other 3D visualization software
+- Progress tracking with timestamps
+
+## Bandwidth Warning
+
+**Important**: Point cloud streaming requires significant network bandwidth. RGB point clouds require even more.
+
+## Troubleshooting
+
+- **No files created**: Check that Hammerhead is running and point cloud streaming is enabled
+- **Connection timeout**: Verify network connectivity and firewall settings
+- **High bandwidth usage**: Consider using point cloud soup recorder for reduced bandwidth
+
+Press `Ctrl+C` to stop recording.
