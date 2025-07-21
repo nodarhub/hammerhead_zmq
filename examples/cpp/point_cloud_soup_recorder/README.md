@@ -15,24 +15,29 @@ cmake --build . --config Release
 
 ```bash
 # Linux
-./point_cloud_soup_recorder <src_ip>
+./point_cloud_soup_recorder [hammerhead_ip] [output_directory]
 
 # Windows
-./Release/point_cloud_soup_recorder.exe <src_ip>
+./Release/point_cloud_soup_recorder.exe [hammerhead_ip] [output_directory]
 ```
 
 ### Parameters
 
-- `src_ip`: IP address of the ZMQ source (the device running Hammerhead)
+- `hammerhead_ip`: IP address of the device running Hammerhead (default: 127.0.0.1)
+- `output_directory`: Directory to save PLY files (default: point_clouds folder)
 
 ### Examples
 
 ```bash
-# Record point clouds from local device
-./point_cloud_soup_recorder 127.0.0.1
+# Record point clouds from local device (default)
+./point_cloud_soup_recorder
 
-# Record point clouds from remote device
-./point_cloud_soup_recorder 10.10.1.10
+# Record point clouds from local device with custom output directory
+./point_cloud_soup_recorder 127.0.0.1 /tmp/ply_output
+
+# Record point clouds from remote device with custom output directory
+./point_cloud_soup_recorder 10.10.1.10 /tmp/ply_output
+
 ```
 
 ## Output
