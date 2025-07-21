@@ -13,7 +13,9 @@ namespace zmq {
 
 class TopbotPublisher {
 public:
-    explicit TopbotPublisher(const uint16_t& port) : publisher(Topic{"external/topbot_raw", port}, "") {}
+    explicit TopbotPublisher(const uint16_t& port) : publisher(Topic{"external/topbot_raw", port}, "") {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 
     bool publishImage(const cv::Mat& img, const uint64_t& timestamp, const uint64_t& frame_id,
                       const uint8_t cvt_to_bgr_code) {
