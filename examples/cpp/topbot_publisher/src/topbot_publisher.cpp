@@ -10,7 +10,7 @@
 #include "get_files.hpp"
 #include "nodar/zmq/topic_ports.hpp"
 
-constexpr auto FRAME_RATE = 10;
+constexpr auto FRAME_RATE = 5;
 std::atomic_bool running{true};
 
 void signalHandler(int) {
@@ -99,21 +99,19 @@ int main(int argc, char* argv[]) {
     nodar::zmq::TopbotPublisher publisher(port);
     auto frame_id = 0;
 
-    while (running) {
-        for (const auto& file : image_files) {
-            if (!running)
-                break;
-            const auto img = cv::imread(file, cv::IMREAD_UNCHANGED);
-            const auto timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                       std::chrono::system_clock::now().time_since_epoch())
-                                       .count();
-            if (publisher.publishImage(img, timestamp, frame_id, cvt_to_bgr_code)) {
-                std::cout << "Published frame " << frame_id << " from " << file << std::endl;
-                frame_id++;
-            }
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000 / FRAME_RATE));
+    for (const auto& file : image_files) {
+        if (!running)
+            break;
+        const auto img = cv::imread(file, cv::IMREAD_UNCHANGED);
+        const auto timestamp =
+            std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch())
+                .count();
+        if (publisher.publishImage(img, timestamp, frame_id, cvt_to_bgr_code)) {
+            std::cout << "Published frame " << frame_id << " from " << file << std::endl;
+            frame_id++;
         }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / FRAME_RATE));
     }
 
     std::cout << "Publisher stopped." << std::endl;

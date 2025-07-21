@@ -1,4 +1,5 @@
 import os
+import signal
 import sys
 import time
 from datetime import datetime
@@ -7,7 +8,7 @@ import cv2
 import numpy as np
 import zmq
 
-FRAME_RATE = 10
+FRAME_RATE = 5
 
 try:
     from zmq_msgs.image import StampedImage
@@ -18,6 +19,14 @@ except ImportError:
     )
     from zmq_msgs.image import StampedImage
     from zmq_msgs.topic_ports import get_reserved_ports
+
+# Global variable for signal handling
+running = True
+
+def signal_handler(signum, frame):
+    global running
+    print("\nSIGINT or SIGTERM received. Exiting...", file=sys.stderr)
+    running = False
 
 PIXEL_FORMAT_MAP = {
     "BGR": StampedImage.COLOR_CONVERSION.BGR2BGR,
@@ -45,6 +54,7 @@ class Publisher:
 class TopbotPublisher:
     def __init__(self, port):
         self.publisher = Publisher("external/topbot_raw", "", port)
+        time.sleep(1)
 
     def publish_image(self, img, timestamp, frame_id, cvt_to_bgr_code):
         stamped_image = StampedImage(timestamp, frame_id, cvt_to_bgr_code, img)
@@ -83,6 +93,12 @@ def parse_pixel_format(format_str):
 
 
 def main():
+    global running
+    
+    # Setup signal handlers
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
     if len(sys.argv) < 3 or len(sys.argv) > 4:
         print("Usage: topbot_publisher <topbot_data_directory> <port_number> [pixel_format]")
         print("Supported pixel formats: " + ", ".join(PIXEL_FORMAT_MAP.keys()))
@@ -112,42 +128,46 @@ def main():
 
     publisher = TopbotPublisher(port)
     frame_id = 0
-    while True:
-        for file in image_files:
-            # Load the image
-            img = cv2.imread(file, cv2.IMREAD_UNCHANGED)
-            if img is None:
-                print(f"Failed to load image: {file}")
+    
+    for file in image_files:
+        if not running:
+            break
+        # Load the image
+        img = cv2.imread(file, cv2.IMREAD_UNCHANGED)
+        if img is None:
+            print(f"Failed to load image: {file}")
+            continue
+
+        # Check that the image is loaded in the format expected by cvt_to_bgr_code.
+        # If using a different format, then add your checks
+        if cvt_to_bgr_code == StampedImage.COLOR_CONVERSION.BGR2BGR:
+            if img.ndim != 3 or img.shape[2] != 3:
+                print(f"[ERROR] Image {file} does not have 3 channels for BGR2BGR")
+                continue
+            if img.dtype not in [np.uint8, np.uint16]:
+                print(f"[ERROR] Unsupported dtype in {file}: {img.dtype}")
+                continue
+        elif cvt_to_bgr_code in [
+            cv2.COLOR_BayerBG2BGR,
+            cv2.COLOR_BayerGB2BGR,
+            cv2.COLOR_BayerRG2BGR,
+            cv2.COLOR_BayerGR2BGR,
+        ]:
+            if img.ndim != 2:
+                print(f"[ERROR] Image {file} is expected to be single-channel for Bayer format")
+                continue
+            if img.dtype not in [np.uint8, np.uint16]:
+                print(f"[ERROR] Unsupported dtype in {file}: {img.dtype}")
                 continue
 
-            # Check that the image is loaded in the format expected by cvt_to_bgr_code.
-            # If using a different format, then add your checks
-            if cvt_to_bgr_code == StampedImage.COLOR_CONVERSION.BGR2BGR:
-                if img.ndim != 3 or img.shape[2] != 3:
-                    print(f"[ERROR] Image {file} does not have 3 channels for BGR2BGR")
-                    continue
-                if img.dtype not in [np.uint8, np.uint16]:
-                    print(f"[ERROR] Unsupported dtype in {file}: {img.dtype}")
-                    continue
-            elif cvt_to_bgr_code in [
-                cv2.COLOR_BayerBG2BGR,
-                cv2.COLOR_BayerGB2BGR,
-                cv2.COLOR_BayerRG2BGR,
-                cv2.COLOR_BayerGR2BGR,
-            ]:
-                if img.ndim != 2:
-                    print(f"[ERROR] Image {file} is expected to be single-channel for Bayer format")
-                    continue
-                if img.dtype not in [np.uint8, np.uint16]:
-                    print(f"[ERROR] Unsupported dtype in {file}: {img.dtype}")
-                    continue
-
-            # Ready to publish
-            timestamp = int(datetime.now().timestamp() * 1e9)
-            if publisher.publish_image(img, timestamp, frame_id, cvt_to_bgr_code):
-                print(f"Published frame {frame_id} from {file}")
-                frame_id += 1
-            time.sleep(1 / FRAME_RATE)
+        # Ready to publish
+        timestamp = int(datetime.now().timestamp() * 1e9)
+        if publisher.publish_image(img, timestamp, frame_id, cvt_to_bgr_code):
+            print(f"Published frame {frame_id} from {file}")
+            frame_id += 1
+        time.sleep(1 / FRAME_RATE)
+    
+    print("Publisher stopped.")
 
 
 if __name__ == "__main__":

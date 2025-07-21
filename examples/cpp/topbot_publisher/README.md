@@ -41,7 +41,7 @@ cmake --build . --config Release
 
 - High-performance C++ implementation for real-time streaming
 - Publish pre-recorded stereo image pairs to Hammerhead
-- Sequential playback of numbered image sequences
+- Single-pass playback of numbered image sequences (no looping)
 - ZMQ-based communication for minimal latency
 - Multiple pixel format support
 

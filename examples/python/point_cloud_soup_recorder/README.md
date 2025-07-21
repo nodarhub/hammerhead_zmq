@@ -11,28 +11,32 @@ pip install -e examples/python/point_cloud_soup_recorder
 ## Usage
 
 ```bash
-python point_cloud_soup_recorder.py <src_ip>
+python point_cloud_soup_recorder.py [hammerhead_ip] [output_directory]
 ```
 
 ### Parameters
 
-- `src_ip`: IP address of the ZMQ source (the device running Hammerhead)
+- `hammerhead_ip`: IP address of the device running Hammerhead (default: 127.0.0.1)
+- `output_directory`: Directory to save PLY files (default: point_clouds folder)
 
 ### Examples
 
 ```bash
-# Record point clouds from local device
-python point_cloud_soup_recorder.py 127.0.0.1
+# Record point clouds from local device (default)
+python point_cloud_soup_recorder.py
 
-# Record point clouds from remote device
-python point_cloud_soup_recorder.py 10.10.1.10
+# Record point clouds from local device with custom output directory
+python point_cloud_soup_recorder.py 127.0.0.1 /tmp/ply_output
+
+# Record point clouds from remote device with custom output directory
+python point_cloud_soup_recorder.py 10.10.1.10 /tmp/ply_output
 ```
 
 ## Output
 
 - **Format**: PLY files (.ply)
-- **Location**: Current working directory
-- **Naming**: Sequential numbering based on received messages
+- **Location**: `point_clouds` folder (or specified directory)
+- **Naming**: Sequential numbering based on frame IDs from messages
 
 ## Features
 

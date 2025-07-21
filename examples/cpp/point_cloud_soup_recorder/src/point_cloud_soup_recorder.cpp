@@ -145,8 +145,8 @@ private:
 
 void printUsage(const std::string &default_ip) {
     std::cout << "You should specify the IP address of the device running hammerhead:\n\n"
-                 "     ./point_cloud_soup_recorder hammerhead_ip\n\n"
-                 "e.g. ./point_cloud_soup_recorder 192.168.1.9\n\n"
+                 "     ./point_cloud_soup_recorder [hammerhead_ip] [output_directory]\n\n"
+                 "e.g. ./point_cloud_soup_recorder 10.10.1.10 /tmp/ply_output\n\n"
                  "In the meantime, we assume that you are running this on the device running Hammerhead,\n"
                  "that is, we assume that you specified\n\n"
                  "     ./point_cloud_soup_recorder "
@@ -164,8 +164,13 @@ int main(int argc, char *argv[]) {
     const auto ip = argc > 1 ? argv[1] : default_ip;
     const auto endpoint = std::string("tcp://") + ip + ":" + std::to_string(topic.port);
 
-    const auto HERE = std::filesystem::path(__FILE__).parent_path();
-    const auto output_dir = HERE / "point_clouds";
+    std::filesystem::path output_dir;
+    if (argc > 2) {
+        output_dir = argv[2];
+    } else {
+        const auto HERE = std::filesystem::path(__FILE__).parent_path();
+        output_dir = HERE / "point_clouds";
+    }
     std::filesystem::create_directories(output_dir);
 
     PointCloudSink sink(output_dir, endpoint);
