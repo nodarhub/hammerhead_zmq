@@ -10,17 +10,15 @@ import zmq
 
 FRAME_RATE = 5
 
-import zmq_msgs.image
 try:
     from zmq_msgs.image import StampedImage
     from zmq_msgs.topic_ports import get_reserved_ports
 except ImportError:
-    pass
-    # sys.path.append(
-    #     os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../zmq_msgs/python"))
-    # )
-    # from zmq_msgs.image import StampedImage
-    # from zmq_msgs.topic_ports import get_reserved_ports
+    sys.path.append(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../zmq_msgs/python"))
+    )
+    from zmq_msgs.image import StampedImage
+    from zmq_msgs.topic_ports import get_reserved_ports
 
 # Global variable for signal handling
 running = True
@@ -60,10 +58,8 @@ class TopbotPublisher:
 
     def publish_image(self, img, timestamp, frame_id, cvt_to_bgr_code):
         stamped_image = StampedImage(timestamp, frame_id, cvt_to_bgr_code, img)
-        stamped_image.additional_field = b"haha"
         buffer = bytearray(stamped_image.msg_size())
         stamped_image.write(buffer, 0)
-        print(buffer[:64])
         self.publisher.send(buffer)
         return True
 
