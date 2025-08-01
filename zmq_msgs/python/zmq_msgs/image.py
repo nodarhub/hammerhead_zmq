@@ -86,13 +86,27 @@ class StampedImage:
         self.frame_id = frame_id
         self.cvt_to_bgr_code = cvt_to_bgr_code
         self.img: np.ndarray = img
-        self.additional_field: bytearray = bytearray()
+        self._additional_field: bytearray = bytearray()
 
     def info(self) -> MessageInfo:
         return MessageInfo(0)
 
     def msg_size(self):
-        return StampedImage.HEADER_SIZE + self.img.nbytes + len(self.additional_field)
+        return StampedImage.HEADER_SIZE + self.img.nbytes + len(self._additional_field)
+
+    @property
+    def additional_field(self) -> bytearray:
+        """Returns the additional field as a bytearray."""
+        return self._additional_field
+
+    @additional_field.setter
+    def additional_field(self, value: bytearray | bytes):
+        """Sets the additional field to a bytearray."""
+        if isinstance(value, bytes):
+            value = bytearray(value)
+        if not isinstance(value, bytearray):
+            raise TypeError("Additional field must be a bytearray or bytes.")
+        self._additional_field = value
 
     def read(self, buffer: bytes, original_offset: int = 0):
         msg_info = MessageInfo()
@@ -129,7 +143,7 @@ class StampedImage:
         offset += self.img.nbytes
 
         # Read the additional field
-        self.additional_field = bytearray(buffer[offset:offset + n_additional])
+        self._additional_field = bytearray(buffer[offset:offset + n_additional])
         offset += n_additional
 
         assert offset == original_offset + self.msg_size()
@@ -163,7 +177,7 @@ class StampedImage:
             cols,
             encode_cv_type(channels, img.dtype),
             cvt_to_bgr_code,
-            len(self.additional_field),
+            len(self._additional_field),
         )
         offset = original_offset + StampedImage.HEADER_SIZE
 
@@ -172,8 +186,8 @@ class StampedImage:
         offset += img.nbytes
 
         # Write additional field
-        buffer[offset : offset + len(self.additional_field)] = self.additional_field
-        offset += len(self.additional_field)
+        buffer[offset : offset + len(self._additional_field)] = self._additional_field
+        offset += len(self._additional_field)
 
         assert offset == original_offset + self.msg_size()
         return original_offset + self.msg_size()
