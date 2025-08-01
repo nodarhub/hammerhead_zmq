@@ -55,7 +55,7 @@ struct StampedImage {
           cols(cols_arg),
           type(type_arg),
           cvt_to_bgr_code(cvt_to_bgr_code_arg),
-          img(data, data + dataSize()) {}
+          img(data, data + dataSize(rows_arg, cols_arg, type_arg)) {}
 
     explicit StampedImage(const uint8_t *src) {
         // The message has a header, followed by the image data
