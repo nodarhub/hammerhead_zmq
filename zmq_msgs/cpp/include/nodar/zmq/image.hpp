@@ -89,14 +89,15 @@ struct StampedImage {
         header = utils::read(header, additional_field_size);
 
         // Copy the image data
-        img = std::vector<uint8_t>(data, data + dataSize());
+        const auto image_data_size = StampedImage::dataSize(rows, cols, type, 0);
+        img = std::vector<uint8_t>(data, data + image_data_size);
 
         if (additional_field_size > 1024) {
             std::cerr << "According to the message, the additional field has exceeded the maximum size of 1024 bytes. "
                       << "We are ignoring this message so that you don't run out of memory." << std::endl;
         } else if (additional_field_size > 0) {
             // Copy the additional field, if it exists
-            const auto additional_data = data + dataSize();
+            const auto additional_data = data + image_data_size;
             additional_field = std::vector<uint8_t>(additional_data, additional_data + additional_field_size);
         } else {
             // initialize an empty additional field
