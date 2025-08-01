@@ -80,6 +80,7 @@ class StampedImage:
         UNSPECIFIED = 255
 
     HEADER_SIZE = 64
+    HEADER_STRUCT_FORMAT = "=QQIIIBH"
 
     def __init__(self, time=0, frame_id=0, cvt_to_bgr_code=COLOR_CONVERSION.UNSPECIFIED, img=None):
         self.time = time
@@ -114,7 +115,7 @@ class StampedImage:
         if msg_info.is_different(self.info(), "StampedImage"):
             return None
 
-        unpacked = struct.unpack_from("QQIIIBH", buffer, offset)
+        unpacked = struct.unpack_from(self.HEADER_STRUCT_FORMAT, buffer, offset)
         self.time = unpacked[0]
         self.frame_id = unpacked[1]
         rows = unpacked[2]
@@ -168,7 +169,7 @@ class StampedImage:
         # Write header
         offset = self.info().write(buffer, original_offset)
         struct.pack_into(
-            "QQIIIBH",
+            self.HEADER_STRUCT_FORMAT,
             buffer,
             offset,
             time,
