@@ -3,7 +3,7 @@ import struct
 
 class MessageInfo:
     MAJOR_VERSION = 0
-    MINOR_VERSION = 1
+    MINOR_VERSION = 2
 
     def __init__(self, message_type=-1):  # -1 denotes INVALID
         self.message_type = message_type
