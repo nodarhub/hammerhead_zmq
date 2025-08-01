@@ -85,30 +85,38 @@ class StampedImage:
         self.time = time
         self.frame_id = frame_id
         self.cvt_to_bgr_code = cvt_to_bgr_code
-        self.img = img
+        self.img: np.ndarray = img
+        self.additional_field: bytearray = bytearray()
 
-    def info(self):
+    def info(self) -> MessageInfo:
         return MessageInfo(0)
 
     def msg_size(self):
-        return StampedImage.HEADER_SIZE + self.img.nbytes
+        return StampedImage.HEADER_SIZE + self.img.nbytes + len(self.additional_field)
 
-    def read(self, buffer, original_offset=0):
+    def read(self, buffer: bytes, original_offset: int = 0):
         msg_info = MessageInfo()
         offset = msg_info.read(buffer, original_offset)
         if msg_info.is_different(self.info(), "StampedImage"):
             return None
 
-        self.time, self.frame_id, rows, cols, cv_type, self.cvt_to_bgr_code = struct.unpack_from(
-            "QQIIIB", buffer, offset
-        )
+        unpacked = struct.unpack_from("QQIIIBH", buffer, offset)
+        self.time = unpacked[0]
+        self.frame_id = unpacked[1]
+        rows = unpacked[2]
+        cols = unpacked[3]
+        cv_type = unpacked[4]
+        self.cvt_to_bgr_code = unpacked[5]
+        n_additional = unpacked[6]
+
         if rows * cols > 1e8:
             print(
                 "According to the message, the image has the impossibly large of dimensions "
                 f"{rows} x {cols}. "
                 "We are ignoring this message so that you don't run out of memory."
             )
-            return
+            return None
+        offset = original_offset + StampedImage.HEADER_SIZE
 
         # Convert opencv type to something more understandable
         channels, dtype = decode_cv_type(cv_type)
@@ -116,11 +124,18 @@ class StampedImage:
             buffer,
             dtype=dtype,
             count=rows * cols * channels,
-            offset=original_offset + StampedImage.HEADER_SIZE,
+            offset=offset,
         ).reshape(rows, cols, channels)
+        offset += self.img.nbytes
+
+        # Read the additional field
+        self.additional_field = bytearray(buffer[offset:offset + n_additional])
+        offset += n_additional
+
+        assert offset == original_offset + self.msg_size()
         return original_offset + self.msg_size()
 
-    def write(self, buffer, original_offset):
+    def write(self, buffer: bytearray, original_offset: int):
         time, frame_id, cvt_to_bgr_code, img = (
             self.time,
             self.frame_id,
@@ -134,10 +149,12 @@ class StampedImage:
             rows, cols, channels = img.shape
         else:
             print("Cannot write this image, it has either <2 dimensions, or >3 dimensions")
-            return
+            return None
+
+        # Write header
         offset = self.info().write(buffer, original_offset)
         struct.pack_into(
-            "QQIIIB",
+            "QQIIIBH",
             buffer,
             offset,
             time,
@@ -146,7 +163,17 @@ class StampedImage:
             cols,
             encode_cv_type(channels, img.dtype),
             cvt_to_bgr_code,
+            len(self.additional_field),
         )
         offset = original_offset + StampedImage.HEADER_SIZE
+
+        # Write image data
         buffer[offset : offset + img.nbytes] = img.tobytes()
+        offset += img.nbytes
+
+        # Write additional field
+        buffer[offset : offset + len(self.additional_field)] = self.additional_field
+        offset += len(self.additional_field)
+
+        assert offset == original_offset + self.msg_size()
         return original_offset + self.msg_size()
