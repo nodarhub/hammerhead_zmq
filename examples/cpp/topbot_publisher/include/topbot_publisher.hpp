@@ -29,9 +29,9 @@ public:
         }
 
         auto buffer = publisher.getBuffer();
-        buffer->resize(nodar::zmq::StampedImage::msgSize(img.rows, img.cols, img.type()));
+        buffer->resize(nodar::zmq::StampedImage::msgSize(img.rows, img.cols, img.type(), 0));
         nodar::zmq::StampedImage::write(buffer->data(), timestamp, frame_id, img.rows, img.cols, img.type(),
-                                        cvt_to_bgr_code, img.data);
+                                        cvt_to_bgr_code, img.data, 0);
         publisher.send(buffer);
         return true;
     }
