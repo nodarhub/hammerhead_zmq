@@ -1,3 +1,4 @@
+import argparse
 import os
 import signal
 import sys
@@ -92,43 +93,60 @@ def parse_pixel_format(format_str):
     return PIXEL_FORMAT_MAP[format_str]
 
 
+def argument_parsing():
+    parser = argparse.ArgumentParser(description="Topbot Publisher")
+    parser.add_argument(
+        "topbot_data_directory",
+        help="Path to the topbot data directory"
+    )
+    parser.add_argument(
+        "port_number",
+        type=int,
+        help="Port number to publish the data on"
+    )
+    parser.add_argument(
+        "pixel_format",
+        nargs="?",
+        default="BGR",
+        choices=PIXEL_FORMAT_MAP.keys(),
+        help=(
+            "Optional pixel format after loaded by OpenCV (default: BGR)."
+            f" Valid choice: {list(PIXEL_FORMAT_MAP.keys())}"
+        ),
+        metavar="pixel_format",
+    )
+
+    return parser.parse_args()
+
+
 def main():
     global running
-    
+    args = argument_parsing()
+
     # Setup signal handlers
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    
-    if len(sys.argv) < 3 or len(sys.argv) > 4:
-        print("Usage: topbot_publisher <topbot_data_directory> <port_number> [pixel_format]")
-        print("Supported pixel formats: " + ", ".join(PIXEL_FORMAT_MAP.keys()))
-        return
 
-    image_dir = sys.argv[1]
+    image_dir = args.topbot_data_directory
     image_files = get_files(image_dir, ".tiff")
     if not image_files:
         print("No images found in folder.")
         return
 
-    try:
-        port = int(sys.argv[2])
-    except ValueError:
-        print("Invalid port number. Please provide an integer value.")
-        return
+    port = args.port_number
     if not is_valid_port(port):
+        print("Invalid port number.")
         return
 
     # Parse pixel format
-    cvt_to_bgr_code = PIXEL_FORMAT_MAP["BGR"]
-    if len(sys.argv) == 4:
-        pixel_format = sys.argv[3]
-        cvt_to_bgr_code = parse_pixel_format(pixel_format)
-        if cvt_to_bgr_code is None:
-            return
+    cvt_to_bgr_code = PIXEL_FORMAT_MAP[args.pixel_format]
+    if cvt_to_bgr_code is None:
+        print("Invalid pixel format specified.")
+        return
 
     publisher = TopbotPublisher(port)
     frame_id = 0
-    
+
     for file in image_files:
         if not running:
             break
