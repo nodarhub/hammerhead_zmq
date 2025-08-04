@@ -1,12 +1,16 @@
 import argparse
 import os
 import signal
+import struct
 import sys
 import time
+import uuid
 from datetime import datetime
 
 import cv2
 import numpy as np
+import numpy.typing as npt
+import yaml
 import zmq
 
 FRAME_RATE = 5
@@ -57,8 +61,25 @@ class TopbotPublisher:
         self.publisher = Publisher("external/topbot_raw", "", port)
         time.sleep(1)
 
-    def publish_image(self, img, timestamp, frame_id, cvt_to_bgr_code):
+    def publish_image(
+        self,
+        img: npt.NDArray,
+        timestamp: int,
+        frame_id: int,
+        cvt_to_bgr_code: StampedImage.COLOR_CONVERSION,
+        extrinsics: dict | None = None,
+    ):
         stamped_image = StampedImage(timestamp, frame_id, cvt_to_bgr_code, img)
+        if extrinsics is not None:
+            attached_extrinsics(
+                stamped_image,
+                extrinsics["euler_x_deg"],
+                extrinsics["euler_y_deg"],
+                extrinsics["euler_z_deg"],
+                extrinsics["Tx"],
+                extrinsics["Ty"],
+                extrinsics["Tz"],
+            )
         buffer = bytearray(stamped_image.msg_size())
         stamped_image.write(buffer, 0)
         self.publisher.send(buffer)
@@ -115,8 +136,41 @@ def argument_parsing():
         ),
         metavar="pixel_format",
     )
-
+    parser.add_argument(
+        "--extr",
+        required=False,
+        default=None,
+        help="Optional path to the folder containing per-frame extrinsics files"
+    )
     return parser.parse_args()
+
+
+def get_one_extrinsiscs(image_file_path: str, extrinsics_dir: str) -> dict | None:
+    if not os.path.exists(extrinsics_dir):
+        print("The provided extrinsics directory does not exist:", extrinsics_dir)
+        return None
+
+    file_name_number_part = os.path.splitext(os.path.basename(image_file_path))[0]
+    extrinsics_file = os.path.join(extrinsics_dir, file_name_number_part + ".yaml")
+    if not os.path.exists(extrinsics_file):
+        return None
+
+    with open(extrinsics_file, 'r') as f:
+        extrinsics = yaml.safe_load(f)
+    for k in ["euler_x_deg", "euler_y_deg", "euler_z_deg", "Tx", "Ty", "Tz"]:
+        if k not in extrinsics:
+            print(f"Missing key '{k}' in extrinsics file: {extrinsics_file}")
+            return None
+    return extrinsics
+
+
+def attached_extrinsics(
+    stamped_image: StampedImage, euler_x_deg, euler_y_deg, euler_z_deg, tx, ty, tz
+) -> None:
+    stamped_image.additional_field = (
+        uuid.UUID("2c5e9c77-a730-42ce-ac21-c33e26793bcb").bytes
+        + struct.pack("=dddddd", euler_x_deg, euler_y_deg, euler_z_deg, tx, ty, tz)
+    )
 
 
 def main():
@@ -143,6 +197,8 @@ def main():
     if cvt_to_bgr_code is None:
         print("Invalid pixel format specified.")
         return
+
+    extrinsics_dir = args.extr
 
     publisher = TopbotPublisher(port)
     frame_id = 0
@@ -178,9 +234,12 @@ def main():
                 print(f"[ERROR] Unsupported dtype in {file}: {img.dtype}")
                 continue
 
+        # Check extrinsics if provided
+        extrinsics = get_one_extrinsiscs(file, extrinsics_dir) if extrinsics_dir else None
+
         # Ready to publish
         timestamp = int(datetime.now().timestamp() * 1e9)
-        if publisher.publish_image(img, timestamp, frame_id, cvt_to_bgr_code):
+        if publisher.publish_image(img, timestamp, frame_id, cvt_to_bgr_code, extrinsics):
             print(f"Published frame {frame_id} from {file}")
             frame_id += 1
         time.sleep(1 / FRAME_RATE)
