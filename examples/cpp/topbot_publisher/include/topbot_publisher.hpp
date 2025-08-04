@@ -42,6 +42,12 @@ public:
             return false;
         }
 
+        if (!img.isContinuous()) {
+            // Check if the image is continuous
+            std::cerr << "The image is not continuous in memory layout. Currently support continuous images only." << std::endl;
+            return false;
+        }
+
         auto additional_field =
             extrinsics.has_value() ? makeExtrinsicsMessage(extrinsics.value()) : std::vector<uint8_t>{};
 
