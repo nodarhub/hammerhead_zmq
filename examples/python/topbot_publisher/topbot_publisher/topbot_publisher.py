@@ -199,6 +199,8 @@ def main():
         return
 
     extrinsics_dir = args.extr
+    if extrinsics_dir:
+        print("Using extrinsics from:", extrinsics_dir)
 
     publisher = TopbotPublisher(port)
     frame_id = 0
@@ -240,7 +242,10 @@ def main():
         # Ready to publish
         timestamp = int(datetime.now().timestamp() * 1e9)
         if publisher.publish_image(img, timestamp, frame_id, cvt_to_bgr_code, extrinsics):
-            print(f"Published frame {frame_id} from {file}")
+            print(
+                f"Published frame {frame_id} from {file}"
+                + (" with extrinsics" if extrinsics else "")
+            )
             frame_id += 1
         time.sleep(1 / FRAME_RATE)
     
