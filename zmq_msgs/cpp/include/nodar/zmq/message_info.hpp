@@ -11,7 +11,7 @@ namespace zmq {
 
 struct MessageInfo {
     static constexpr uint8_t MAJOR_VERSION = 0;
-    static constexpr uint8_t MINOR_VERSION = 1;
+    static constexpr uint8_t MINOR_VERSION = 2;
 
     uint16_t message_type = 0;
     uint8_t major_version = MAJOR_VERSION;

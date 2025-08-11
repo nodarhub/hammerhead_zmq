@@ -55,8 +55,8 @@ struct PointCloudSoup {
                                                     uint32_t disparity_type_) {
         return sizeof(INFO) + sizeof(baseline) + sizeof(focal_length) + sizeof(time) + sizeof(frame_id) +
                disparity_to_depth4x4_bytes + rotation_disparity_to_raw_cam_bytes + rotation_world_to_raw_cam_bytes +
-               StampedImage::msgSize(rows_, cols_, rectified_type_) +
-               StampedImage::msgSize(rows_, cols_, disparity_type_);
+               StampedImage::msgSize(rows_, cols_, rectified_type_, 0) +
+               StampedImage::msgSize(rows_, cols_, disparity_type_, 0);
     }
 
     [[nodiscard]] bool empty() const { return rectified.empty() or disparity.empty(); }
@@ -147,8 +147,8 @@ struct PointCloudSoup {
                            rotation_world_to_raw_cam_,  //
                            rows_,  //
                            cols_);
-        dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, rectified_type_, rectified_data_);
-        dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, disparity_type_, disparity_data_);
+        dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, rectified_type_, rectified_data_, 0);
+        dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, disparity_type_, disparity_data_, 0);
         return dst;
     }
 
