@@ -8,7 +8,10 @@ LEFT_RAW_TOPIC = Topic("nodar/left/image_raw", 9800)
 RIGHT_RAW_TOPIC = Topic("nodar/right/image_raw", 9801)
 LEFT_RECT_TOPIC = Topic("nodar/left/image_rect", 9802)
 RIGHT_RECT_TOPIC = Topic("nodar/right/image_rect", 9803)
-DISPARITY_TOPIC = Topic("nodar/disparity", 9804)
+LEFT_DISPARITY_TOPIC = Topic("nodar/disparity", 9804)
+RIGHT_DISPARITY_TOPIC = Topic("nodar/right/disparity", 9815)
+LEFT_CONFIDENCE_TOPIC = Topic("nodar/left/confidence", 9816)
+RIGHT_CONFIDENCE_TOPIC = Topic("nodar/right/confidence", 9817)
 COLOR_BLENDED_DEPTH_TOPIC = Topic("nodar/color_blended_depth/image_raw", 9805)
 TOPBOT_RAW_TOPIC = Topic("nodar/topbot_raw", 9813)
 
@@ -18,9 +21,12 @@ IMAGE_TOPICS = [
     RIGHT_RAW_TOPIC,
     LEFT_RECT_TOPIC,
     RIGHT_RECT_TOPIC,
-    DISPARITY_TOPIC,
+    LEFT_DISPARITY_TOPIC,
+    RIGHT_DISPARITY_TOPIC,
     COLOR_BLENDED_DEPTH_TOPIC,
     TOPBOT_RAW_TOPIC,
+    LEFT_CONFIDENCE_TOPIC,
+    RIGHT_CONFIDENCE_TOPIC,
 ]
 
 # Define other topics as individual Topic objects
