@@ -16,18 +16,25 @@ constexpr Topic LEFT_RAW_TOPIC{"nodar/left/image_raw", 9800};
 constexpr Topic RIGHT_RAW_TOPIC{"nodar/right/image_raw", 9801};
 constexpr Topic LEFT_RECT_TOPIC{"nodar/left/image_rect", 9802};
 constexpr Topic RIGHT_RECT_TOPIC{"nodar/right/image_rect", 9803};
-constexpr Topic DISPARITY_TOPIC{"nodar/disparity", 9804};
+constexpr Topic LEFT_DISPARITY_TOPIC{"nodar/disparity", 9804}; // Left unchanged to maintain compatibility
+constexpr Topic RIGHT_DISPARITY_TOPIC{"nodar/right/disparity", 9815};
+constexpr Topic LEFT_CONFIDENCE_TOPIC{"nodar/left/confidence", 9816};
+constexpr Topic RIGHT_CONFIDENCE_TOPIC{"nodar/right/confidence", 9817};
 constexpr Topic COLOR_BLENDED_DEPTH_TOPIC{"nodar/color_blended_depth/image_raw", 9805};
 constexpr Topic TOPBOT_RAW_TOPIC{"nodar/topbot_raw", 9813};
 
-constexpr std::array<Topic, 7> IMAGE_TOPICS{{LEFT_RAW_TOPIC,  //
-                                             RIGHT_RAW_TOPIC,  //
-                                             LEFT_RECT_TOPIC,  //
-                                             RIGHT_RECT_TOPIC,  //
-                                             DISPARITY_TOPIC,  //
-                                             COLOR_BLENDED_DEPTH_TOPIC,  //
-                                             TOPBOT_RAW_TOPIC}};
-
+constexpr std::array<Topic, 10> IMAGE_TOPICS{{
+    LEFT_RAW_TOPIC,  //
+    RIGHT_RAW_TOPIC,  //
+    LEFT_RECT_TOPIC,  //
+    RIGHT_RECT_TOPIC,  //
+    LEFT_DISPARITY_TOPIC,  //
+    RIGHT_DISPARITY_TOPIC,  //
+    COLOR_BLENDED_DEPTH_TOPIC,  //
+    TOPBOT_RAW_TOPIC,  //
+    LEFT_CONFIDENCE_TOPIC,  //
+    RIGHT_CONFIDENCE_TOPIC  //
+}};
 constexpr Topic SOUP_TOPIC{"nodar/point_cloud_soup", 9806};
 
 constexpr Topic CAMERA_EXPOSURE_TOPIC{"nodar/set_exposure", 9807};
