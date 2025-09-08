@@ -95,7 +95,7 @@ def print_usage(default_ip):
     print(
         "You should specify the IP address of the device running hammerhead:\n\n"
         "     python qa_findings_viewer.py hammerhead_ip\n\n"
-        "e.g. python qa_findings_viewer.py 192.168.1.9\n\n"
+        "e.g. python qa_findings_viewer.py 10.10.1.10\n\n"
         "In the meantime, we assume that you are running this on the device running Hammerhead:\n\n"
         f"     python qa_findings_viewer.py {default_ip}\n"
         "\n----------------------------------------"

@@ -123,7 +123,7 @@ public:
 void printUsage(const std::string& default_ip) {
     std::cout << "You should specify the IP address of the device running hammerhead:\n\n"
                  "     ./qa_findings_viewer hammerhead_ip\n\n"
-                 "e.g. ./qa_findings_viewer 192.168.1.9\n\n"
+                 "e.g. ./qa_findings_viewer 10.10.1.10\n\n"
                  "In the meantime, we assume that you are running this on the device running Hammerhead:\n\n"
                  "     ./qa_findings_viewer "
               << default_ip << "\n"

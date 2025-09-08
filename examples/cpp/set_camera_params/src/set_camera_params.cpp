@@ -42,10 +42,10 @@ void printUsage() {
     std::cout << "You should specify the IP address of the device running hammerhead:\n\n"
 #ifdef TOPIC_exposure
                  "     ./set_exposure hammerhead_ip\n\n"
-                 "e.g. ./set_exposure 192.168.1.9\n\n"
+                 "e.g. ./set_exposure 10.10.1.10\n\n"
 #else
                  "     ./set_gain hammerhead_ip\n\n"
-                 "e.g. ./set_gain 192.168.1.9\n\n"
+                 "e.g. ./set_gain 10.10.1.10\n\n"
 #endif
                  "In the meantime, we assume that you are running this on the device running Hammerhead,\n"
                  "that is, we assume that you specified "
