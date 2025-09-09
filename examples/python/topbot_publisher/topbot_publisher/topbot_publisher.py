@@ -75,10 +75,10 @@ def is_valid_port(port):
     if port < 1024 or port > 65535:
         print("Invalid port number: Port number must be in the range [1024, 65535].")
         return False
-    if port in get_reserved_ports():
+    if port not in get_reserved_ports():
         print(
-            "Invalid port number: Port number is reserved. "
-            "Please choose a port number other than 98xx."
+            "Invalid port number: Port number is not a standard topic port. "
+            "Please choose a port number corresponding to a topic, e.g., 98xx."
         )
         return False
     return True
