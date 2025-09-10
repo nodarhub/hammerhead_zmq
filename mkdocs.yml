@@ -48,6 +48,7 @@ nav:
       - Disparity to Point Cloud: examples/python/disparity_to_ordered_point_cloud.md
       - Hammerhead Scheduler: examples/python/hammerhead_scheduler.md
       - Topbot Publisher: examples/python/topbot_publisher.md
+      - Quality assurance: examples/python/qa_findings_viewer.md
   - C++ Examples:
       - Image Viewer: examples/cpp/image_viewer.md
       - Image Recorder: examples/cpp/image_recorder.md
@@ -60,6 +61,7 @@ nav:
       - Camera Parameter Control: examples/cpp/set_camera_params.md
       - Topbot Publisher: examples/cpp/topbot_publisher.md
       - Legacy Obstacle Converter: examples/cpp/legacy_obstacle_data_converter.md
+      - Quality assurance: examples/cpp/qa_findings_viewer.md
 
 markdown_extensions:
   - toc
