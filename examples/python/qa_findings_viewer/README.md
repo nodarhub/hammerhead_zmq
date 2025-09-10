@@ -62,6 +62,7 @@ The viewer displays three categories of quality assurance findings:
 ## Output Format
 
 Each QA finding is displayed with:
+
 - **Frame ID**: Sequential frame identifier from the stereo camera system
 - **Timestamp**: When the finding was detected (corresponds to left image timestamp)
 - **Domain**: Category (system/hammerhead/image)
