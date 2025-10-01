@@ -16,6 +16,8 @@ COLOR_BLENDED_DEPTH_TOPIC = Topic("nodar/color_blended_depth/image_raw", 9805)
 TOPBOT_RAW_TOPIC = Topic("nodar/topbot_raw", 9813)
 LEFT_VALID_PIXELS_TOPIC = Topic("nodar/left/valid_pixel_mask", 9818)
 RIGHT_VALID_PIXELS_TOPIC = Topic("nodar/right/valid_pixel_mask", 9819)
+LEFT_RECTIFICATION_MASK_TOPIC = Topic("nodar/left/rectification_mask", 9820)
+RIGHT_RECTIFICATION_MASK_TOPIC = Topic("nodar/right/rectification_mask", 9821)
 
 
 # Define the image topics as a list of Topic objects
@@ -32,6 +34,8 @@ IMAGE_TOPICS = [
     RIGHT_CONFIDENCE_TOPIC,
     LEFT_VALID_PIXELS_TOPIC,
     RIGHT_VALID_PIXELS_TOPIC,
+    LEFT_RECTIFICATION_MASK_TOPIC,
+    RIGHT_RECTIFICATION_MASK_TOPIC,
 ]
 
 # Define other topics as individual Topic objects

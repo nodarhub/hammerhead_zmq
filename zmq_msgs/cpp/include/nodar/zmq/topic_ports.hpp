@@ -24,8 +24,10 @@ constexpr Topic COLOR_BLENDED_DEPTH_TOPIC{"nodar/color_blended_depth/image_raw",
 constexpr Topic TOPBOT_RAW_TOPIC{"nodar/topbot_raw", 9813};
 constexpr Topic LEFT_VALID_PIXELS_TOPIC{"nodar/left/valid_pixel_mask", 9818};
 constexpr Topic RIGHT_VALID_PIXELS_TOPIC{"nodar/right/valid_pixel_mask", 9819};
+constexpr Topic LEFT_RECTIFICATION_MASK_TOPIC{"nodar/left/rectification_mask", 9820};
+constexpr Topic RIGHT_RECTIFICATION_MASK_TOPIC{"nodar/right/rectification_mask", 9821};
 
-constexpr std::array<Topic, 12> IMAGE_TOPICS{{
+constexpr std::array<Topic, 14> IMAGE_TOPICS{{
     LEFT_RAW_TOPIC,  //
     RIGHT_RAW_TOPIC,  //
     LEFT_RECT_TOPIC,  //
@@ -37,7 +39,9 @@ constexpr std::array<Topic, 12> IMAGE_TOPICS{{
     LEFT_CONFIDENCE_TOPIC,  //
     RIGHT_CONFIDENCE_TOPIC,  //
     LEFT_VALID_PIXELS_TOPIC,  //
-    RIGHT_VALID_PIXELS_TOPIC   //
+    RIGHT_VALID_PIXELS_TOPIC,   //
+    LEFT_RECTIFICATION_MASK_TOPIC,  //
+    RIGHT_RECTIFICATION_MASK_TOPIC   //
 }};
 constexpr Topic SOUP_TOPIC{"nodar/point_cloud_soup", 9806};
 
