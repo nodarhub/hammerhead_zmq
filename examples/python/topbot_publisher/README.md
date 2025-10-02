@@ -24,10 +24,10 @@ python topbot_publisher <topbot_data_directory> <port_number> [pixel_format]
 
 ```bash
 # Publish topbot images with default BGR format
-python topbot_publisher /path/to/topbot/data 9800
+python topbot_publisher /path/to/topbot/data 5000
 
 # Publish topbot images with Bayer format
-python topbot_publisher /path/to/topbot/data 9800 Bayer_RGGB
+python topbot_publisher /path/to/topbot/data 5000 Bayer_RGGB
 ```
 
 ## Supported Pixel Formats

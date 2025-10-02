@@ -31,10 +31,10 @@ cmake --build . --config Release
 
 ```bash
 # Publish topbot images with default BGR format
-./topbot_publisher /path/to/topbot/data 9800
+./topbot_publisher /path/to/topbot/data 5000
 
 # Publish topbot images with Bayer format
-./topbot_publisher /path/to/topbot/data 9800 Bayer_RGGB
+./topbot_publisher /path/to/topbot/data 5000 Bayer_RGGB
 ```
 
 ## Features
