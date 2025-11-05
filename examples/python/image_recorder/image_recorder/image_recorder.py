@@ -25,8 +25,15 @@ class ZMQImageRecorder:
         self.socket.connect(endpoint)
         self.last_frame_id = 0
         print(f"Subscribing to {endpoint}")
-        self.output_dir = output_dir
-        os.makedirs(output_dir, exist_ok=True)
+        self.topbot_dir = output_dir + "/topbot"
+        self.timing_dir = output_dir + "/times"
+        print(f"Creating the directory {self.topbot_dir}")
+        os.makedirs(self.topbot_dir, exist_ok=True)
+        print(f"Creating the directory {self.timing_dir}")
+        os.makedirs(self.timing_dir, exist_ok=True)
+        # Create a separate timing file with all times
+        self.timing_file = open(output_dir + "/times.txt", "w")
+        # This means NO COMPRESSION in libtiff
         self.compression_params = [cv2.IMWRITE_TIFF_COMPRESSION, 1]
 
     def loop_once(self):
@@ -52,8 +59,17 @@ class ZMQImageRecorder:
         # We recommend saving tiffs with no compression if the data rate is high.
         # Depending on the underlying image type, consider using stamped_image.cvt_to_bgr_code
         # to convert to BGR before saving.
-        cv2.imwrite(self.output_dir + f"/{frame_id:09}.tiff", img, self.compression_params)
+        cv2.imwrite(self.topbot_dir + f"/{frame_id:09}.tiff", img, self.compression_params)
+        with open(self.timing_dir + f"/{frame_id:09}.txt", "w") as f:
+            f.write(f"{stamped_image.time}\n")
+        with open(self.timing_dir + f"/{frame_id:09}.txt", "w") as f:
+            f.write(f"{stamped_image.time}\n")
+        self.timing_file.write(f"{frame_id:09} {stamped_image.time}\n")
+        self.timing_file.flush()
         return
+
+    def close(self):
+        self.timing_file.close()
 
 
 def print_usage(default_ip, default_port, default_output_dir):
@@ -77,7 +93,7 @@ def main():
     default_ip = "127.0.0.1"
     default_topic = IMAGE_TOPICS[0]
     default_port = default_topic.port
-    default_output_dir = datetime.now().strftime("%Y%m%d-%H%M%S") + "/topbot"
+    default_output_dir = datetime.now().strftime("%Y%m%d-%H%M%S")
 
     if len(sys.argv) < 4:
         print_usage(default_ip, default_port, default_output_dir)
@@ -112,7 +128,6 @@ def main():
                 return
 
     output_dir = sys.argv[3] if len(sys.argv) >= 4 else default_output_dir
-    os.makedirs(output_dir, exist_ok=True)
     endpoint = f"tcp://{ip}:{topic.port}"
     subscriber = ZMQImageRecorder(endpoint, output_dir)
     try:
@@ -120,6 +135,8 @@ def main():
             subscriber.loop_once()
     except KeyboardInterrupt:
         print("\nExiting...")
+    finally:
+        subscriber.close()
 
 
 if __name__ == "__main__":
