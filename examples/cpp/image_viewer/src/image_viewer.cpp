@@ -85,7 +85,7 @@ private:
 };
 
 void printUsage(const std::string &default_ip, const std::string &default_port) {
-    std::cout << "You should specify the IP address of  the ZMQ source (the device running Hammerhead), \n"
+    std::cout << "You should specify the IP address of the ZMQ source (the device running Hammerhead), \n"
                  "as well as the port number of the message that you want to listen to:\n\n"
                  "     ./image_viewer hammerhead_ip port\n\n"
                  "e.g. ./image_viewer 192.168.1.9 9800\n\n"

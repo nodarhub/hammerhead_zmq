@@ -99,8 +99,6 @@ class ZMQImageRecorder:
         cv2.imwrite(self.topbot_dir + f"/{frame_id:09}.tiff", img, self.compression_params)
         with open(self.timing_dir + f"/{frame_id:09}.txt", "w") as f:
             f.write(f"{stamped_image.time}\n")
-        with open(self.timing_dir + f"/{frame_id:09}.txt", "w") as f:
-            f.write(f"{stamped_image.time}\n")
         self.timing_file.write(f"{frame_id:09} {stamped_image.time}\n")
         self.timing_file.flush()
         return
@@ -111,12 +109,12 @@ class ZMQImageRecorder:
 
 def print_usage(default_ip, default_port, default_output_dir):
     print(
-        "You should specify the IP address of the ZMQ source (the device running Hammerhead),\n"
-        "the port number of the message that you want to listen to,\n"
+        "You should specify the IP address of the ZMQ source (the device running Hammerhead), \n"
+        "the port number of the message that you want to listen to, \n"
         "and the folder where you want the data to be saved:\n\n"
-        "     python image_recorder.py orin_ip port output_dir\n\n"
-        "e.g. python image_recorder.py 192.168.1.9 9800 images\n\n"
-        "Alternatively, you can specify one of the image names in topic_ports.hpp of zmq_msgs:"
+        "     python image_recorder.py hammerhead_ip port output_dir\n\n"
+        "e.g. python image_recorder.py 192.168.1.9 9800 recorded_images\n\n"
+        "Alternatively, you can specify one of the image topic names in topic_ports.py of zmq_msgs...\n\n"
         "e.g. python image_recorder.py 192.168.1.9 nodar/right/image_raw recorded_images\n\n"
         "If unspecified, we assume you are running this on the device running Hammerhead,\n"
         "along with the defaults\n\n"
