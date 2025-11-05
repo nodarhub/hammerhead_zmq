@@ -19,14 +19,18 @@ constexpr Topic RIGHT_RECT_TOPIC{"nodar/right/image_rect", 9803};
 constexpr Topic DISPARITY_TOPIC{"nodar/disparity", 9804};
 constexpr Topic COLOR_BLENDED_DEPTH_TOPIC{"nodar/color_blended_depth/image_raw", 9805};
 constexpr Topic TOPBOT_RAW_TOPIC{"nodar/topbot_raw", 9813};
+constexpr Topic TOPBOT_RECT_TOPIC{"nodar/topbot_rect", 9823};
 
-constexpr std::array<Topic, 7> IMAGE_TOPICS{{LEFT_RAW_TOPIC,  //
-                                             RIGHT_RAW_TOPIC,  //
-                                             LEFT_RECT_TOPIC,  //
-                                             RIGHT_RECT_TOPIC,  //
-                                             DISPARITY_TOPIC,  //
-                                             COLOR_BLENDED_DEPTH_TOPIC,  //
-                                             TOPBOT_RAW_TOPIC}};
+constexpr std::array<Topic, 8> IMAGE_TOPICS{{
+    LEFT_RAW_TOPIC,  //
+    RIGHT_RAW_TOPIC,  //
+    LEFT_RECT_TOPIC,  //
+    RIGHT_RECT_TOPIC,  //
+    DISPARITY_TOPIC,  //
+    COLOR_BLENDED_DEPTH_TOPIC,  //
+    TOPBOT_RAW_TOPIC,  //
+    TOPBOT_RECT_TOPIC,  //
+}};
 
 constexpr Topic SOUP_TOPIC{"nodar/point_cloud_soup", 9806};
 
