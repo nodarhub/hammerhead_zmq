@@ -78,11 +78,11 @@ class ZMQImageViewer:
 
 def print_usage(default_ip, default_port):
     print(
-        "You should specify the IP address of the ZMQ source (the device running Hammerhead),\n"
+        "You should specify the IP address of the ZMQ source (the device running Hammerhead), \n"
         " as well as the port number of the message that you want to listen to:\n\n"
-        "     python image_viewer.py orin_ip port\n\n"
+        "     python image_viewer.py hammerhead_ip port\n\n"
         "e.g. python image_viewer.py 192.168.1.9 9800\n\n"
-        "Alternatively, you can specify one of the image names in topic_ports.hpp of zmq_msgs:"
+        "Alternatively, you can specify one of the image topic names in topic_ports.py of zmq_msgs...\n\n"
         "e.g. python image_viewer.py 192.168.1.9 nodar/right/image_raw\n\n"
         "If unspecified, we assume you are running this on the device running Hammerhead,\n"
         "along with the defaults\n\n"
