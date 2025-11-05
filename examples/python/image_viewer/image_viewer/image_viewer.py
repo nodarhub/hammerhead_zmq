@@ -76,17 +76,17 @@ class ZMQImageViewer:
         return True
 
 
-def print_usage(default_ip, default_output_dir):
+def print_usage(default_ip, default_port):
     print(
-        "You should specify the IP address of the device running Hammerhead,\n"
-        " as well as the port of the message that you want to listen to:\n\n"
+        "You should specify the IP address of the ZMQ source (the device running Hammerhead),\n"
+        " as well as the port number of the message that you want to listen to:\n\n"
         "     python image_viewer.py orin_ip port\n\n"
         "e.g. python image_viewer.py 192.168.1.9 9800\n\n"
         "Alternatively, you can specify one of the image names in topic_ports.hpp of zmq_msgs:"
         "e.g. python image_viewer.py 192.168.1.9 nodar/right/image_raw\n\n"
-        "In the meantime, we assume that you are running this on the device running Hammerhead,\n"
-        "and that you want the images on port 9800, that is, we assume that you specified\n\n"
-        f"     python image_viewer.py {default_ip} {default_output_dir}\n\n"
+        "If unspecified, we assume you are running this on the device running Hammerhead,\n"
+        "along with the defaults\n\n"
+        f"     python image_viewer.py {default_ip} {default_port}\n\n"
         "Note that the list of topic/port mappings is in topic_ports.py in the zmq_msgs target.\n"
         "----------------------------------------"
     )
@@ -95,9 +95,9 @@ def print_usage(default_ip, default_output_dir):
 def main():
     default_ip = "127.0.0.1"
     default_topic = IMAGE_TOPICS[0]
-    default_output_dir = default_topic.port
+    default_port = default_topic.port
     if len(sys.argv) < 3:
-        print_usage(default_ip, default_output_dir)
+        print_usage(default_ip, default_port)
 
     ip = sys.argv[1] if len(sys.argv) > 1 else default_ip
 
@@ -130,9 +130,8 @@ def main():
 
     endpoint = f"tcp://{ip}:{topic.port}"
     subscriber = ZMQImageViewer(endpoint)
-    running = True
     try:
-        while running:
+        while True:
             subscriber.loop_once()
     except KeyboardInterrupt:
         print("\nExiting...")
