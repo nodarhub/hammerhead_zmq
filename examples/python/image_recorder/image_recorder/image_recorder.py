@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime
 
 import cv2
 import zmq
@@ -76,7 +77,8 @@ def main():
     default_ip = "127.0.0.1"
     default_topic = IMAGE_TOPICS[0]
     default_port = default_topic.port
-    default_output_dir = "recorded_images"
+    default_output_dir = datetime.now().strftime("%Y%m%d-%H%M%S") + "/topbot"
+
     if len(sys.argv) < 4:
         print_usage(default_ip, default_port, default_output_dir)
 
@@ -110,6 +112,7 @@ def main():
                 return
 
     output_dir = sys.argv[3] if len(sys.argv) >= 4 else default_output_dir
+    os.makedirs(output_dir, exist_ok=True)
     endpoint = f"tcp://{ip}:{topic.port}"
     subscriber = ZMQImageRecorder(endpoint, output_dir)
     try:
