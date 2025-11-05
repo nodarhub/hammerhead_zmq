@@ -1,11 +1,17 @@
 #include <atomic>
+#include <chrono>
 #include <csignal>
+#include <deque>
 #include <filesystem>
+#include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <nodar/zmq/image.hpp>
 #include <nodar/zmq/opencv_utils.hpp>
 #include <nodar/zmq/topic_ports.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <sstream>
+#include <string>
 #include <unordered_map>
 #include <zmq.hpp>
 
@@ -32,29 +38,88 @@ void printDetails(const cv::Mat &mat) {
               << std::endl;
 }
 
+class FPS {
+public:
+    // Store timestamps for up to 100 frames
+    explicit FPS(size_t maxlen = 100) : frame_times(), start_time(), total_frames(0), maxlen(maxlen) {}
+
+    /** Call this once per frame. **/
+    void tic() {
+        auto now = Clock::now();
+        if (total_frames == 0) {
+            start_time = now;
+        }
+        frame_times.push_back(now);
+        if (frame_times.size() > maxlen) {
+            frame_times.pop_front();
+        }
+        ++total_frames;
+    }
+
+    /** Compute FPS over the last n frames (if enough data). **/
+    [[nodiscard]] double fps_over_window(size_t n) const {
+        if (frame_times.size() < 2) {
+            return 0.0;
+        }
+        if (frame_times.size() < n) {
+            n = frame_times.size();
+        }
+        const auto t1 = frame_times[frame_times.size() - n];
+        const auto t2 = frame_times.back();
+        const std::chrono::duration<double> delta = t2 - t1;
+        return (t2 == t1) ? 0.0 : static_cast<double>(n - 1) / delta.count();
+    }
+
+    [[nodiscard]] auto str() const {
+        const double fps_100 = fps_over_window(100);
+        std::ostringstream ss;
+        ss << std::fixed << std::setprecision(2) << "fps_100: " << fps_100 << ", fps_inf: ";
+        if (total_frames <= 1) {
+            ss << 0.0;
+        } else {
+            const std::chrono::duration<double> total_time = frame_times.back() - start_time;
+            ss << static_cast<double>(total_frames - 1) / total_time.count();
+        }
+        return ss.str();
+    }
+
+private:
+    using Clock = std::chrono::steady_clock;
+    std::deque<Clock::time_point> frame_times;
+    Clock::time_point start_time;
+    size_t total_frames;
+    size_t maxlen;
+};
+
 class ZMQImageRecorder {
 public:
-    uint64_t last_frame_id = 0;
-
-    ZMQImageRecorder(const std::string &endpoint, const std::string &output_dirname)
-        : context(1), socket(context, ZMQ_SUB), output_dir(output_dirname) {
+    ZMQImageRecorder(const std::string &endpoint, const std::filesystem::path &output_dir)
+        : context(1),
+          socket(context, ZMQ_SUB),
+          topbot_dir(output_dir / "topbot"),
+          timing_dir(output_dir / "times"),
+          timing_file(output_dir / "times.txt") {
         const int hwm = 1;  // set maximum queue length to 1 message
         socket.set(zmq::sockopt::rcvhwm, hwm);
         socket.set(zmq::sockopt::subscribe, "");
         socket.connect(endpoint);
         std::cout << "Subscribing to " << endpoint << std::endl;
-        std::filesystem::create_directories(output_dir);
+        std::cout << "Creating the directory " << topbot_dir << std::endl;
+        std::filesystem::create_directories(topbot_dir);
+        std::cout << "Creating the directory " << timing_dir << std::endl;
+        std::filesystem::create_directories(timing_dir);
         compression_params.push_back(cv::IMWRITE_TIFF_COMPRESSION);
         compression_params.push_back(1);  // No compression
     }
 
-    std::string frame_string(uint64_t frame_no) {
+    [[nodiscard]] static std::string frame_string(uint64_t frame_no) {
         std::ostringstream oss;
-        oss << std::setw(9) << std::setfill('0') << frame_no << ".tiff";
+        oss << std::setw(9) << std::setfill('0') << frame_no;
         return oss.str();
     }
 
-    void loopOnce() {
+    void loop_once() {
+        fps.tic();
         zmq::message_t msg;
         const auto received_bytes = socket.recv(msg, zmq::recv_flags::none);
         const nodar::zmq::StampedImage stamped_image(static_cast<uint8_t *>(msg.data()));
@@ -63,58 +128,78 @@ public:
             return;
         }
         const auto &frame_id = stamped_image.frame_id;
+        std::cout << "\rFrame # " << frame_id << ", Last #: " << last_frame_id  //
+                  << ", img.shape = " << img.rows << "x" << img.cols << "x" << img.channels()  //
+                  << ", img.dtype = " << img.type() << ". ";
+        std::cout << fps.str() << ". ";
         if (last_frame_id != 0 and frame_id != last_frame_id + 1) {
-            std::cerr << (frame_id - last_frame_id - 1) << " frames dropped. Current frame ID : " << frame_id
-                      << ", last frame ID: " << last_frame_id << std::endl;
+            std::cout << "Frames dropped: " << frame_id - last_frame_id - 1 << ". ";
         }
+        std::cout << std::flush;
         last_frame_id = frame_id;
-        std::cout << "\rFrame # " << frame_id << std::flush;
 
         // We recommend saving tiffs with no compression if the data rate is high.
         // Depending on the underlying image type, you might want to use stamped_image.cvt_to_bgr_code
         // to convert to BGR before saving.
-        cv::imwrite(output_dir / frame_string(frame_id), img, compression_params);
+        const auto frame_str = frame_string(frame_id);
+        cv::imwrite(topbot_dir / (frame_str + ".tiff"), img, compression_params);
+        {
+            std::ofstream f(timing_dir / (frame_str + ".txt"));
+            f << stamped_image.time << std::flush;
+        }
+        timing_file << frame_string(frame_id) << " " << stamped_image.time << std::endl;
     }
 
 private:
     zmq::context_t context;
     zmq::socket_t socket;
-    std::filesystem::path output_dir;
+    uint64_t last_frame_id = 0;
+    std::filesystem::path topbot_dir;
+    std::filesystem::path timing_dir;
+    std::ofstream timing_file;
     std::vector<int> compression_params;
+    FPS fps;
 };
 
-void printUsage(const std::string &DEFAULT_IP, const std::string &DEFAULT_PORT, const std::string &DEFAULT_OUTPUT_DIR) {
-    std::cout << "You should specify the IP address of the device running hammerhead, \n"
-                 "the port of the message that you want to listen to, "
+void print_usage(const std::string &default_ip, const std::string &default_port,
+                 const std::string &default_output_dir) {
+    std::cout << "You should specify the IP address of the ZMQ source (the device running Hammerhead), \n"
+                 "the port number of the message that you want to listen to, \n"
                  "and the folder where you want the data to be saved:\n\n"
                  "     ./image_recorder hammerhead_ip port output_dir\n\n"
                  "e.g. ./image_recorder 192.168.1.9 9800 recorded_images\n\n"
-                 "Alternatively, you can specify one of the image topic names in topic_ports.hpp of zmq_msgs:"
-                 "e.g. ./image_recorder 192.168.1.9 nodar/right/image_raw output_dir\n\n"
-                 "In the meantime, we assume that you are running this on the device running Hammerhead,\n"
-                 "and that you want the images on port 9800, that is, we assume that you specified\n\n"
-                 "     ./image_recorder " +
-                     DEFAULT_IP + " " + DEFAULT_PORT + " " + DEFAULT_OUTPUT_DIR + "\n\n"
-              << "\n\nNote that the list of topic/port mappings is in topic_ports.hpp header in the zmq_msgs target."
-              << "\n----------------------------------------" << std::endl;
+                 "Alternatively, you can specify one of the image topic names in topic_ports.hpp of zmq_msgs...\n\n"
+                 "e.g. ./image_recorder 192.168.1.9 nodar/right/image_raw recorded_images\n\n"
+                 "If unspecified, we assume you are running this on the device running Hammerhead,\n"
+                 "along with the defaults\n\n"
+              << "     ./image_recorder " << default_ip << " " << default_port << " " << default_output_dir + "\n\n"
+              << "Note that the list of topic/port mappings is in topic_ports.hpp in the zmq_msgs target.\n"
+              << "----------------------------------------" << std::endl;
+}
+
+inline std::string date_string() {
+    const auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::ostringstream date_ss;
+    date_ss << std::put_time(std::localtime(&now), "%Y%m%d-%H%M%S");
+    return date_ss.str();
 }
 
 int main(int argc, char *argv[]) {
-    constexpr auto DEFAULT_IP = "127.0.0.1";
-    constexpr auto DEFAULT_TOPIC = nodar::zmq::IMAGE_TOPICS[0];
-    const std::string DEFAULT_PORT = std::to_string(DEFAULT_TOPIC.port);
-    constexpr auto DEFAULT_OUTPUT_DIR = "recorded_images";
+    constexpr auto default_ip = "127.0.0.1";
+    constexpr auto default_topic = nodar::zmq::IMAGE_TOPICS[0];
+    const std::string default_port = std::to_string(default_topic.port);
+    const auto default_output_dir = date_string();
 
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
     if (argc < 4) {
-        printUsage(DEFAULT_IP, DEFAULT_PORT, DEFAULT_OUTPUT_DIR);
+        print_usage(default_ip, default_port, default_output_dir);
     }
-    const auto ip = argc > 1 ? argv[1] : DEFAULT_IP;
+    const auto ip = argc > 1 ? argv[1] : default_ip;
 
     // If no second argument was provided, then assume the default topic.
     // Try to parse the second argument to see if you provided a port number.
-    nodar::zmq::Topic topic = DEFAULT_TOPIC;
+    nodar::zmq::Topic topic = default_topic;
     if (argc >= 3) {
         // See if we can parse the second argument as a port number
         bool invalid_topic = true;
@@ -149,10 +234,11 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    const auto output_dirname = argc >= 4 ? argv[3] : DEFAULT_OUTPUT_DIR;
+    const auto output_dir = argc >= 4 ? argv[3] : default_output_dir;
     const auto endpoint = std::string("tcp://") + ip + ":" + std::to_string(topic.port);
-    ZMQImageRecorder subscriber(endpoint, output_dirname);
+    std::filesystem::create_directories(output_dir);
+    ZMQImageRecorder subscriber(endpoint, output_dir);
     while (running) {
-        subscriber.loopOnce();
+        subscriber.loop_once();
     }
 }
