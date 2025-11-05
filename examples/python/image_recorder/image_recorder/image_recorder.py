@@ -1,5 +1,7 @@
 import os
 import sys
+import time
+from collections import deque
 from datetime import datetime
 
 import cv2
@@ -14,6 +16,41 @@ except ImportError:
     )
     from zmq_msgs.image import StampedImage
     from zmq_msgs.topic_ports import IMAGE_TOPICS
+
+
+class FPS:
+    def __init__(self):
+        # Store timestamps for up to 100 frames
+        self.frame_times = deque(maxlen=100)
+        self.start_time = None
+        self.total_frames = 0
+
+    def tic(self):
+        """Call this once per frame."""
+        now = time.perf_counter()
+        if self.start_time is None:
+            self.start_time = now
+        self.frame_times.append(now)
+        self.total_frames += 1
+
+    def fps_over_window(self, n):
+        """Compute FPS over the last n frames (if enough data)."""
+        if len(self.frame_times) < 2:
+            return 0.0
+        if len(self.frame_times) < n:
+            n = len(self.frame_times)
+        t1 = self.frame_times[-n]
+        t2 = self.frame_times[-1]
+        return (n - 1) / (t2 - t1) if (t2 - t1) > 0 else 0.0
+
+    def __str__(self):
+        fps_100 = self.fps_over_window(100)
+        if self.total_frames > 1:
+            total_time = self.frame_times[-1] - self.start_time
+            fps_life = (self.total_frames - 1) / total_time if total_time > 0 else 0.0
+        else:
+            fps_life = 0.0
+        return f"fps_100: {fps_100:.2f}, fps_inf: {fps_life:.2f}"
 
 
 class ZMQImageRecorder:
@@ -35,8 +72,10 @@ class ZMQImageRecorder:
         self.timing_file = open(output_dir + "/times.txt", "w")
         # This means NO COMPRESSION in libtiff
         self.compression_params = [cv2.IMWRITE_TIFF_COMPRESSION, 1]
+        self.fps = FPS()
 
     def loop_once(self):
+        self.fps.tic()
         msg = self.socket.recv()
         stamped_image = StampedImage()
         stamped_image.read(msg)
@@ -46,14 +85,12 @@ class ZMQImageRecorder:
             return
 
         frame_id = stamped_image.frame_id
-        drop_string = ""
+        info_str = f"Frame # {frame_id}, Last #: {self.last_frame_id}, img.shape = {img.shape}, img.dtype = {img.dtype}. "
+        fps_str = f"{self.fps}. "
+        drop_str = ""
         if self.last_frame_id != 0 and frame_id != self.last_frame_id + 1:
-            drop_string = f", {frame_id - self.last_frame_id - 1} frames dropped. "
-        print(
-            f"\rFrame # {frame_id}, Last #: {self.last_frame_id}, img.shape = {img.shape}, img.dtype = {img.dtype}{drop_string}",
-            end="",
-            flush=True,
-        )
+            drop_str = f"Frames dropped: {frame_id - self.last_frame_id - 1}. "
+        print(f"\r{info_str}{fps_str}{drop_str}", end="", flush=True)
         self.last_frame_id = frame_id
 
         # We recommend saving tiffs with no compression if the data rate is high.
