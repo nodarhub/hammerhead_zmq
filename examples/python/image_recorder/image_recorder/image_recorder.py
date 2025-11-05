@@ -38,17 +38,15 @@ class ZMQImageRecorder:
             return
 
         frame_id = stamped_image.frame_id
+        drop_string = ""
         if self.last_frame_id != 0 and frame_id != self.last_frame_id + 1:
-            print(
-                f"{frame_id - self.last_frame_id - 1} frames dropped. "
-                f"Current frame ID: {frame_id}, last frame ID: {self.last_frame_id}"
-            )
-        self.last_frame_id = frame_id
+            drop_string = f", {frame_id - self.last_frame_id - 1} frames dropped. "
         print(
-            f"\rFrame # {frame_id}, img.shape = {img.shape}, img.dtype = {img.dtype}",
+            f"\rFrame # {frame_id}, Last #: {self.last_frame_id}, img.shape = {img.shape}, img.dtype = {img.dtype}{drop_string}",
             end="",
             flush=True,
         )
+        self.last_frame_id = frame_id
 
         # We recommend saving tiffs with no compression if the data rate is high.
         # Depending on the underlying image type, consider using stamped_image.cvt_to_bgr_code
