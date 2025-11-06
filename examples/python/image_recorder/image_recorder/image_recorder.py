@@ -9,6 +9,12 @@ import cv2
 import zmq
 
 try:
+    import tifffile
+    HAS_TIFFFILE = True
+except ImportError:
+    HAS_TIFFFILE = False
+
+try:
     from zmq_msgs.image import StampedImage
     from zmq_msgs.topic_ports import *
 except ImportError:
@@ -89,6 +95,42 @@ class ZMQImageRecorder:
         self.compression_params = [cv2.IMWRITE_TIFF_COMPRESSION, 1]
         self.fps = FPS()
 
+    @staticmethod
+    def add_tiff_metadata(filename, left_time, right_time):
+        """Add timestamp metadata to TIFF file (compatible with Hammerhead viewer format)"""
+        if not HAS_TIFFFILE:
+            return  # Skip if tifffile not available
+
+        # Create YAML string with all required fields (compatible with Hammerhead format)
+        # Must include all fields that DetailsParameters expects
+        details_str = (
+            f"left_time: {left_time}\\n"
+            f"right_time: {right_time}\\n"
+            f"focal_length: 0.0\\n"
+            f"baseline: 0.0\\n"
+            f"meters_above_ground: 0.0\\n"
+            f"projection: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]\\n"
+            f"rotation_disparity_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
+            f"rotation_world_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
+        )
+        metadata_yaml = f'details: "{details_str}"'
+
+        # Use tifffile to add metadata to the SOFTWARE tag (tag 305)
+        try:
+            with tifffile.TiffFile(filename) as tif:
+                img_data = tif.asarray()
+                # Write back with metadata in SOFTWARE tag (305)
+                tifffile.imwrite(
+                    filename,
+                    img_data,
+                    compression=None,
+                    metadata=None,
+                    extratags=[(305, 's', 0, metadata_yaml, True)]  # TIFFTAG_SOFTWARE
+                )
+        except Exception:
+            # If adding metadata fails, skip it (metadata is optional)
+            pass
+
     def loop_once(self):
         loop_start_time = time.perf_counter()
         self.fps.tic()
@@ -112,12 +154,17 @@ class ZMQImageRecorder:
         # We recommend saving tiffs with no compression if the data rate is high.
         # Depending on the underlying image type, consider using stamped_image.cvt_to_bgr_code
         # to convert to BGR before saving.
-        cv2.imwrite(self.image_dir + f"/{frame_id:09}.tiff", img, self.compression_params)
+        tiff_path = self.image_dir + f"/{frame_id:09}.tiff"
+        cv2.imwrite(tiff_path, img, self.compression_params)
 
         # Extract right_time from additional_field if present (for topbot messages)
         right_time = None
         if len(stamped_image.additional_field) == 8:
             right_time = struct.unpack('<Q', stamped_image.additional_field)[0]
+
+        # Add timestamp metadata to TIFF file (for topbot images with dual timestamps)
+        if right_time is not None:
+            self.add_tiff_metadata(tiff_path, stamped_image.time, right_time)
 
         with open(self.timing_dir + f"/{frame_id:09}.txt", "w") as f:
             f.write(f"{stamped_image.time}")

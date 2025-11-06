@@ -46,9 +46,20 @@ bool add_tiff_metadata(const std::filesystem::path &filename, uint64_t left_time
         return false;
     }
 
-    // Create a simple YAML string with the timestamps (compatible with Hammerhead format)
+    // Create YAML string with all required fields (compatible with Hammerhead format)
+    // Must include all fields that DetailsParameters expects
+    std::ostringstream details_str;
+    details_str << "left_time: " << left_time << "\\n"
+                << "right_time: " << right_time << "\\n"
+                << "focal_length: 0.0\\n"
+                << "baseline: 0.0\\n"
+                << "meters_above_ground: 0.0\\n"
+                << "projection: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]\\n"
+                << "rotation_disparity_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
+                << "rotation_world_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n";
+
     std::ostringstream metadata_yaml;
-    metadata_yaml << "details: \"left_time: " << left_time << "\\nright_time: " << right_time << "\\n\"";
+    metadata_yaml << "details: \"" << details_str.str() << "\"";
 
     // Embed metadata in the SOFTWARE tag using libtiff
     bool success = TIFFSetField(tiff, TIFFTAG_SOFTWARE, metadata_yaml.str().c_str());
