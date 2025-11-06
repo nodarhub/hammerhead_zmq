@@ -81,11 +81,15 @@ class ZMQImageRecorder:
         os.makedirs(self.timing_dir, exist_ok=True)
         # Create a separate timing file with all times
         self.timing_file = open(output_dir + "/times.txt", "w")
+        # Create a file to log how long each loop_once call is taking.
+        # This helps to identify any bottlenecks in SSD write performance
+        self.loop_latency_log = open(output_dir + "/loop_latency.txt", "w")
         # This means NO COMPRESSION in libtiff
         self.compression_params = [cv2.IMWRITE_TIFF_COMPRESSION, 1]
         self.fps = FPS()
 
     def loop_once(self):
+        loop_start_time = time.perf_counter()
         self.fps.tic()
         msg = self.socket.recv()
         stamped_image = StampedImage()
@@ -112,10 +116,14 @@ class ZMQImageRecorder:
             f.write(f"{stamped_image.time}\n")
         self.timing_file.write(f"{frame_id:09} {stamped_image.time}\n")
         self.timing_file.flush()
+        loop_stop_time = time.perf_counter()
+        self.loop_latency_log.write(f"{frame_id:09} {loop_stop_time - loop_start_time}\n")
+        self.loop_latency_log.flush()
         return
 
     def close(self):
         self.timing_file.close()
+        self.loop_latency_log.close()
 
 
 def print_usage(default_ip, default_port, default_output_dir):
