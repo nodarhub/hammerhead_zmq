@@ -145,11 +145,26 @@ public:
         // to convert to BGR before saving.
         const auto frame_str = frame_string(frame_id);
         cv::imwrite(image_dir / (frame_str + ".tiff"), img, compression_params);
+
+        // Extract right_time from additional_field if present (for topbot messages)
+        uint64_t right_time = 0;
+        if (stamped_image.additional_field_size == 8) {
+            memcpy(&right_time, stamped_image.additional_field, 8);
+        }
+
         {
             std::ofstream f(timing_dir / (frame_str + ".txt"));
-            f << stamped_image.time << std::flush;
+            f << stamped_image.time;
+            if (right_time != 0) {
+                f << " " << right_time;
+            }
+            f << std::flush;
         }
-        timing_file << frame_string(frame_id) << " " << stamped_image.time << std::endl;
+        timing_file << frame_string(frame_id) << " " << stamped_image.time;
+        if (right_time != 0) {
+            timing_file << " " << right_time;
+        }
+        timing_file << std::endl;
     }
 
 private:
