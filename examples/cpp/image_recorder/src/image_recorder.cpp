@@ -149,7 +149,7 @@ public:
         // Extract right_time from additional_field if present (for topbot messages)
         uint64_t right_time = 0;
         if (stamped_image.additional_field_size == 8) {
-            memcpy(&right_time, stamped_image.additional_field, 8);
+            memcpy(&right_time, stamped_image.additional_field.data(), 8);
         }
 
         {
