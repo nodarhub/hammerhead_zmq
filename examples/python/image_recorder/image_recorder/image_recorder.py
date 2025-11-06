@@ -113,7 +113,7 @@ class ZMQImageRecorder:
             f"rotation_disparity_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
             f"rotation_world_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
         )
-        metadata_yaml = f'DETAILS: "{details_str}"'
+        software_text = f'DETAILS: "{details_str}"'
 
         # Use tifffile to add metadata to the SOFTWARE tag (tag 305)
         try:
@@ -125,7 +125,7 @@ class ZMQImageRecorder:
                     img_data,
                     compression=None,
                     metadata=None,
-                    extratags=[(305, 's', 0, metadata_yaml, True)]  # TIFFTAG_SOFTWARE
+                    software=software_text
                 )
         except Exception:
             # If adding metadata fails, skip it (metadata is optional)
