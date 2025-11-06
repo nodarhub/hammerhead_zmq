@@ -1,4 +1,5 @@
 import os
+import struct
 import sys
 import time
 from collections import deque
@@ -112,9 +113,22 @@ class ZMQImageRecorder:
         # Depending on the underlying image type, consider using stamped_image.cvt_to_bgr_code
         # to convert to BGR before saving.
         cv2.imwrite(self.image_dir + f"/{frame_id:09}.tiff", img, self.compression_params)
+
+        # Extract right_time from additional_field if present (for topbot messages)
+        right_time = None
+        if len(stamped_image.additional_field) == 8:
+            right_time = struct.unpack('<Q', stamped_image.additional_field)[0]
+
         with open(self.timing_dir + f"/{frame_id:09}.txt", "w") as f:
-            f.write(f"{stamped_image.time}\n")
-        self.timing_file.write(f"{frame_id:09} {stamped_image.time}\n")
+            f.write(f"{stamped_image.time}")
+            if right_time is not None:
+                f.write(f" {right_time}")
+            f.write("\n")
+
+        self.timing_file.write(f"{frame_id:09} {stamped_image.time}")
+        if right_time is not None:
+            self.timing_file.write(f" {right_time}")
+        self.timing_file.write("\n")
         self.timing_file.flush()
         loop_stop_time = time.perf_counter()
         self.loop_latency_log.write(f"{frame_id:09} {loop_stop_time - loop_start_time}\n")
