@@ -147,7 +147,8 @@ def main():
     default_ip = "127.0.0.1"
     default_topic = IMAGE_TOPICS[0]
     default_port = default_topic.port
-    default_output_dir = datetime.now().strftime("%Y%m%d-%H%M%S")
+    dated_folder = datetime.now().strftime("%Y%m%d-%H%M%S")
+    default_output_dir = "./" + dated_folder
 
     if len(sys.argv) < 4:
         print_usage(default_ip, default_port, default_output_dir)
@@ -181,7 +182,7 @@ def main():
                 )
                 return
 
-    output_dir = sys.argv[3] if len(sys.argv) >= 4 else default_output_dir
+    output_dir = (sys.argv[3] + "/" + dated_folder) if len(sys.argv) >= 4 else default_output_dir
     endpoint = f"tcp://{ip}:{topic.port}"
     subscriber = ZMQImageRecorder(endpoint, output_dir, folder_name_dict.get(topic.name, "images"))
     try:

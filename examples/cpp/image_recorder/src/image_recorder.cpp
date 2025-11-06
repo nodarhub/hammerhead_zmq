@@ -219,7 +219,8 @@ int main(int argc, char *argv[]) {
     constexpr auto default_ip = "127.0.0.1";
     constexpr auto default_topic = nodar::zmq::IMAGE_TOPICS[0];
     const std::string default_port = std::to_string(default_topic.port);
-    const auto default_output_dir = date_string();
+    const auto dated_folder = date_string();
+    const auto default_output_dir = "./" + dated_folder;
 
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
@@ -265,7 +266,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    const auto output_dir = argc >= 4 ? argv[3] : default_output_dir;
+    const auto output_dir = argc >= 4 ? (std::string(argv[3]) + "/" + dated_folder) : default_output_dir;
     const auto endpoint = std::string("tcp://") + ip + ":" + std::to_string(topic.port);
     std::filesystem::create_directories(output_dir);
     ZMQImageRecorder subscriber(endpoint, output_dir, get_folder_name(topic.name));
