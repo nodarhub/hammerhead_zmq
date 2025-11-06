@@ -12,6 +12,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <sstream>
 #include <string>
+#include <tiffio.h>
 #include <unordered_map>
 #include <zmq.hpp>
 
@@ -36,6 +37,34 @@ const std::unordered_map<int, const char *> types = {
 void printDetails(const cv::Mat &mat) {
     std::cout << mat.rows << ", " << mat.cols << ", " << mat.channels() << ", " << types.find(mat.type())->second
               << std::endl;
+}
+
+// Add timestamp metadata to TIFF file (compatible with Hammerhead viewer format)
+bool add_tiff_metadata(const std::filesystem::path &filename, uint64_t left_time, uint64_t right_time) {
+    TIFF *tiff = TIFFOpen(filename.c_str(), "r+");
+    if (!tiff) {
+        return false;
+    }
+
+    // Create YAML string with all required fields (compatible with Hammerhead format)
+    // Must include all fields that DetailsParameters expects
+    std::ostringstream details_str;
+    details_str << "left_time: " << left_time << "\\n"
+                << "right_time: " << right_time << "\\n"
+                << "focal_length: 0.0\\n"
+                << "baseline: 0.0\\n"
+                << "meters_above_ground: 0.0\\n"
+                << "projection: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]\\n"
+                << "rotation_disparity_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
+                << "rotation_world_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n";
+
+    std::ostringstream metadata_yaml;
+    metadata_yaml << "DETAILS: \"" << details_str.str() << "\"";
+
+    // Embed metadata in the SOFTWARE tag using libtiff
+    bool success = TIFFSetField(tiff, TIFFTAG_SOFTWARE, metadata_yaml.str().c_str());
+    TIFFClose(tiff);
+    return success;
 }
 
 class FPS {
@@ -144,12 +173,18 @@ public:
         // Depending on the underlying image type, you might want to use stamped_image.cvt_to_bgr_code
         // to convert to BGR before saving.
         const auto frame_str = frame_string(frame_id);
-        cv::imwrite(image_dir / (frame_str + ".tiff"), img, compression_params);
+        const auto tiff_path = image_dir / (frame_str + ".tiff");
+        cv::imwrite(tiff_path, img, compression_params);
 
         // Extract right_time from additional_field if present (for topbot messages)
         uint64_t right_time = 0;
         if (stamped_image.additional_field_size == 8) {
             memcpy(&right_time, stamped_image.additional_field.data(), 8);
+        }
+
+        // Add timestamp metadata to TIFF file (for topbot images with dual timestamps)
+        if (right_time != 0) {
+            add_tiff_metadata(tiff_path, stamped_image.time, right_time);
         }
 
         {
