@@ -8,6 +8,7 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif ()
 
 find_package(OpenCV 4 REQUIRED COMPONENTS highgui imgproc)
+find_package(TIFF REQUIRED)
 
 add_executable(image_recorder
         src/image_recorder.cpp
@@ -19,6 +20,7 @@ target_link_libraries(image_recorder
         opencv_imgproc
         hammerhead::zmq_msgs
         hammerhead::zmq_opencv
+        TIFF::TIFF
 )
 
 set_target_properties(image_recorder PROPERTIES
