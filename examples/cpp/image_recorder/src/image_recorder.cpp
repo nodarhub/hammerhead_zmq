@@ -180,23 +180,20 @@ public:
         uint64_t right_time = 0;
         if (stamped_image.additional_field_size == 8) {
             memcpy(&right_time, stamped_image.additional_field.data(), 8);
-        }
 
-        // Add timestamp metadata to TIFF file (for topbot images with dual timestamps)
-        if (right_time != 0) {
+            // Add timestamp metadata to TIFF file (for topbot images with dual timestamps)
             add_tiff_metadata(tiff_path, stamped_image.time, right_time);
         }
-
         {
             std::ofstream f(timing_dir / (frame_str + ".txt"));
             f << stamped_image.time;
-            if (right_time != 0) {
+            if (stamped_image.additional_field_size == 8) {
                 f << " " << right_time;
             }
             f << std::flush;
         }
         timing_file << frame_string(frame_id) << " " << stamped_image.time;
-        if (right_time != 0) {
+        if (stamped_image.additional_field_size == 8) {
             timing_file << " " << right_time;
         }
         timing_file << std::endl;
