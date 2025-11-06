@@ -9,13 +9,24 @@ import zmq
 
 try:
     from zmq_msgs.image import StampedImage
-    from zmq_msgs.topic_ports import IMAGE_TOPICS
+    from zmq_msgs.topic_ports import *
 except ImportError:
     sys.path.append(
         os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../zmq_msgs/python"))
     )
     from zmq_msgs.image import StampedImage
-    from zmq_msgs.topic_ports import IMAGE_TOPICS
+    from zmq_msgs.topic_ports import *
+
+folder_name_dict = {
+    LEFT_RAW_TOPIC.name: "left_raw",
+    RIGHT_RAW_TOPIC.name: "right_raw",
+    LEFT_RECT_TOPIC.name: "left_rect",
+    RIGHT_RECT_TOPIC.name: "right_rect",
+    DISPARITY_TOPIC.name: "disparity",
+    COLOR_BLENDED_DEPTH_TOPIC.name: "color_blended_depth",
+    TOPBOT_RAW_TOPIC.name: "topbot_raw",
+    TOPBOT_RECT_TOPIC.name: "topbot_rect",
+}
 
 
 class FPS:
@@ -54,7 +65,7 @@ class FPS:
 
 
 class ZMQImageRecorder:
-    def __init__(self, endpoint, output_dir):
+    def __init__(self, endpoint, output_dir, image_dirname):
         self.context = zmq.Context(1)
         self.socket = self.context.socket(zmq.SUB)
         self.socket.setsockopt(zmq.RCVHWM, 1)
@@ -62,10 +73,10 @@ class ZMQImageRecorder:
         self.socket.connect(endpoint)
         self.last_frame_id = 0
         print(f"Subscribing to {endpoint}")
-        self.topbot_dir = output_dir + "/topbot"
+        self.image_dir = output_dir + "/" + image_dirname
         self.timing_dir = output_dir + "/times"
-        print(f"Creating the directory {self.topbot_dir}")
-        os.makedirs(self.topbot_dir, exist_ok=True)
+        print(f"Creating the directory {self.image_dir}")
+        os.makedirs(self.image_dir, exist_ok=True)
         print(f"Creating the directory {self.timing_dir}")
         os.makedirs(self.timing_dir, exist_ok=True)
         # Create a separate timing file with all times
@@ -96,7 +107,7 @@ class ZMQImageRecorder:
         # We recommend saving tiffs with no compression if the data rate is high.
         # Depending on the underlying image type, consider using stamped_image.cvt_to_bgr_code
         # to convert to BGR before saving.
-        cv2.imwrite(self.topbot_dir + f"/{frame_id:09}.tiff", img, self.compression_params)
+        cv2.imwrite(self.image_dir + f"/{frame_id:09}.tiff", img, self.compression_params)
         with open(self.timing_dir + f"/{frame_id:09}.txt", "w") as f:
             f.write(f"{stamped_image.time}\n")
         self.timing_file.write(f"{frame_id:09} {stamped_image.time}\n")
@@ -164,7 +175,7 @@ def main():
 
     output_dir = sys.argv[3] if len(sys.argv) >= 4 else default_output_dir
     endpoint = f"tcp://{ip}:{topic.port}"
-    subscriber = ZMQImageRecorder(endpoint, output_dir)
+    subscriber = ZMQImageRecorder(endpoint, output_dir, folder_name_dict.get(topic.name, "images"))
     try:
         while True:
             subscriber.loop_once()

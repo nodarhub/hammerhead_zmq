@@ -93,10 +93,12 @@ private:
 
 class ZMQImageRecorder {
 public:
-    ZMQImageRecorder(const std::string &endpoint, const std::filesystem::path &output_dir)
+    ZMQImageRecorder(const std::string &endpoint,  //
+                     const std::filesystem::path &output_dir,  //
+                     const std::string &image_dirname)
         : context(1),
           socket(context, ZMQ_SUB),
-          topbot_dir(output_dir / "topbot"),
+          image_dir(output_dir / image_dirname),
           timing_dir(output_dir / "times"),
           timing_file(output_dir / "times.txt") {
         const int hwm = 1;  // set maximum queue length to 1 message
@@ -104,8 +106,8 @@ public:
         socket.set(zmq::sockopt::subscribe, "");
         socket.connect(endpoint);
         std::cout << "Subscribing to " << endpoint << std::endl;
-        std::cout << "Creating the directory " << topbot_dir << std::endl;
-        std::filesystem::create_directories(topbot_dir);
+        std::cout << "Creating the directory " << image_dir << std::endl;
+        std::filesystem::create_directories(image_dir);
         std::cout << "Creating the directory " << timing_dir << std::endl;
         std::filesystem::create_directories(timing_dir);
         compression_params.push_back(cv::IMWRITE_TIFF_COMPRESSION);
@@ -142,7 +144,7 @@ public:
         // Depending on the underlying image type, you might want to use stamped_image.cvt_to_bgr_code
         // to convert to BGR before saving.
         const auto frame_str = frame_string(frame_id);
-        cv::imwrite(topbot_dir / (frame_str + ".tiff"), img, compression_params);
+        cv::imwrite(image_dir / (frame_str + ".tiff"), img, compression_params);
         {
             std::ofstream f(timing_dir / (frame_str + ".txt"));
             f << stamped_image.time << std::flush;
@@ -154,12 +156,41 @@ private:
     zmq::context_t context;
     zmq::socket_t socket;
     uint64_t last_frame_id = 0;
-    std::filesystem::path topbot_dir;
+    std::filesystem::path image_dir;
     std::filesystem::path timing_dir;
     std::ofstream timing_file;
     std::vector<int> compression_params;
     FPS fps;
 };
+
+std::string get_folder_name(const std::string &topic_name) {
+    using namespace nodar::zmq;
+    if (topic_name == LEFT_RAW_TOPIC.name) {
+        return "left_raw";
+    }
+    if (topic_name == RIGHT_RAW_TOPIC.name) {
+        return "right_raw";
+    }
+    if (topic_name == LEFT_RECT_TOPIC.name) {
+        return "left_rect";
+    }
+    if (topic_name == RIGHT_RECT_TOPIC.name) {
+        return "right_rect";
+    }
+    if (topic_name == DISPARITY_TOPIC.name) {
+        return "disparity";
+    }
+    if (topic_name == COLOR_BLENDED_DEPTH_TOPIC.name) {
+        return "color_blended_depth";
+    }
+    if (topic_name == TOPBOT_RAW_TOPIC.name) {
+        return "topbot_raw";
+    }
+    if (topic_name == TOPBOT_RECT_TOPIC.name) {
+        return "topbot_rect";
+    }
+    return "images";
+}
 
 void print_usage(const std::string &default_ip, const std::string &default_port,
                  const std::string &default_output_dir) {
@@ -237,7 +268,7 @@ int main(int argc, char *argv[]) {
     const auto output_dir = argc >= 4 ? argv[3] : default_output_dir;
     const auto endpoint = std::string("tcp://") + ip + ":" + std::to_string(topic.port);
     std::filesystem::create_directories(output_dir);
-    ZMQImageRecorder subscriber(endpoint, output_dir);
+    ZMQImageRecorder subscriber(endpoint, output_dir, get_folder_name(topic.name));
     while (running) {
         subscriber.loop_once();
     }
