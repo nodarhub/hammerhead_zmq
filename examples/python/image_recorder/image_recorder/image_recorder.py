@@ -104,14 +104,14 @@ class ZMQImageRecorder:
         # Create YAML string with all required fields (compatible with Hammerhead format)
         # Must include all fields that DetailsParameters expects
         details_str = (
-            f"left_time: {left_time}\\n"
-            f"right_time: {right_time}\\n"
-            f"focal_length: 0.0\\n"
-            f"baseline: 0.0\\n"
-            f"meters_above_ground: 0.0\\n"
-            f"projection: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]\\n"
-            f"rotation_disparity_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
-            f"rotation_world_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
+            f"left_time: {left_time}\n"
+            f"right_time: {right_time}\n"
+            f"focal_length: 0.0\n"
+            f"baseline: 0.0\n"
+            f"meters_above_ground: 0.0\n"
+            f"projection: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]\n"
+            f"rotation_disparity_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\n"
+            f"rotation_world_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\n"
         )
         metadata_yaml = f'details: "{details_str}"'
 
