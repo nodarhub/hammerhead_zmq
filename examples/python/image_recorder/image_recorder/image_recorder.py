@@ -148,7 +148,8 @@ class ZMQImageRecorder:
         drop_str = ""
         if self.last_frame_id != 0 and frame_id != self.last_frame_id + 1:
             drop_str = f"Frames dropped: {frame_id - self.last_frame_id - 1}. "
-        print(f"\r{info_str}{fps_str}{drop_str}", end="", flush=True)
+        tiff_str = f"added_metadata = {HAS_TIFFFILE}. "
+        print(f"\r{info_str}{fps_str}{tiff_str}{drop_str}", end="", flush=True)
         self.last_frame_id = frame_id
 
         # We recommend saving tiffs with no compression if the data rate is high.
