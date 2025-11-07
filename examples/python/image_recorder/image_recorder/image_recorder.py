@@ -1,4 +1,5 @@
 import os
+import struct
 import sys
 import time
 from collections import deque
@@ -6,6 +7,13 @@ from datetime import datetime
 
 import cv2
 import zmq
+
+try:
+    import tifffile
+
+    HAS_TIFFFILE = True
+except ImportError:
+    HAS_TIFFFILE = False
 
 try:
     from zmq_msgs.image import StampedImage
@@ -64,6 +72,22 @@ class FPS:
         return f"fps_100: {fps_100:.2f}, fps_inf: {fps_life:.2f}"
 
 
+def get_tiff_metadata(left_time, right_time):
+    # Create YAML string with all required fields (compatible with Hammerhead format)
+    # Must include all fields that DetailsParameters expects (use \\n for literal backslash-n)
+    details_str = (
+        f"left_time: {left_time}\\n"
+        f"right_time: {right_time}\\n"
+        f"focal_length: 0.0\\n"
+        f"baseline: 0.0\\n"
+        f"meters_above_ground: 0.0\\n"
+        f"projection: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]\\n"
+        f"rotation_disparity_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
+        f"rotation_world_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
+    )
+    return f'DETAILS: "{details_str}"'
+
+
 class ZMQImageRecorder:
     def __init__(self, endpoint, output_dir, image_dirname):
         self.context = zmq.Context(1)
@@ -105,16 +129,32 @@ class ZMQImageRecorder:
         drop_str = ""
         if self.last_frame_id != 0 and frame_id != self.last_frame_id + 1:
             drop_str = f"Frames dropped: {frame_id - self.last_frame_id - 1}. "
-        print(f"\r{info_str}{fps_str}{drop_str}", end="", flush=True)
+        tiff_str = f"added_metadata = {HAS_TIFFFILE}. "
+        print(f"\r{info_str}{fps_str}{tiff_str}{drop_str}", end="", flush=True)
         self.last_frame_id = frame_id
+
+        # Extract right_time from additional_field if present (for topbot messages)
+        right_time = None
+        if len(stamped_image.additional_field) == 8:
+            right_time = struct.unpack('<Q', stamped_image.additional_field)[0]
 
         # We recommend saving tiffs with no compression if the data rate is high.
         # Depending on the underlying image type, consider using stamped_image.cvt_to_bgr_code
         # to convert to BGR before saving.
-        cv2.imwrite(self.image_dir + f"/{frame_id:09}.tiff", img, self.compression_params)
+        tiff_path = self.image_dir + f"/{frame_id:09}.tiff"
+        software = get_tiff_metadata(stamped_image.time, right_time) if right_time is not None else None
+        tifffile.imwrite(tiff_path, img, compression="none", software=software)
+
         with open(self.timing_dir + f"/{frame_id:09}.txt", "w") as f:
-            f.write(f"{stamped_image.time}\n")
-        self.timing_file.write(f"{frame_id:09} {stamped_image.time}\n")
+            f.write(f"{stamped_image.time}")
+            if right_time is not None:
+                f.write(f" {right_time}")
+            f.write("\n")
+
+        self.timing_file.write(f"{frame_id:09} {stamped_image.time}")
+        if right_time is not None:
+            self.timing_file.write(f" {right_time}")
+        self.timing_file.write("\n")
         self.timing_file.flush()
         loop_stop_time = time.perf_counter()
         self.loop_latency_log.write(f"{frame_id:09} {loop_stop_time - loop_start_time}\n")
