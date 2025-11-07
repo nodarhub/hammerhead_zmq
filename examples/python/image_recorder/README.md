@@ -40,12 +40,31 @@ python image_recorder.py 127.0.0.1 nodar/right/image_raw output_dir
 | `nodar/right/image_rect` | 9803 | Rectified right image |
 | `nodar/disparity` | 9804 | Disparity map |
 | `nodar/color_blended_depth/image_raw` | 9805 | Color-coded depth visualization |
+| `nodar/topbot_raw` | 9813 | Raw top (left) and bottom (right) camera pair |
+| `nodar/topbot_rect` | 9823 | Rectified top (left) and bottom (right) camera pair |
 
 ## Output
 
-- **Format**: Image files
-- **Location**: Specified output directory
-- **Naming**: Sequential numbering based on received images
+The recorder creates a timestamped folder structure:
+
+```
+<output_dir>/YYYYMMDD-HHMMSS/
+├── <topic_name>/           # Image subdirectory (e.g., left_raw/, topbot_raw/)
+│   ├── 000000001.tiff
+│   ├── 000000002.tiff
+│   └── ...
+├── times/                  # Individual timestamp files
+│   ├── 000000001.txt
+│   ├── 000000002.txt
+│   └── ...
+├── times.txt               # Consolidated timestamps (one line per frame)
+└── loop_latency.txt        # Performance metrics
+```
+
+- **Images**: TIFF format with no compression
+- **Naming**: 9-digit zero-padded frame numbers
+- **Timestamps**: Each frame's timestamp(s) saved in `times/` and consolidated in `times.txt`
+- **TOPBOT metadata**: For topbot images, dual timestamps (left/right) are embedded in TIFF metadata
 
 ## Features
 

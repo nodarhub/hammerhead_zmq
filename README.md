@@ -80,6 +80,9 @@ sudo apt install build-essential cmake
 
 # Install OpenCV (optional but recommended)
 sudo apt install libopencv-dev
+
+# Install libtiff (required for image_recorder)
+sudo apt install libtiff-dev
 ```
 
 ##### Windows:
@@ -116,7 +119,8 @@ Hammerhead publishes data using structured message types over predefined ZMQ por
 | 9803 | `nodar/right/image_rect` | Rectified right image | `StampedImage` |
 | 9804 | `nodar/disparity` | Disparity map (Q12.4 format) | `StampedImage` |
 | 9805 | `nodar/color_blended_depth/image_raw` | Color-coded depth visualization | `StampedImage` |
-| 9813 | `nodar/topbot_raw` | Top/bottom camera feed | `StampedImage` |
+| 9813 | `nodar/topbot_raw` | Raw top (left) and bottom (right) camera pair | `StampedImage` |
+| 9823 | `nodar/topbot_rect` | Rectified top (left) and bottom (right) camera pair | `StampedImage` |
 
 ### 3D Data Streams
 | Port | Topic | Description                        | Message Type |
