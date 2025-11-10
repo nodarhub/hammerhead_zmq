@@ -54,17 +54,25 @@ class Details:
         self.rotation_disparity_to_raw_cam = get_array(
             data, "rotation_disparity_to_raw_cam", (3, 3)
         )
+        self.rotation_right_rect_to_raw_cam = get_array(
+            data, "rotation_right_rect_to_raw_cam", (3, 3)
+        )
         self.rotation_world_to_raw_cam = get_array(data, "rotation_world_to_raw_cam", (3, 3))
+        self.left_fx_fy_cx_cy = get_array(data, "left_fx_fy_cx_cy", (4,))
+        self.right_fx_fy_cx_cy = get_array(data, "right_fx_fy_cx_cy", (4,))
 
     def __str__(self):
         return (
             "Details:\n"
-            f"\tleft_time                   : {self.left_time}\n"
-            f"\tright_time                  : {self.right_time}\n"
-            f"\tfocal_length                : {self.focal_length:.6f}\n"
-            f"\tbaseline                    : {self.baseline:.6f}\n"
-            f"\tmeters_above_ground         : {self.meters_above_ground:.6f}\n"
-            f"\tdisparity_to_depth4x4       :\n{self.disparity_to_depth4x4}\n"
-            f"\trotation_disp_to_raw_cam    :\n{self.rotation_disparity_to_raw_cam}\n"
-            f"\trotation_world_to_raw_cam   :\n{self.rotation_world_to_raw_cam}\n"
+            f"\tleft_time                       : {self.left_time}\n"
+            f"\tright_time                      : {self.right_time}\n"
+            f"\tfocal_length                    : {self.focal_length:.6f}\n"
+            f"\tbaseline                        : {self.baseline:.6f}\n"
+            f"\tmeters_above_ground             : {self.meters_above_ground:.6f}\n"
+            f"\tdisparity_to_depth4x4           :\n{self.disparity_to_depth4x4}\n"
+            f"\trotation_disp_to_raw_cam        :\n{self.rotation_disparity_to_raw_cam}\n"
+            f"\trotation_right_rect_to_raw_cam  :\n{self.rotation_world_to_raw_cam}\n"
+            f"\trotation_world_to_raw_cam       :\n{self.rotation_world_to_raw_cam}\n"
+            f"\tleft_fx_fy_cx_cy                : {self.left_fx_fy_cx_cy}\n"
+            f"\tright_fx_fy_cx_cy               : {self.right_fx_fy_cx_cy}\n"
         )

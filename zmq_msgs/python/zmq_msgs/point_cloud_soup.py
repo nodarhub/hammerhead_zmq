@@ -19,7 +19,10 @@ class PointCloudSoup:
         focal_length=1000,
         disparity_to_depth4x4=None,
         rotation_disparity_to_raw_cam=None,
+        rotation_right_rectified_to_raw_cam=None,
         rotation_world_to_raw_cam=None,
+        left_fx_fy_cx_cy=None,
+        right_fx_fy_cx_cy=None,
         rectified=None,
         disparity=None,
     ):
@@ -31,7 +34,10 @@ class PointCloudSoup:
         self.rotation_disparity_to_raw_cam = (
             rotation_disparity_to_raw_cam  # float array with 9 entries
         )
+        self.rotation_right_rectified_to_raw_cam = rotation_right_rectified_to_raw_cam # float array with 9 entries
         self.rotation_world_to_raw_cam = rotation_world_to_raw_cam  # float array with 9 entries
+        self.left_fx_fy_cx_cy = left_fx_fy_cx_cy  # float array with 4 entries
+        self.right_fx_fy_cx_cy = right_fx_fy_cx_cy  # float array with 4 entries
         self.rectified = rectified
         self.disparity = disparity
 
@@ -44,7 +50,10 @@ class PointCloudSoup:
             + struct.calcsize("QQdd")  # time, frame_id, baseline, focal_length
             + 16 * np.dtype(np.float32).itemsize  # disparity_to_depth4x4
             + 9 * np.dtype(np.float32).itemsize  # rotation_disparity_to_raw_cam
+            + 9 * np.dtype(np.float32).itemsize  # rotation_right_rectified_to_raw_cam
             + 9 * np.dtype(np.float32).itemsize  # rotation_world_to_raw_cam
+            + 4 * np.dtype(np.float32).itemsize  # left_fx_fy_cx_cy
+            + 4 * np.dtype(np.float32).itemsize  # right_fx_fy_cx_cy
             + self.rectified.msg_size()
             + self.disparity.msg_size()
         )
@@ -67,10 +76,22 @@ class PointCloudSoup:
             buffer, dtype=np.float32, count=9, offset=offset
         ).reshape(3, 3)
         offset += self.rotation_disparity_to_raw_cam.nbytes
+        self.rotation_right_rectified_to_raw_cam = np.frombuffer(
+            buffer, dtype=np.float32, count=9, offset=offset
+        ).reshape(3, 3)
+        offset += self.rotation_right_rectified_to_raw_cam.nbytes
         self.rotation_world_to_raw_cam = np.frombuffer(
             buffer, dtype=np.float32, count=9, offset=offset
         ).reshape(3, 3)
         offset += self.rotation_world_to_raw_cam.nbytes
+        self.left_fx_fy_cx_cy = np.frombuffer(
+            buffer, dtype=np.float32, count=4, offset=offset
+        )
+        offset += self.left_fx_fy_cx_cy.nbytes
+        self.right_fx_fy_cx_cy = np.frombuffer(
+            buffer, dtype=np.float32, count=4, offset=offset
+        )
+        offset += self.right_fx_fy_cx_cy.nbytes
         self.rectified = StampedImage()
         offset = self.rectified.read(buffer, offset)
         self.disparity = StampedImage()
@@ -92,9 +113,17 @@ class PointCloudSoup:
         ] = self.rotation_disparity_to_raw_cam.tobytes()
         offset += self.rotation_disparity_to_raw_cam.nbytes
         buffer[
+            offset : offset + self.rotation_right_rectified_to_raw_cam.nbytes
+        ] = self.disparity_to_raw_cam.tobytes()
+        offset += self.rotation_disparity_to_raw_cam.nbytes
+        buffer[
             offset : offset + self.rotation_world_to_raw_cam.nbytes
         ] = self.rotation_world_to_raw_cam.tobytes()
         offset += self.rotation_world_to_raw_cam.nbytes
+        buffer[offset : offset + self.left_fx_fy_cx_cy.nbytes] = self.left_fx_fy_cx_cy.tobytes()
+        offset += self.left_fx_fy_cx_cy.nbytes
+        buffer[offset : offset + self.right_fx_fy_cx_cy.nbytes] = self.right_fx_fy_cx_cy.tobytes()
+        offset += self.right_fx_fy_cx_cy.nbytes
         offset = self.rectified.write(buffer, offset)
         offset = self.disparity.write(buffer, offset)
         return offset

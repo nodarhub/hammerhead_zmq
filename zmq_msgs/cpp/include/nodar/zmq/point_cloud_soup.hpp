@@ -22,8 +22,14 @@ struct PointCloudSoup {
     static constexpr uint64_t disparity_to_depth4x4_bytes = 16 * sizeof(disparity_to_depth4x4[0]);
     std::array<float, 9> rotation_disparity_to_raw_cam{};
     static constexpr uint64_t rotation_disparity_to_raw_cam_bytes = 9 * sizeof(rotation_disparity_to_raw_cam[0]);
+    std::array<float, 9> rotation_right_rectified_to_raw_cam{};
+    static constexpr uint64_t rotation_right_rectified_to_raw_cam_bytes = 9 * sizeof(rotation_right_rectified_to_raw_cam[0]);
     std::array<float, 9> rotation_world_to_raw_cam{};
     static constexpr uint64_t rotation_world_to_raw_cam_bytes = 9 * sizeof(rotation_world_to_raw_cam[0]);
+    std::array<float, 4> left_fx_fy_cx_cy{};
+    static constexpr uint64_t left_fx_fy_cx_cy_bytes = 4 * sizeof(left_fx_fy_cx_cy[0]);
+    std::array<float, 4> right_fx_fy_cx_cy{};
+    static constexpr uint64_t right_fx_fy_cx_cy_bytes = 4 * sizeof(right_fx_fy_cx_cy[0]);
 
     StampedImage rectified;
     StampedImage disparity;
@@ -36,7 +42,10 @@ struct PointCloudSoup {
                    double focal_length,  //
                    std::array<float, 16> disparity_to_depth4x4,  //
                    std::array<float, 9> rotation_disparity_to_raw_cam,  //
+                   std::array<float, 9> rotation_right_rectified_to_raw_cam,  //
                    std::array<float, 9> rotation_world_to_raw_cam,  //
+                   std::array<float, 4> left_fx_fy_cx_cy,
+                   std::array<float, 4> right_fx_fy_cx_cy,
                    StampedImage rectified,  //
                    StampedImage disparity)
         : time(time),
@@ -45,7 +54,10 @@ struct PointCloudSoup {
           focal_length(focal_length),
           disparity_to_depth4x4(disparity_to_depth4x4),
           rotation_disparity_to_raw_cam(rotation_disparity_to_raw_cam),
+          rotation_right_rectified_to_raw_cam(rotation_right_rectified_to_raw_cam),
           rotation_world_to_raw_cam(rotation_world_to_raw_cam),
+          left_fx_fy_cx_cy(left_fx_fy_cx_cy),
+          right_fx_fy_cx_cy(right_fx_fy_cx_cy),
           rectified(std::move(rectified)),
           disparity(std::move(disparity)) {}
 
@@ -54,7 +66,9 @@ struct PointCloudSoup {
     [[nodiscard]] static constexpr uint64_t msgSize(uint32_t rows_, uint32_t cols_, uint32_t rectified_type_,
                                                     uint32_t disparity_type_) {
         return sizeof(INFO) + sizeof(baseline) + sizeof(focal_length) + sizeof(time) + sizeof(frame_id) +
-               disparity_to_depth4x4_bytes + rotation_disparity_to_raw_cam_bytes + rotation_world_to_raw_cam_bytes +
+               disparity_to_depth4x4_bytes + rotation_disparity_to_raw_cam_bytes + rotation_right_rectified_to_raw_cam_bytes +
+               rotation_world_to_raw_cam_bytes +
+               left_fx_fy_cx_cy_bytes + right_fx_fy_cx_cy_bytes +
                StampedImage::msgSize(rows_, cols_, rectified_type_, 0) +
                StampedImage::msgSize(rows_, cols_, disparity_type_, 0);
     }
@@ -84,8 +98,15 @@ struct PointCloudSoup {
         src += disparity_to_depth4x4_bytes;
         memcpy(rotation_disparity_to_raw_cam.data(), src, rotation_disparity_to_raw_cam_bytes);
         src += rotation_disparity_to_raw_cam_bytes;
+        memcpy(rotation_right_rectified_to_raw_cam.data(), src, rotation_disparity_to_raw_cam_bytes);
+        src += rotation_disparity_to_raw_cam_bytes;
         memcpy(rotation_world_to_raw_cam.data(), src, rotation_world_to_raw_cam_bytes);
         src += rotation_world_to_raw_cam_bytes;
+        // framewise-updated intrinsics
+        memcpy(left_fx_fy_cx_cy.data(), src, left_fx_fy_cx_cy_bytes);
+        src += left_fx_fy_cx_cy_bytes;
+        memcpy(right_fx_fy_cx_cy.data(), src, right_fx_fy_cx_cy_bytes);
+        src += right_fx_fy_cx_cy_bytes;
 
         // Read the image data
         rectified = StampedImage(src);
@@ -103,7 +124,10 @@ struct PointCloudSoup {
                              double focal_length_,  //
                              const std::array<float, 16> &disparity_to_depth4x4_,  //
                              const std::array<float, 9> &rotation_disparity_to_raw_cam_,  //
+                             const std::array<float, 9> &rotation_right_rectified_to_raw_cam,  //
                              const std::array<float, 9> &rotation_world_to_raw_cam_,
+                             const std::array<float, 4> &left_fx_fy_cx_cy_,
+                             const std::array<float, 4> &right_fx_fy_cx_cy_,
                              uint32_t rows_,  //
                              uint32_t cols_) {
         dst = utils::append(dst, getInfo());
@@ -118,8 +142,18 @@ struct PointCloudSoup {
         memcpy(dst, rotation_disparity_to_raw_cam_.data(), rotation_disparity_to_raw_cam_bytes);
         dst += rotation_disparity_to_raw_cam_bytes;
 
+        memcpy(dst, rotation_right_rectified_to_raw_cam.data(), rotation_right_rectified_to_raw_cam_bytes);
+        dst += rotation_disparity_to_raw_cam_bytes;
+
         memcpy(dst, rotation_world_to_raw_cam_.data(), rotation_world_to_raw_cam_bytes);
         dst += rotation_world_to_raw_cam_bytes;
+
+        memcpy(dst, left_fx_fy_cx_cy_.data(), left_fx_fy_cx_cy_bytes);
+        dst += left_fx_fy_cx_cy_bytes;
+
+        memcpy(dst, right_fx_fy_cx_cy_.data(), right_fx_fy_cx_cy_bytes);
+        dst += right_fx_fy_cx_cy_bytes;
+
         return dst;
     }
 
@@ -130,7 +164,10 @@ struct PointCloudSoup {
                       double focal_length_,  //
                       const std::array<float, 16> &disparity_to_depth4x4_,  //
                       const std::array<float, 9> &rotation_disparity_to_raw_cam_,  //
+                      const std::array<float, 9> &rotation_right_rectified_to_raw_cam,  //
                       const std::array<float, 9> &rotation_world_to_raw_cam_,
+                      const std::array<float, 4> &left_fx_fy_cx_cy_,
+                      const std::array<float, 4> &right_fx_fy_cx_cy_,
                       uint32_t rows_,  //
                       uint32_t cols_,  //
                       uint32_t rectified_type_,  //
@@ -144,7 +181,10 @@ struct PointCloudSoup {
                            focal_length_,  //
                            disparity_to_depth4x4_,  //
                            rotation_disparity_to_raw_cam_,  //
+                           rotation_right_rectified_to_raw_cam,  //
                            rotation_world_to_raw_cam_,  //
+                           left_fx_fy_cx_cy_,
+                           right_fx_fy_cx_cy_,
                            rows_,  //
                            cols_);
         dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, rectified_type_, rectified_data_, 0);
@@ -159,7 +199,10 @@ struct PointCloudSoup {
                       double focal_length_,  //
                       const std::array<float, 16> &disparity_to_depth4x4_,  //
                       const std::array<float, 9> &rotation_disparity_to_raw_cam_,  //
+                      const std::array<float, 9> &rotation_right_rectified_to_raw_cam_,  //
                       const std::array<float, 9> &rotation_world_to_raw_cam_,  //
+                      const std::array<float, 4> &left_fx_fy_cx_cy_,
+                      const std::array<float, 4> &right_fx_fy_cx_cy_,
                       const StampedImage &rectified_,  //
                       const StampedImage &disparity_) {
         assert(rectified_.rows == disparity_.rows &&
@@ -173,7 +216,10 @@ struct PointCloudSoup {
                      focal_length_,  //
                      disparity_to_depth4x4_,  //
                      rotation_disparity_to_raw_cam_,  //
+                     rotation_right_rectified_to_raw_cam_,  //
                      rotation_world_to_raw_cam_,  //
+                     left_fx_fy_cx_cy_, //
+                     right_fx_fy_cx_cy_, //
                      rectified_.rows,  //
                      rectified_.cols,  //
                      rectified_.type,  //
@@ -184,7 +230,8 @@ struct PointCloudSoup {
 
     auto write(uint8_t *dst) const {
         return write(dst, time, frame_id, baseline, focal_length, disparity_to_depth4x4, rotation_disparity_to_raw_cam,
-                     rotation_world_to_raw_cam, rectified, disparity);
+                rotation_right_rectified_to_raw_cam, rotation_world_to_raw_cam, left_fx_fy_cx_cy, right_fx_fy_cx_cy,
+                rectified, disparity);
     }
 };
 
