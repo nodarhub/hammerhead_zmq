@@ -16,7 +16,8 @@ add_executable(occupancy_map_viewer
 target_link_libraries(occupancy_map_viewer
         PRIVATE
         hammerhead::zmq_msgs
-        ${OpenCV_LIBS}
+        hammerhead::zmq_opencv
+        opencv_highgui
 )
 
 set_target_properties(occupancy_map_viewer PROPERTIES
