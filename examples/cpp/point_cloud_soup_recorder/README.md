@@ -15,11 +15,16 @@ cmake --build . --config Release
 
 ```bash
 # Linux
-./point_cloud_soup_recorder [hammerhead_ip] [output_directory]
+./point_cloud_soup_recorder [OPTIONS] [hammerhead_ip] [output_directory]
 
 # Windows
-./Release/point_cloud_soup_recorder.exe [hammerhead_ip] [output_directory]
+./Release/point_cloud_soup_recorder.exe [OPTIONS] [hammerhead_ip] [output_directory]
 ```
+
+### Options
+
+- `-w`, `--wait-for-scheduler`: Enable scheduler synchronization with Hammerhead. When enabled, the recorder will wait for Hammerhead to request the next frame before continuing, ensuring frame-by-frame synchronization.
+- `-h`, `--help`: Display usage information
 
 ### Parameters
 
@@ -38,7 +43,29 @@ cmake --build . --config Release
 # Record point clouds from remote device with custom output directory
 ./point_cloud_soup_recorder 10.10.1.10 /tmp/ply_output
 
+# Record with scheduler synchronization (frame-by-frame)
+./point_cloud_soup_recorder -w 10.10.1.10 /tmp/ply_output
+./point_cloud_soup_recorder --wait-for-scheduler 10.10.1.10 /tmp/ply_output
+
 ```
+
+### Scheduler Synchronization Workflow
+
+When using the `-w` flag for frame-by-frame synchronization:
+
+1. **Configure Hammerhead** - Edit `master_config.ini`:
+   ```ini
+   wait_for_scheduler = 1
+   ```
+
+2. **Start the recorder first**:
+   ```bash
+   ./point_cloud_soup_recorder -w
+   ```
+
+3. **Start Hammerhead** - The recorder will now control frame processing timing
+
+This ensures proper ZMQ connection establishment.
 
 ## Output
 
@@ -53,6 +80,7 @@ cmake --build . --config Release
 - Reconstruct full point clouds from compact soup representation
 - Generate PLY files compatible with CloudCompare and other tools
 - Handle high-resolution point clouds efficiently with minimal memory usage
+- Optional scheduler synchronization for frame-by-frame processing with Hammerhead
 
 ## `PointCloudSoup` Format
 
