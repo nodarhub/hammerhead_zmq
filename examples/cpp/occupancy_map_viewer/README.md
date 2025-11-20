@@ -1,6 +1,11 @@
 # Occupancy Map Viewer
 
-Real-time viewer for occupancy grid maps with coordinate overlay, published by Hammerhead's GridDetect feature.
+Real-time viewer for occupancy grid maps published by Hammerhead's GridDetect feature.
+
+This directory contains two versions:
+
+- **`occupancy_map_viewer`**: Full version with OpenCV visualization (grid overlay, coordinate labels)
+- **`occupancy_map_stats`**: Lightweight version without OpenCV (prints metadata and statistics only)
 
 ## Build
 
@@ -11,7 +16,11 @@ cmake ..
 cmake --build . --config Release
 ```
 
+Both executables will be built in the same directory.
+
 ## Usage
+
+### occupancy_map_viewer (with visualization)
 
 ```bash
 # Linux
@@ -20,6 +29,20 @@ cmake --build . --config Release
 # Windows
 ./Release/occupancy_map_viewer.exe <src_ip>
 ```
+
+**Requires**: OpenCV 4
+
+### occupancy_map_stats (statistics only)
+
+```bash
+# Linux
+./occupancy_map_stats <src_ip>
+
+# Windows
+./Release/occupancy_map_stats.exe <src_ip>
+```
+
+**Requires**: No OpenCV dependency - only ZMQ
 
 ### Parameters
 
@@ -31,17 +54,23 @@ cmake --build . --config Release
 # View occupancy map from local device
 ./occupancy_map_viewer 127.0.0.1
 
-# View occupancy map from remote device
-./occupancy_map_viewer 10.10.1.10
+# Print occupancy statistics from remote device (no OpenCV needed)
+./occupancy_map_stats 10.10.1.10
 ```
 
 ## Features
 
+### occupancy_map_viewer
 - Binary occupancy grid visualization (white = occupied, black = free)
 - Grid overlay with 10-meter spacing in physical coordinates
 - Coordinate labels in margins (red for X-axis lateral, green for Z-axis depth)
 - Real-time frame statistics: timestamp, grid dimensions, occupied cell count
 - Metadata display: grid bounds (xMin, xMax, zMin, zMax) and cell size
+
+### occupancy_map_stats
+- Prints frame statistics: frame ID, timestamp, grid dimensions, image type
+- Displays occupied cell count and occupancy percentage
+- Shows metadata: grid bounds (xMin, xMax, zMin, zMax), cell size, grid dimensions
 
 ## Prerequisites
 
