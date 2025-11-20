@@ -1,7 +1,6 @@
 #pragma once
 
 #include <atomic>
-#include <chrono>
 #include <condition_variable>
 #include <list>
 #include <mutex>
@@ -40,8 +39,6 @@ public:
             const std::string endpoint = "tcp://*:" + std::to_string(topic.port);
             std::cout << "Binding publisher for " << topic.name << " on the endpoint " << endpoint << std::endl;
             socket.bind(endpoint);
-            // ZMQ slow joiner mitigation: wait for subscribers to connect after binding
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         } else {
             // Otherwise, assume this is a subscriber IP and connect to it
             const std::string endpoint = "tcp://" + ip + ":" + std::to_string(topic.port);
