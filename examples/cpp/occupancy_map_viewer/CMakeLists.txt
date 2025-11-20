@@ -25,3 +25,19 @@ set_target_properties(occupancy_map_viewer PROPERTIES
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
 )
+
+# Stats version without OpenCV - just prints metadata and occupied cell count
+add_executable(occupancy_map_stats
+        src/occupancy_map_stats.cpp
+)
+
+target_link_libraries(occupancy_map_stats
+        PRIVATE
+        hammerhead::zmq_msgs
+)
+
+set_target_properties(occupancy_map_stats PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED YES
+        CXX_EXTENSIONS NO
+)
