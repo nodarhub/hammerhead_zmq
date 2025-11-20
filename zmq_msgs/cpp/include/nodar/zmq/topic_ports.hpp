@@ -20,8 +20,9 @@ constexpr Topic DISPARITY_TOPIC{"nodar/disparity", 9804};
 constexpr Topic COLOR_BLENDED_DEPTH_TOPIC{"nodar/color_blended_depth/image_raw", 9805};
 constexpr Topic TOPBOT_RAW_TOPIC{"nodar/topbot_raw", 9813};
 constexpr Topic TOPBOT_RECT_TOPIC{"nodar/topbot_rect", 9823};
+constexpr Topic OCCUPANCY_MAP_TOPIC{"nodar/occupancy_map", 9900};
 
-constexpr std::array<Topic, 8> IMAGE_TOPICS{{
+constexpr std::array<Topic, 9> IMAGE_TOPICS{{
     LEFT_RAW_TOPIC,  //
     RIGHT_RAW_TOPIC,  //
     LEFT_RECT_TOPIC,  //
@@ -30,6 +31,7 @@ constexpr std::array<Topic, 8> IMAGE_TOPICS{{
     COLOR_BLENDED_DEPTH_TOPIC,  //
     TOPBOT_RAW_TOPIC,  //
     TOPBOT_RECT_TOPIC,  //
+    OCCUPANCY_MAP_TOPIC,  //
 }};
 
 constexpr Topic SOUP_TOPIC{"nodar/point_cloud_soup", 9806};

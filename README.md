@@ -121,6 +121,7 @@ Hammerhead publishes data using structured message types over predefined ZMQ por
 | 9805 | `nodar/color_blended_depth/image_raw` | Color-coded depth visualization | `StampedImage` |
 | 9813 | `nodar/topbot_raw` | Raw top (left) and bottom (right) camera pair | `StampedImage` |
 | 9823 | `nodar/topbot_rect` | Rectified top (left) and bottom (right) camera pair | `StampedImage` |
+| 9900 | `nodar/occupancy_map` | Occupancy map | `StampedImage` |
 
 ### 3D Data Streams
 | Port | Topic | Description                        | Message Type |
