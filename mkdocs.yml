@@ -44,6 +44,7 @@ nav:
       - Point Cloud Recorder: examples/python/point_cloud_recorder.md
       - Point Cloud Soup Recorder: examples/python/point_cloud_soup_recorder.md
       - Obstacle Data Recorder: examples/python/obstacle_data_recorder.md
+      - Occupancy Map Viewer: examples/python/occupancy_map_viewer.md
       - Depth to Disparity: examples/python/depth_to_disparity.md
       - Disparity to Point Cloud: examples/python/disparity_to_ordered_point_cloud.md
       - Hammerhead Scheduler: examples/python/hammerhead_scheduler.md
@@ -54,6 +55,7 @@ nav:
       - Point Cloud Recorder: examples/cpp/point_cloud_recorder.md
       - Point Cloud Soup Recorder: examples/cpp/point_cloud_soup_recorder.md
       - Obstacle Data Recorder: examples/cpp/obstacle_data_recorder.md
+      - Occupancy Map Viewer: examples/cpp/occupancy_map_viewer.md
       - Depth to Disparity: examples/cpp/depth_to_disparity.md
       - Offline Point Cloud Generator: examples/cpp/offline_point_cloud_generator.md
       - Hammerhead Scheduler: examples/cpp/hammerhead_scheduler.md

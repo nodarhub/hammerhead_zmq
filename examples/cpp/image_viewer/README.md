@@ -55,6 +55,7 @@ cmake --build . --config Release
 | `nodar/color_blended_depth/image_raw` | 9805 | Color-coded depth visualization |
 | `nodar/topbot_raw` | 9813 | Raw top (left) and bottom (right) camera pair |
 | `nodar/topbot_rect` | 9823 | Rectified top (left) and bottom (right) camera pair |
+| `nodar/occupancy_map` | 9900 | Occupancy map |
 
 ## Features
 
