@@ -11,6 +11,7 @@ RIGHT_RECT_TOPIC = Topic("nodar/right/image_rect", 9803)
 DISPARITY_TOPIC = Topic("nodar/disparity", 9804)
 COLOR_BLENDED_DEPTH_TOPIC = Topic("nodar/color_blended_depth/image_raw", 9805)
 TOPBOT_RAW_TOPIC = Topic("nodar/topbot_raw", 9813)
+TOPBOT_RECT_TOPIC = Topic("nodar/topbot_rect", 9823)
 
 # Define the image topics as a list of Topic objects
 IMAGE_TOPICS = [
@@ -21,6 +22,7 @@ IMAGE_TOPICS = [
     DISPARITY_TOPIC,
     COLOR_BLENDED_DEPTH_TOPIC,
     TOPBOT_RAW_TOPIC,
+    TOPBOT_RECT_TOPIC,
 ]
 
 # Define other topics as individual Topic objects

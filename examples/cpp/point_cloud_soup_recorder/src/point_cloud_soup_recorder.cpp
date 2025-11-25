@@ -1,11 +1,15 @@
 #include <atomic>
+#include <chrono>
 #include <csignal>
 #include <filesystem>
 #include <iostream>
+#include <memory>
 #include <nodar/zmq/opencv_utils.hpp>
 #include <nodar/zmq/point_cloud_soup.hpp>
 #include <nodar/zmq/topic_ports.hpp>
 #include <opencv2/calib3d.hpp>
+#include <string>
+#include <thread>
 #include <zmq.hpp>
 
 #include "ply.hpp"
@@ -22,13 +26,21 @@ class PointCloudSink {
 public:
     uint64_t last_frame_id = 0;
 
-    PointCloudSink(const std::filesystem::path &output_dir, const std::string &endpoint)
-        : output_dir(output_dir), context(1), socket(context, ZMQ_SUB) {
+    PointCloudSink(const std::filesystem::path &output_dir, const std::string &endpoint,
+                   const std::string &scheduler_endpoint, bool enable_scheduler)
+        : output_dir(output_dir), context(1), socket(context, ZMQ_SUB), enable_scheduler(enable_scheduler) {
         const int hwm = 1;  // set maximum queue length to 1 message
         socket.set(zmq::sockopt::rcvhwm, hwm);
         socket.set(zmq::sockopt::subscribe, "");
         socket.connect(endpoint);
         std::cout << "Subscribing to " << endpoint << std::endl;
+
+        // Connect to scheduler (wait server) if enabled
+        if (enable_scheduler) {
+            scheduler_socket = std::make_unique<zmq::socket_t>(context, ZMQ_DEALER);
+            scheduler_socket->connect(scheduler_endpoint);
+            std::cout << "Connected to scheduler at " << scheduler_endpoint << std::endl;
+        }
     }
 
     void loopOnce() {
@@ -48,7 +60,7 @@ public:
                       << ", last frame ID: " << last_frame_id << std::endl;
         }
         last_frame_id = frame_id;
-        std::cout << "\rFrame # " << frame_id << ". " << std::flush;
+        std::cout << "\rFrame # " << frame_id << ". " << std::endl;
 
         // Allocate space for the point cloud
         const auto rows = soup.disparity.rows;
@@ -127,8 +139,19 @@ public:
         std::ostringstream filename_ss;
         filename_ss << std::setw(9) << std::setfill('0') << frame_id << ".ply";
         const auto filename = output_dir / filename_ss.str();
-        std::cout << "Writing " << filename << std::flush;
+        std::cout << "Writing " << filename << std::endl;
         writePly(filename, point_cloud);
+
+        // Wait for scheduler request from hammerhead, then send reply (if enabled)
+        if (enable_scheduler && scheduler_socket) {
+            zmq::message_t scheduler_request;
+            scheduler_socket->recv(scheduler_request, zmq::recv_flags::none);  // Blocking wait
+
+            // Send reply to release hammerhead for next frame
+            zmq::message_t reply(2);
+            memcpy(reply.data(), "OK", 2);
+            scheduler_socket->send(reply, zmq::send_flags::none);
+        }
     }
 
 private:
@@ -141,39 +164,76 @@ private:
     std::vector<PointXYZRGB> point_cloud;
     zmq::context_t context;
     zmq::socket_t socket;
+    std::unique_ptr<zmq::socket_t> scheduler_socket;
+    bool enable_scheduler;
 };
 
 void printUsage(const std::string &default_ip) {
-    std::cout << "You should specify the IP address of the device running hammerhead:\n\n"
-                 "     ./point_cloud_soup_recorder [hammerhead_ip] [output_directory]\n\n"
-                 "e.g. ./point_cloud_soup_recorder 10.10.1.10 /tmp/ply_output\n\n"
-                 "In the meantime, we assume that you are running this on the device running Hammerhead,\n"
-                 "that is, we assume that you specified\n\n"
-                 "     ./point_cloud_soup_recorder "
-              << default_ip << "\n----------------------------------------" << std::endl;
+    std::cout << "Usage: ./point_cloud_soup_recorder [OPTIONS] [hammerhead_ip] [output_directory]\n\n"
+                 "Options:\n"
+                 "  -w, --wait-for-scheduler    Enable scheduler synchronization with hammerhead\n\n"
+                 "Arguments:\n"
+                 "  hammerhead_ip               IP address of the device running hammerhead (default: "
+              << default_ip
+              << ")\n"
+                 "  output_directory            Directory to save PLY files (default: ./point_clouds)\n\n"
+                 "Examples:\n"
+                 "  ./point_cloud_soup_recorder 10.10.1.10 /tmp/ply_output\n"
+                 "  ./point_cloud_soup_recorder -w 10.10.1.10 /tmp/ply_output\n"
+                 "  ./point_cloud_soup_recorder --wait-for-scheduler\n"
+                 "----------------------------------------"
+              << std::endl;
 }
 
 int main(int argc, char *argv[]) {
     static constexpr auto default_ip = "127.0.0.1";
     static constexpr auto topic = nodar::zmq::SOUP_TOPIC;
+    static constexpr auto wait_topic = nodar::zmq::WAIT_TOPIC;
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
+
+    // Parse command-line arguments
+    bool enable_scheduler = false;
+    int positional_arg_index = 1;
+
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "-w" || arg == "--wait-for-scheduler") {
+            enable_scheduler = true;
+        } else if (arg == "-h" || arg == "--help") {
+            printUsage(default_ip);
+            return 0;
+        } else {
+            // First positional argument
+            positional_arg_index = i;
+            break;
+        }
+    }
+
     if (argc == 1) {
         printUsage(default_ip);
     }
-    const auto ip = argc > 1 ? argv[1] : default_ip;
-    const auto endpoint = std::string("tcp://") + ip + ":" + std::to_string(topic.port);
 
+    // Parse positional arguments (IP and output directory)
+    std::string ip = default_ip;
     std::filesystem::path output_dir;
-    if (argc > 2) {
-        output_dir = argv[2];
+
+    if (positional_arg_index < argc) {
+        ip = argv[positional_arg_index];
+    }
+
+    if (positional_arg_index + 1 < argc) {
+        output_dir = argv[positional_arg_index + 1];
     } else {
         const auto HERE = std::filesystem::path(__FILE__).parent_path();
         output_dir = HERE / "point_clouds";
     }
+
+    const auto endpoint = std::string("tcp://") + ip + ":" + std::to_string(topic.port);
+    const auto scheduler_endpoint = std::string("tcp://") + ip + ":" + std::to_string(wait_topic.port);
     std::filesystem::create_directories(output_dir);
 
-    PointCloudSink sink(output_dir, endpoint);
+    PointCloudSink sink(output_dir, endpoint, scheduler_endpoint, enable_scheduler);
     while (running) {
         sink.loopOnce();
     }
