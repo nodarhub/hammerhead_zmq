@@ -34,7 +34,7 @@ POINT_CLOUD_RGB_TOPIC = Topic("nodar/point_cloud_rgb", 9810)
 RECORDING_TOPIC = Topic("nodar/recording", 9811)
 OBSTACLE_TOPIC = Topic("nodar/obstacle", 9812)
 WAIT_TOPIC = Topic("nodar/wait", 9814)
-QA_FINDINGS_TOPIC = Topic("nodar/qa_findings", 9815)
+QA_FINDINGS_TOPIC = Topic("nodar/qa_findings", 9822)
 
 
 # Function to retrieve reserved ports dynamically
