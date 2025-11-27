@@ -43,21 +43,17 @@ The viewer displays three categories of quality assurance findings:
 
 ### Hammerhead Monitoring
 - **Frame Sync**: Warning ≥50μs, Error ≥1000μs (synchronization timing between cameras)
-- **FOM (Figure of Merit)**: Stereo vision quality metrics (0.0-1.0 scale, higher = better):
-  - **Main FOM**: Warning ≤0.4, Error ≤0.1 (overall stereo matching quality)
-  - **FOM Cal 1**: Warning ≤0.4, Error ≤0.1 (first calibration quality metric)
-  - **FOM Cal 2**: Warning ≤0.4, Error ≤0.1 (second calibration quality metric)
 
 ### Image Monitoring
 - **Underexposure**: Warning ≤-1.5 (exposure assessment)
-  - *Detection method*: Analyzes pixel intensity histograms to identify when too many pixels are dark/clipped to black
-  - *Metric meaning*: Negative values indicate underexposure severity; more negative = more underexposed
-- **Overexposure**: Warning ≥0.3 (exposure assessment)  
-  - *Detection method*: Analyzes pixel intensity histograms to identify when too many pixels are bright/clipped to white
-  - *Metric meaning*: Positive values indicate overexposure severity; higher values = more overexposed
+    - *Detection method*: Analyzes pixel intensity histograms to identify when too many pixels are dark/clipped to black
+    - *Metric meaning*: Negative values indicate underexposure severity; more negative = more underexposed
+- **Overexposure**: Warning ≥0.3 (exposure assessment)
+    - *Detection method*: Analyzes pixel intensity histograms to identify when too many pixels are bright/clipped to white
+    - *Metric meaning*: Positive values indicate overexposure severity; higher values = more overexposed
 - **Blur**: Warning ≤0.58 (image sharpness, lower = more blurry)
-  - *Detection method*: Uses DFT (Discrete Fourier Transform) to analyze frequency domain energy content
-  - *Metric meaning*: Higher energy in high frequencies indicates sharper images; values below 0.58 indicate insufficient sharpness for reliable stereo matching
+    - *Detection method*: Uses DFT (Discrete Fourier Transform) to analyze frequency domain energy content
+    - *Metric meaning*: Higher energy in high frequencies indicates sharper images; values below 0.58 indicate insufficient sharpness for reliable stereo matching
 
 ## Output Format
 
@@ -117,12 +113,12 @@ publish_qa_findings = 1
 
 ### Hammerhead Monitoring Issues
 - **Frame Sync Errors**: Check camera connections, verify cable integrity, ensure cameras are properly synchronized
-- **Low FOM Values**:
-  - Perform initial calibration routine if mounting cameras for the first time
-  - Perform refinement calibration periodically  
-  - Check for obstructions in camera field of view
-  - Ensure cameras are clean and focused
-  - Improve lighting conditions
+- **If you observe sparse or empty depth maps**:
+    - Perform initial calibration routine if mounting cameras for the first time
+    - Perform refinement calibration periodically
+    - Check for obstructions in camera field of view
+    - Ensure cameras are clean and focused
+    - Improve lighting conditions
 
 ### Image Monitoring Issues
 - **Underexposure**: Increase lighting, adjust camera exposure settings, check for lens obstruction

@@ -48,10 +48,6 @@ The viewer displays three categories of quality assurance findings:
 
 ### Hammerhead Monitoring
 - **Frame Sync**: Warning ≥50μs, Error ≥1000μs (synchronization timing between cameras)
-- **FOM (Figure of Merit)**: Stereo vision quality metrics (0.0-1.0 scale, higher = better):
-    - **Main FOM**: Warning ≤0.4, Error ≤0.1 (overall stereo matching quality)
-    - **FOM Cal 1**: Warning ≤0.4, Error ≤0.1 (first calibration quality metric)
-    - **FOM Cal 2**: Warning ≤0.4, Error ≤0.1 (second calibration quality metric)
 
 ### Image Monitoring
 - **Underexposure**: Warning ≤-1.5 (exposure assessment)
@@ -122,7 +118,7 @@ publish_qa_findings = 1
 
 ### Hammerhead Monitoring Issues
 - **Frame Sync Errors**: Check camera connections, verify cable integrity, ensure cameras are properly synchronized
-- **Low FOM Values**:
+- **If you observe sparse or empty depth maps**:
     - Perform initial calibration routine if mounting cameras for the first time
     - Perform refinement calibration periodically
     - Check for obstructions in camera field of view
