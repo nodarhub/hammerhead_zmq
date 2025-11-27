@@ -48,7 +48,7 @@ constexpr Topic OBSTACLE_TOPIC{"nodar/obstacle", 9812};
 
 constexpr Topic WAIT_TOPIC{"nodar/wait", 9814};
 
-constexpr Topic QA_FINDINGS_TOPIC{"nodar/qa_findings", 9815};
+constexpr Topic QA_FINDINGS_TOPIC{"nodar/qa_findings", 9822};
 
 // Function to retrieve reserved ports dynamically
 inline auto getReservedPorts() {
