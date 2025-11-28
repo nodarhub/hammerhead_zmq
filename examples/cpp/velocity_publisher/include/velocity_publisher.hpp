@@ -12,7 +12,7 @@ namespace zmq {
 
 class VelocityPublisher {
 public:
-    explicit VelocityPublisher(const std::string& ip = "") : publisher(VELOCITY_TOPIC, ip) {
+    explicit VelocityPublisher() : publisher(VELOCITY_TOPIC, "") {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
