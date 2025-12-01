@@ -11,8 +11,8 @@
 namespace nodar {
 namespace zmq {
 
-struct Velocity {
-    [[nodiscard]] static constexpr auto msgSize() { return sizeof(Velocity) + sizeof(MessageInfo); }
+struct VelocityData {
+    [[nodiscard]] static constexpr auto msgSize() { return sizeof(VelocityData) + sizeof(MessageInfo); }
     [[nodiscard]] static constexpr MessageInfo expected_info() { return MessageInfo(9); }
 
     uint64_t time{};  // timestamp in nanoseconds
@@ -26,19 +26,19 @@ struct Velocity {
                                   0.0f, 1.0f, 0.0f,  //
                                   0.0f, 0.0f, 1.0f};
 
-    Velocity() = default;
+    VelocityData() = default;
 
-    explicit Velocity(uint64_t time_, const std::array<float, 3>& velocity_, const std::array<float, 9>& rotation_)
+    explicit VelocityData(uint64_t time_, const std::array<float, 3>& velocity_, const std::array<float, 9>& rotation_)
         : time(time_), velocity(velocity_), rotation(rotation_) {}
 
-    explicit Velocity(const uint8_t* src) { read(src); }
+    explicit VelocityData(const uint8_t* src) { read(src); }
 
     void read(const uint8_t* src) {
         // Check the info to make sure this message is the type we expect
         MessageInfo info;
         src = utils::read(src, info);
-        if (info.is_different(expected_info(), "Velocity")) {
-            std::cerr << "This message either is not a Velocity message, or is a different message version."
+        if (info.is_different(expected_info(), "VelocityData")) {
+            std::cerr << "This message either is not a VelocityData message, or is a different message version."
                       << std::endl;
             return;
         }

@@ -20,17 +20,17 @@ public:
     bool publishVelocity(const uint64_t& timestamp_ns, const std::array<float, 3>& velocity,
                          const std::array<float, 9>& rotation = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
                                                                  1.0f}) {
-        nodar::zmq::Velocity vel_msg(timestamp_ns, velocity, rotation);
+        nodar::zmq::VelocityData velocity_data(timestamp_ns, velocity, rotation);
 
         auto buffer = publisher.getBuffer();
-        buffer->resize(vel_msg.msgSize());
-        vel_msg.write(buffer->data());
+        buffer->resize(velocity_data.msgSize());
+        velocity_data.write(buffer->data());
         publisher.send(buffer);
         return true;
     }
 
 private:
-    nodar::zmq::Publisher<nodar::zmq::Velocity> publisher;
+    nodar::zmq::Publisher<nodar::zmq::VelocityData> publisher;
 };
 
 }  // namespace zmq
