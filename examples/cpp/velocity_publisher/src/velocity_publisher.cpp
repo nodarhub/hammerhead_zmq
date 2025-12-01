@@ -31,18 +31,22 @@ int main(int argc, char* argv[]) {
             std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch())
                 .count();
 
-        // Example velocity data (constant forward motion in Nodar coordinate system)
-        const float vx = 0.0f;  // no lateral motion
-        const float vy = 0.0f;  // no vertical motion
-        const float vz = 5.0f;  // 5 m/s forward (z is forward in Nodar system)
+        // Example velocity data in customer coordinate system
+        // Customer system: x=forward, y=left, z=up
+        std::array<float, 3> velocity = {5.0f,  // vx: 5 m/s forward
+                                         0.0f,  // vy: no lateral motion
+                                         0.0f};  // vz: no vertical motion
 
-        // Identity transformation (customer coordinate system = Nodar coordinate system)
-        const float tx = 0.0f, ty = 0.0f, tz = 0.0f;
-        const float qw = 1.0f, qx = 0.0f, qy = 0.0f, qz = 0.0f;
+        // Rotation matrix from customer to Nodar coordinate system
+        // Nodar system: x=right, y=down, z=forward
+        // Transform: Nodar_x = -Customer_y, Nodar_y = -Customer_z, Nodar_z = Customer_x
+        std::array<float, 9> rotation = {0.0f, -1.0f, 0.0f,  // Row 1: Nodar x = -Customer y
+                                         0.0f, 0.0f,  -1.0f,  // Row 2: Nodar y = -Customer z
+                                         1.0f, 0.0f,  0.0f};  // Row 3: Nodar z = Customer x
 
-        if (publisher.publishVelocity(timestamp, vx, vy, vz, tx, ty, tz, qw, qx, qy, qz)) {
-            std::cout << "\rPublishing | vx: " << std::fixed << std::setprecision(2) << vx << " m/s, vy: " << vy
-                      << " m/s, vz: " << vz << " m/s" << std::flush;
+        if (publisher.publishVelocity(timestamp, velocity, rotation)) {
+            std::cout << "\rPublishing | vx: " << std::fixed << std::setprecision(2) << velocity[0]
+                      << " m/s, vy: " << velocity[1] << " m/s, vz: " << velocity[2] << " m/s" << std::flush;
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds((1000 / FRAME_RATE)));
