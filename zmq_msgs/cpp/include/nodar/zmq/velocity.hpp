@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstring>
 #include <iostream>
 #include <memory>
@@ -17,31 +18,22 @@ struct Velocity {
     uint64_t time{};  // timestamp in nanoseconds
 
     // Velocity in customer's coordinate system [m/s]
-    float vx{};  // translation in x direction
-    float vy{};  // translation in y direction
-    float vz{};  // translation in z direction
+    std::array<float, 3> velocity{0.0f, 0.0f, 0.0f};  // [vx, vy, vz]
 
-    // Translation from customer coordinate system to Nodar coordinate system [m]
-    float tx{};  // translation in x direction
-    float ty{};  // translation in y direction
-    float tz{};  // translation in z direction
-
-    // Rotation quaternion from customer coordinate system to Nodar coordinate system
-    // Quaternion format: [qw, qx, qy, qz] where qw is the scalar part
-    float qw{1.0f};  // quaternion w component (scalar part)
-    float qx{};  // quaternion x component
-    float qy{};  // quaternion y component
-    float qz{};  // quaternion z component
+    // 3x3 Rotation matrix from customer coordinate system to Nodar coordinate system
+    // Row-major order: [r00, r01, r02, r10, r11, r12, r20, r21, r22]
+    std::array<float, 9> rotation{1.0f, 0.0f, 0.0f,  //
+                                  0.0f, 1.0f, 0.0f,  //
+                                  0.0f, 0.0f, 1.0f};
 
     Velocity() = default;
 
-    explicit Velocity(uint64_t time_, float vx_, float vy_, float vz_, float tx_ = 0.0f, float ty_ = 0.0f,
-                      float tz_ = 0.0f, float qw_ = 1.0f, float qx_ = 0.0f, float qy_ = 0.0f, float qz_ = 0.0f)
-        : time(time_), vx(vx_), vy(vy_), vz(vz_), tx(tx_), ty(ty_), tz(tz_), qw(qw_), qx(qx_), qy(qy_), qz(qz_) {}
+    explicit Velocity(uint64_t time_, const std::array<float, 3>& velocity_, const std::array<float, 9>& rotation_)
+        : time(time_), velocity(velocity_), rotation(rotation_) {}
 
-    explicit Velocity(const uint8_t *src) { read(src); }
+    explicit Velocity(const uint8_t* src) { read(src); }
 
-    void read(const uint8_t *src) {
+    void read(const uint8_t* src) {
         // Check the info to make sure this message is the type we expect
         MessageInfo info;
         src = utils::read(src, info);
@@ -51,37 +43,38 @@ struct Velocity {
             return;
         }
 
-        // Read the basic data types
+        // Read timestamp
         src = utils::read(src, time);
-        src = utils::read(src, vx);
-        src = utils::read(src, vy);
-        src = utils::read(src, vz);
-        src = utils::read(src, tx);
-        src = utils::read(src, ty);
-        src = utils::read(src, tz);
-        src = utils::read(src, qw);
-        src = utils::read(src, qx);
-        src = utils::read(src, qy);
-        utils::read(src, qz);
+
+        // Read velocity array
+        for (size_t i = 0; i < 3; ++i) {
+            src = utils::read(src, velocity[i]);
+        }
+
+        // Read rotation matrix array
+        for (size_t i = 0; i < 9; ++i) {
+            src = utils::read(src, rotation[i]);
+        }
     }
 
-    static auto write(uint8_t *dst, uint64_t timestamp_ns, float vx, float vy, float vz, float tx, float ty, float tz,
-                      float qw, float qx, float qy, float qz) {
+    static auto write(uint8_t* dst, uint64_t timestamp_ns, const std::array<float, 3>& vel,
+                      const std::array<float, 9>& rot) {
         dst = utils::append(dst, expected_info());
         dst = utils::append(dst, timestamp_ns);
-        dst = utils::append(dst, vx);
-        dst = utils::append(dst, vy);
-        dst = utils::append(dst, vz);
-        dst = utils::append(dst, tx);
-        dst = utils::append(dst, ty);
-        dst = utils::append(dst, tz);
-        dst = utils::append(dst, qw);
-        dst = utils::append(dst, qx);
-        dst = utils::append(dst, qy);
-        return utils::append(dst, qz);
+
+        // Write velocity array
+        for (size_t i = 0; i < 3; ++i) {
+            dst = utils::append(dst, vel[i]);
+        }
+
+        // Write rotation matrix array
+        for (size_t i = 0; i < 8; ++i) {
+            dst = utils::append(dst, rot[i]);
+        }
+        return utils::append(dst, rot[8]);
     }
 
-    auto write(uint8_t *dst) const { return write(dst, time, vx, vy, vz, tx, ty, tz, qw, qx, qy, qz); }
+    auto write(uint8_t* dst) const { return write(dst, time, velocity, rotation); }
 };
 
 }  // namespace zmq
