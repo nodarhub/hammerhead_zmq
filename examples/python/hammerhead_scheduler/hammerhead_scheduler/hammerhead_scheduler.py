@@ -51,7 +51,7 @@ def print_usage():
     print(
         "You should specify the IP address of the device running hammerhead:\n\n"
         "     python hammerhead_scheduler.py IP\n\n"
-        "e.g. python hammerhead_scheduler.py 192.168.1.9\n\n"
+        "e.g. python hammerhead_scheduler.py 10.10.1.10\n\n"
         "In the meantime, we assume that you are running this on the device running Hammerhead,\n"
         f"that is, we assume that you specified {DEFAULT_IP}"
         "\n----------------------------------------"
