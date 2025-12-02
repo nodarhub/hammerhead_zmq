@@ -31,20 +31,20 @@ int main(int argc, char* argv[]) {
             std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch())
                 .count();
 
-        // Example velocity data in customer coordinate system
-        // Customer system: x=forward, y=left, z=up
+        // Example velocity data in odometry coordinate system
+        // Odometry system: x=forward, y=left, z=up
         std::array<float, 3> velocity = {5.0f,  // vx: 5 m/s forward
                                          0.0f,  // vy: no lateral motion
                                          0.0f};  // vz: no vertical motion
 
-        // Rotation matrix from customer to Nodar coordinate system
+        // Rotation matrix from odometry to Nodar coordinate system
         // Nodar system: x=right, y=down, z=forward
-        // Transform: Nodar_x = -Customer_y, Nodar_y = -Customer_z, Nodar_z = Customer_x
-        std::array<float, 9> rotation = {0.0f, -1.0f, 0.0f,  // Row 1: Nodar x = -Customer y
-                                         0.0f, 0.0f,  -1.0f,  // Row 2: Nodar y = -Customer z
-                                         1.0f, 0.0f,  0.0f};  // Row 3: Nodar z = Customer x
+        // Transform: Nodar_x = -Odom_y, Nodar_y = -Odom_z, Nodar_z = Odom_x
+        std::array<float, 9> rotationOdomToNodar = {0.0f, -1.0f, 0.0f,  // Row 1: Nodar x = -Odom y
+                                                    0.0f, 0.0f,  -1.0f,  // Row 2: Nodar y = -Odom z
+                                                    1.0f, 0.0f,  0.0f};  // Row 3: Nodar z = Odom x
 
-        if (publisher.publishVelocity(timestamp, velocity, rotation)) {
+        if (publisher.publishVelocity(timestamp, velocity, rotationOdomToNodar)) {
             std::cout << "\rPublishing | vx: " << std::fixed << std::setprecision(2) << velocity[0]
                       << " m/s, vy: " << velocity[1] << " m/s, vz: " << velocity[2] << " m/s" << std::flush;
         }
