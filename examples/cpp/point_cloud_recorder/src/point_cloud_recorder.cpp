@@ -64,7 +64,7 @@ private:
 void printUsage(const std::string &default_ip) {
     std::cout << "You should specify the IP address of the device running hammerhead:\n\n"
                  "     ./point_cloud_recorder hammerhead_ip\n\n"
-                 "e.g. ./point_cloud_recorder 192.168.1.9\n\n"
+                 "e.g. ./point_cloud_recorder 10.10.1.10\n\n"
                  "In the meantime, we assume that you are running this on the device running Hammerhead,\n"
                  "that is, we assume that you specified\n\n"
                  "     ./point_cloud_recorder "

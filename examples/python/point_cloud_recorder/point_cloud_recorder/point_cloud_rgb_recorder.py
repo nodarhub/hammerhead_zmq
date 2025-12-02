@@ -114,7 +114,7 @@ def print_usage(default_ip, default_output_dir):
         "You should specify the IP address of the device running Hammerhead,\n"
         "as well as the folder where you want the data to be saved:\n\n"
         "     python point_cloud_rgb_recorder.py hammerhead_ip output_dir\n\n"
-        "e.g. python point_cloud_rgb_recorder.py 192.168.1.9 point_clouds_rgb\n\n"
+        "e.g. python point_cloud_rgb_recorder.py 10.10.1.10 point_clouds_rgb\n\n"
         "If unspecified, then we assume you are running this on the device running Hammerhead,\n"
         "along with the other defaults\n\n"
         f"     python point_cloud_rgb_recorder.py {default_ip} {default_output_dir}\n"
