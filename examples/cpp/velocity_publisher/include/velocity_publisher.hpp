@@ -18,9 +18,9 @@ public:
     }
 
     bool publishVelocity(const uint64_t& timestamp_ns, const std::array<float, 3>& velocity,
-                         const std::array<float, 9>& rotationOdomToNodar = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-                                                                            0.0f, 1.0f}) {
-        nodar::zmq::VelocityData velocity_data(timestamp_ns, velocity, rotationOdomToNodar);
+                         const std::array<float, 9>& rotationToNodarRaw = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+                                                                           0.0f, 1.0f}) {
+        nodar::zmq::VelocityData velocity_data(timestamp_ns, velocity, rotationToNodarRaw);
 
         auto buffer = publisher.getBuffer();
         buffer->resize(velocity_data.msgSize());

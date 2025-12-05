@@ -20,17 +20,17 @@ struct VelocityData {
     // Velocity in odometry coordinate system [m/s]
     std::array<float, 3> velocity{0.0f, 0.0f, 0.0f};  // [vx, vy, vz]
 
-    // 3x3 Rotation matrix from odometry coordinate system to Nodar coordinate system
+    // 3x3 Rotation matrix from odometry coordinate system to Nodar raw camera coordinate system
     // Row-major order: [r00, r01, r02, r10, r11, r12, r20, r21, r22]
-    std::array<float, 9> rotationOdomToNodar{1.0f, 0.0f, 0.0f,  //
-                                             0.0f, 1.0f, 0.0f,  //
-                                             0.0f, 0.0f, 1.0f};
+    std::array<float, 9> rotationToNodarRaw{1.0f, 0.0f, 0.0f,  //
+                                            0.0f, 1.0f, 0.0f,  //
+                                            0.0f, 0.0f, 1.0f};
 
     VelocityData() = default;
 
     explicit VelocityData(uint64_t time_, const std::array<float, 3>& velocity_,
-                          const std::array<float, 9>& rotationOdomToNodar_)
-        : time(time_), velocity(velocity_), rotationOdomToNodar(rotationOdomToNodar_) {}
+                          const std::array<float, 9>& rotationToNodarRaw_)
+        : time(time_), velocity(velocity_), rotationToNodarRaw(rotationToNodarRaw_) {}
 
     explicit VelocityData(const uint8_t* src) { read(src); }
 
@@ -54,7 +54,7 @@ struct VelocityData {
 
         // Read rotation matrix array
         for (size_t i = 0; i < 9; ++i) {
-            src = utils::read(src, rotationOdomToNodar[i]);
+            src = utils::read(src, rotationToNodarRaw[i]);
         }
     }
 
@@ -75,7 +75,7 @@ struct VelocityData {
         return utils::append(dst, rot[8]);
     }
 
-    auto write(uint8_t* dst) const { return write(dst, time, velocity, rotationOdomToNodar); }
+    auto write(uint8_t* dst) const { return write(dst, time, velocity, rotationToNodarRaw); }
 };
 
 }  // namespace zmq

@@ -37,14 +37,14 @@ int main(int argc, char* argv[]) {
                                          0.0f,  // vy: no lateral motion
                                          0.0f};  // vz: no vertical motion
 
-        // Rotation matrix from odometry to Nodar coordinate system
-        // Nodar system: x=right, y=down, z=forward
+        // Rotation matrix from odometry to Nodar raw camera coordinate system
+        // Nodar raw camera system: x=right, y=down, z=forward
         // Transform: Nodar_x = -Odom_y, Nodar_y = -Odom_z, Nodar_z = Odom_x
-        std::array<float, 9> rotationOdomToNodar = {0.0f, -1.0f, 0.0f,  // Row 1: Nodar x = -Odom y
-                                                    0.0f, 0.0f,  -1.0f,  // Row 2: Nodar y = -Odom z
-                                                    1.0f, 0.0f,  0.0f};  // Row 3: Nodar z = Odom x
+        std::array<float, 9> rotationToNodarRaw = {0.0f, -1.0f, 0.0f,  // Row 1: Nodar x = -Odom y
+                                                   0.0f, 0.0f,  -1.0f,  // Row 2: Nodar y = -Odom z
+                                                   1.0f, 0.0f,  0.0f};  // Row 3: Nodar z = Odom x
 
-        if (publisher.publishVelocity(timestamp, velocity, rotationOdomToNodar)) {
+        if (publisher.publishVelocity(timestamp, velocity, rotationToNodarRaw)) {
             std::cout << "\rPublishing | vx: " << std::fixed << std::setprecision(2) << velocity[0]
                       << " m/s, vy: " << velocity[1] << " m/s, vz: " << velocity[2] << " m/s" << std::flush;
         }
