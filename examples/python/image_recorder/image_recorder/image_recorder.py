@@ -72,12 +72,14 @@ class FPS:
         return f"fps_100: {fps_100:.2f}, fps_inf: {fps_life:.2f}"
 
 
-def get_tiff_metadata(left_time, right_time):
+def get_tiff_metadata(left_time, right_time, exposure=0.0, gain=0.0):
     # Create YAML string with all required fields (compatible with Hammerhead format)
     # Must include all fields that DetailsParameters expects (use \\n for literal backslash-n)
     details_str = (
         f"left_time: {left_time}\\n"
         f"right_time: {right_time}\\n"
+        f"exposure: {exposure}\\n"
+        f"gain: {gain}\\n"
         f"focal_length: 0.0\\n"
         f"baseline: 0.0\\n"
         f"meters_above_ground: 0.0\\n"
@@ -133,27 +135,31 @@ class ZMQImageRecorder:
         print(f"\r{info_str}{fps_str}{tiff_str}{drop_str}", end="", flush=True)
         self.last_frame_id = frame_id
 
-        # Extract right_time from additional_field if present (for topbot messages)
+        # Extract right_time, exposure, and gain from additional_field (for topbot messages)
+        # Format: right_time (8 bytes) + exposure (4 bytes) + gain (4 bytes) = 16 bytes
         right_time = None
-        if len(stamped_image.additional_field) == 8:
-            right_time = struct.unpack('<Q', stamped_image.additional_field)[0]
+        exposure = 0.0
+        gain = 0.0
+
+        if len(stamped_image.additional_field) == 16:
+            right_time, exposure, gain = struct.unpack('<Qff', stamped_image.additional_field)
 
         # We recommend saving tiffs with no compression if the data rate is high.
         # Depending on the underlying image type, consider using stamped_image.cvt_to_bgr_code
         # to convert to BGR before saving.
         tiff_path = self.image_dir + f"/{frame_id:09}.tiff"
-        software = get_tiff_metadata(stamped_image.time, right_time) if right_time is not None else None
+        software = get_tiff_metadata(stamped_image.time, right_time, exposure, gain) if right_time is not None else None
         tifffile.imwrite(tiff_path, img, compression="none", software=software)
 
         with open(self.timing_dir + f"/{frame_id:09}.txt", "w") as f:
             f.write(f"{stamped_image.time}")
             if right_time is not None:
-                f.write(f" {right_time}")
+                f.write(f" {right_time} {exposure} {gain}")
             f.write("\n")
 
         self.timing_file.write(f"{frame_id:09} {stamped_image.time}")
         if right_time is not None:
-            self.timing_file.write(f" {right_time}")
+            self.timing_file.write(f" {right_time} {exposure} {gain}")
         self.timing_file.write("\n")
         self.timing_file.flush()
         loop_stop_time = time.perf_counter()
