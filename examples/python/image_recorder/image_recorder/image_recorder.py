@@ -91,6 +91,8 @@ def get_tiff_metadata(left_time, right_time, exposure=0.0, gain=0.0):
 
 
 class ZMQImageRecorder:
+    ADDITIONAL_DATA_SIZE = 16
+
     def __init__(self, endpoint, output_dir, image_dirname):
         self.context = zmq.Context(1)
         self.socket = self.context.socket(zmq.SUB)
@@ -141,7 +143,7 @@ class ZMQImageRecorder:
         exposure = 0.0
         gain = 0.0
 
-        if len(stamped_image.additional_field) == 16:
+        if len(stamped_image.additional_field) == self.ADDITIONAL_DATA_SIZE:
             right_time, exposure, gain = struct.unpack('<Qff', stamped_image.additional_field)
 
         # We recommend saving tiffs with no compression if the data rate is high.

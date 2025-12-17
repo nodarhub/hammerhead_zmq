@@ -126,6 +126,8 @@ private:
 
 class ZMQImageRecorder {
 public:
+    static constexpr auto additional_data_size = 16;
+
     ZMQImageRecorder(const std::string& endpoint,  //
                      const std::filesystem::path& output_dir,  //
                      const std::string& image_dirname)
@@ -184,7 +186,7 @@ public:
         uint64_t right_time = 0;
         float exposure = 0.0f;
         float gain = 0.0f;
-        if (stamped_image.additional_field_size == 16) {
+        if (stamped_image.additional_field_size == additional_data_size) {
             memcpy(&right_time, stamped_image.additional_field.data(), 8);
             memcpy(&exposure, stamped_image.additional_field.data() + 8, 4);
             memcpy(&gain, stamped_image.additional_field.data() + 12, 4);
@@ -195,13 +197,13 @@ public:
         {
             std::ofstream f(timing_dir / (frame_str + ".txt"));
             f << stamped_image.time;
-            if (stamped_image.additional_field_size == 16) {
+            if (stamped_image.additional_field_size == additional_data_size) {
                 f << " " << right_time << " " << exposure << " " << gain;
             }
             f << std::flush;
         }
         timing_file << frame_string(frame_id) << " " << stamped_image.time;
-        if (stamped_image.additional_field_size == 16) {
+        if (stamped_image.additional_field_size == additional_data_size) {
             timing_file << " " << right_time << " " << exposure << " " << gain;
         }
         timing_file << std::endl;
