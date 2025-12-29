@@ -1,3 +1,5 @@
+#include <tiffio.h>
+
 #include <atomic>
 #include <chrono>
 #include <csignal>
@@ -12,7 +14,6 @@
 #include <opencv2/imgcodecs.hpp>
 #include <sstream>
 #include <string>
-#include <tiffio.h>
 #include <unordered_map>
 #include <zmq.hpp>
 
@@ -23,7 +24,7 @@ void signalHandler(int signum) {
     running = false;
 }
 
-const std::unordered_map<int, const char *> types = {
+const std::unordered_map<int, const char*> types = {
     {CV_8UC1, "CV_8UC1"},  //
     {CV_8UC3, "CV_8UC3"},  //
     {CV_8SC1, "CV_8SC1"},  //
@@ -34,14 +35,15 @@ const std::unordered_map<int, const char *> types = {
     {CV_16SC3, "CV_16SC3"},  //
 };
 
-void printDetails(const cv::Mat &mat) {
+void printDetails(const cv::Mat& mat) {
     std::cout << mat.rows << ", " << mat.cols << ", " << mat.channels() << ", " << types.find(mat.type())->second
               << std::endl;
 }
 
-// Add timestamp metadata to TIFF file (compatible with Hammerhead viewer format)
-bool add_tiff_metadata(const std::filesystem::path &filename, uint64_t left_time, uint64_t right_time) {
-    TIFF *tiff = TIFFOpen(filename.c_str(), "r+");
+// Add timestamp and camera parameters metadata to TIFF file (compatible with Hammerhead viewer format)
+bool add_tiff_metadata(const std::filesystem::path& filename, uint64_t left_time, uint64_t right_time,
+                       float exposure = 0.0f, float gain = 0.0f) {
+    TIFF* tiff = TIFFOpen(filename.c_str(), "r+");
     if (!tiff) {
         return false;
     }
@@ -51,6 +53,8 @@ bool add_tiff_metadata(const std::filesystem::path &filename, uint64_t left_time
     std::ostringstream details_str;
     details_str << "left_time: " << left_time << "\\n"
                 << "right_time: " << right_time << "\\n"
+                << "exposure: " << exposure << "\\n"
+                << "gain: " << gain << "\\n"
                 << "focal_length: 0.0\\n"
                 << "baseline: 0.0\\n"
                 << "meters_above_ground: 0.0\\n"
@@ -122,9 +126,11 @@ private:
 
 class ZMQImageRecorder {
 public:
-    ZMQImageRecorder(const std::string &endpoint,  //
-                     const std::filesystem::path &output_dir,  //
-                     const std::string &image_dirname)
+    static constexpr auto additional_data_size = 16;
+
+    ZMQImageRecorder(const std::string& endpoint,  //
+                     const std::filesystem::path& output_dir,  //
+                     const std::string& image_dirname)
         : context(1),
           socket(context, ZMQ_SUB),
           image_dir(output_dir / image_dirname),
@@ -153,12 +159,12 @@ public:
         fps.tic();
         zmq::message_t msg;
         const auto received_bytes = socket.recv(msg, zmq::recv_flags::none);
-        const nodar::zmq::StampedImage stamped_image(static_cast<uint8_t *>(msg.data()));
+        const nodar::zmq::StampedImage stamped_image(static_cast<uint8_t*>(msg.data()));
         auto img = nodar::zmq::cvMatFromStampedImage(stamped_image);
         if (img.empty()) {
             return;
         }
-        const auto &frame_id = stamped_image.frame_id;
+        const auto& frame_id = stamped_image.frame_id;
         std::cout << "\rFrame # " << frame_id << ", Last #: " << last_frame_id  //
                   << ", img.shape = " << img.rows << "x" << img.cols << "x" << img.channels()  //
                   << ", img.dtype = " << img.type() << ". ";
@@ -176,25 +182,29 @@ public:
         const auto tiff_path = image_dir / (frame_str + ".tiff");
         cv::imwrite(tiff_path, img, compression_params);
 
-        // Extract right_time from additional_field if present (for topbot messages)
+        // Extract right_time, exposure, and gain from additional_field (for topbot messages)
         uint64_t right_time = 0;
-        if (stamped_image.additional_field_size == 8) {
+        float exposure = 0.0f;
+        float gain = 0.0f;
+        if (stamped_image.additional_field_size == additional_data_size) {
             memcpy(&right_time, stamped_image.additional_field.data(), 8);
+            memcpy(&exposure, stamped_image.additional_field.data() + 8, 4);
+            memcpy(&gain, stamped_image.additional_field.data() + 12, 4);
 
-            // Add timestamp metadata to TIFF file (for topbot images with dual timestamps)
-            add_tiff_metadata(tiff_path, stamped_image.time, right_time);
+            // Add timestamp and camera parameters metadata to TIFF file
+            add_tiff_metadata(tiff_path, stamped_image.time, right_time, exposure, gain);
         }
         {
             std::ofstream f(timing_dir / (frame_str + ".txt"));
             f << stamped_image.time;
-            if (stamped_image.additional_field_size == 8) {
-                f << " " << right_time;
+            if (stamped_image.additional_field_size == additional_data_size) {
+                f << " " << right_time << " " << exposure << " " << gain;
             }
             f << std::flush;
         }
         timing_file << frame_string(frame_id) << " " << stamped_image.time;
-        if (stamped_image.additional_field_size == 8) {
-            timing_file << " " << right_time;
+        if (stamped_image.additional_field_size == additional_data_size) {
+            timing_file << " " << right_time << " " << exposure << " " << gain;
         }
         timing_file << std::endl;
     }
@@ -210,7 +220,7 @@ private:
     FPS fps;
 };
 
-std::string get_folder_name(const std::string &topic_name) {
+std::string get_folder_name(const std::string& topic_name) {
     using namespace nodar::zmq;
     if (topic_name == LEFT_RAW_TOPIC.name) {
         return "left_raw";
@@ -239,8 +249,8 @@ std::string get_folder_name(const std::string &topic_name) {
     return "images";
 }
 
-void print_usage(const std::string &default_ip, const std::string &default_port,
-                 const std::string &default_output_dir) {
+void print_usage(const std::string& default_ip, const std::string& default_port,
+                 const std::string& default_output_dir) {
     std::cout << "You should specify the IP address of the ZMQ source (the device running Hammerhead), \n"
                  "the port number of the message that you want to listen to, \n"
                  "and the folder where you want the data to be saved:\n\n"
@@ -262,7 +272,7 @@ inline std::string date_string() {
     return date_ss.str();
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     constexpr auto default_ip = "127.0.0.1";
     constexpr auto default_topic = nodar::zmq::IMAGE_TOPICS[0];
     const std::string default_port = std::to_string(default_topic.port);
@@ -285,7 +295,7 @@ int main(int argc, char *argv[]) {
         size_t port = 0;
         std::istringstream iss(argv[2]);
         if (iss >> port) {
-            for (const auto &image_topic : nodar::zmq::IMAGE_TOPICS) {
+            for (const auto& image_topic : nodar::zmq::IMAGE_TOPICS) {
                 if (port == image_topic.port) {
                     topic = image_topic;
                     invalid_topic = false;
@@ -299,7 +309,7 @@ int main(int argc, char *argv[]) {
         } else {
             // It seems like you specified a topic name. Let's see if it is a valid image topic
             const std::string topic_name = argv[2];
-            for (const auto &image_topic : nodar::zmq::IMAGE_TOPICS) {
+            for (const auto& image_topic : nodar::zmq::IMAGE_TOPICS) {
                 if (topic_name == image_topic.name) {
                     topic = image_topic;
                     invalid_topic = false;
