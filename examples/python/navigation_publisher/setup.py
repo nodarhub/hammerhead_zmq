@@ -1,7 +1,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-package_name = "velocity_publisher"
+package_name = "navigation_publisher"
 
 setup(
     name=package_name,
@@ -11,7 +11,7 @@ setup(
     zip_safe=False,
     maintainer="nodar",
     maintainer_email="support@nodarsensor.com",
-    description="This example shows how to publish velocity data to Hammerhead.",
+    description="This example shows how to publish navigation data to Hammerhead.",
     license="NODAR Limited Copyright License",
     license_files=["LICENSE"],
     project_urls={
