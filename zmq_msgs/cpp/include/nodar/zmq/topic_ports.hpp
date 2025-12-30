@@ -50,7 +50,7 @@ constexpr Topic WAIT_TOPIC{"nodar/wait", 9814};
 
 constexpr Topic QA_FINDINGS_TOPIC{"nodar/qa_findings", 9822};
 
-constexpr Topic VELOCITY_TOPIC{"nodar/velocity", 9824};
+constexpr Topic NAVIGATION_TOPIC{"nodar/navigation", 9824};
 
 // Function to retrieve reserved ports dynamically
 inline auto getReservedPorts() {
@@ -67,7 +67,7 @@ inline auto getReservedPorts() {
     reserved_ports.insert(nodar::zmq::OBSTACLE_TOPIC.port);
     reserved_ports.insert(nodar::zmq::WAIT_TOPIC.port);
     reserved_ports.insert(nodar::zmq::QA_FINDINGS_TOPIC.port);
-    reserved_ports.insert(nodar::zmq::VELOCITY_TOPIC.port);
+    reserved_ports.insert(nodar::zmq::NAVIGATION_TOPIC.port);
     return reserved_ports;
 }
 
