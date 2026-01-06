@@ -13,16 +13,13 @@ pip install -e examples/python/navigation_publisher
 Before running the navigation publisher, ensure the following settings are configured in `master_config.ini`:
 
 ```ini
-# [bool] Enable external navigation subscriber via ZMQ.
-# This allows hammerhead to receive navigation data from an external publisher.
-enable_navigation_subscriber = 1
-
-# [string] IP address of the navigation publisher.
-# Only used if enable_navigation_subscriber is enabled.
-navigation_publisher_ip = 127.0.0.1
+# [string] Navigation publisher source.
+# Specify the IP address of the navigation publisher (e.g., 127.0.0.1).
+# Leave empty to disable navigation data.
+navigation_publisher = 127.0.0.1
 ```
 
-**Note**: Set `navigation_publisher_ip` to the IP address where the navigation publisher is running. Use `127.0.0.1` for local testing.
+**Note**: Set `navigation_publisher` to the IP address where the navigation publisher is running. Use `127.0.0.1` for local testing.
 
 ### Examples
 
@@ -119,6 +116,6 @@ To change the transformation matrix, modify the `T_body_to_raw_camera` list acco
 ## Troubleshooting
 
 - **Port conflict**: Ensure port 9824 is not in use by another application
-- **Hammerhead not receiving data**: Verify `enable_navigation_subscriber = 1` and `navigation_publisher_ip` is correctly set in `master_config.ini`
+- **Hammerhead not receiving data**: Verify `navigation_publisher` is set to the correct IP address in `master_config.ini`
 
 Press `Ctrl+C` to stop publishing.
