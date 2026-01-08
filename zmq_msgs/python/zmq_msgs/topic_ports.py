@@ -35,6 +35,7 @@ RECORDING_TOPIC = Topic("nodar/recording", 9811)
 OBSTACLE_TOPIC = Topic("nodar/obstacle", 9812)
 WAIT_TOPIC = Topic("nodar/wait", 9814)
 QA_FINDINGS_TOPIC = Topic("nodar/qa_findings", 9822)
+NAVIGATION_TOPIC = Topic("nodar/navigation", 9824)
 
 
 # Function to retrieve reserved ports dynamically
@@ -51,4 +52,5 @@ def get_reserved_ports():
     reserved_ports.add(OBSTACLE_TOPIC.port)
     reserved_ports.add(WAIT_TOPIC.port)
     reserved_ports.add(QA_FINDINGS_TOPIC.port)
+    reserved_ports.add(NAVIGATION_TOPIC.port)
     return reserved_ports
