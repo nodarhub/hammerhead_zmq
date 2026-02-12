@@ -14,6 +14,7 @@ dependencies = [
     "pyzmq",
     "pyyaml",
     "tifffile",
+    "tifftools",
     "tqdm",
 ]
 
@@ -29,6 +30,7 @@ include = [
     "obstacle_data_recorder*",
     "point_cloud_recorder*",
     "point_cloud_soup_recorder*",
+    "topbot_metadata_writer*",
     "topbot_publisher*",
 ]
 
@@ -56,6 +58,7 @@ image_viewer = "image_viewer.image_viewer.image_viewer:main"
 obstacle_data_recorder = "obstacle_data_recorder.obstacle_data_recorder.obstacle_data_recorder:main"
 point_cloud_recorder = "point_cloud_recorder.point_cloud_recorder.point_cloud_recorder:main"
 point_cloud_soup_recorder = "point_cloud_soup_recorder.point_cloud_soup_recorder.point_cloud_soup_recorder:main"
+topbot_metadata_writer = "topbot_metadata_writer.topbot_metadata_writer.topbot_metadata_writer:main"
 topbot_publisher = "topbot_publisher.topbot_publisher.topbot_publisher:main"
 visualize_point_cloud_tiff = "disparity_to_ordered_point_cloud.disparity_to_ordered_point_cloud.visualize_point_cloud_tiff:main"
 

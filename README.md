@@ -168,6 +168,7 @@ Python examples provide easy-to-use scripts for common Hammerhead integration ta
 #### Processing Examples
 - **[Depth to Disparity Converter](examples/python/depth_to_disparity/README.md)** - Convert depth images to disparity format
 - **[Disparity to Point Cloud](examples/python/disparity_to_ordered_point_cloud/README.md)** - Convert stored disparity images to ordered 3D point clouds
+- **[Topbot Metadata Writer](examples/python/topbot_metadata_writer/README.md)** - Write details YAML metadata into topbot TIFF Software tags
 
 #### Control Examples
 - **[Hammerhead Scheduler](examples/python/hammerhead_scheduler/README.md)** - Control Hammerhead's processing schedule
