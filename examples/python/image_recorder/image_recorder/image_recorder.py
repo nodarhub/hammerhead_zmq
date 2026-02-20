@@ -195,7 +195,7 @@ def main():
     default_ip = "127.0.0.1"
     default_topic = IMAGE_TOPICS[0]
     default_port = default_topic.port
-    dated_folder = datetime.now().strftime("%Y%m%d-%H%M%S")
+    dated_folder = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
     default_output_dir = "./" + dated_folder
 
     if len(sys.argv) < 4:

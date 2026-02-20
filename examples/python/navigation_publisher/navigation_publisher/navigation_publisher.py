@@ -74,7 +74,7 @@ def main():
 
     while running:
         # Get current timestamp
-        timestamp = int(datetime.now().timestamp() * 1e9)
+        timestamp = int(datetime.utcnow().timestamp() * 1e9)
 
         # Create NavigationData message
         nav_data = NavigationData()

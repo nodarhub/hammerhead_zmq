@@ -268,7 +268,7 @@ void print_usage(const std::string& default_ip, const std::string& default_port,
 inline std::string date_string() {
     const auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     std::ostringstream date_ss;
-    date_ss << std::put_time(std::localtime(&now), "%Y%m%d-%H%M%S");
+    date_ss << std::put_time(std::gmtime(&now), "%Y%m%d-%H%M%S");
     return date_ss.str();
 }
 
