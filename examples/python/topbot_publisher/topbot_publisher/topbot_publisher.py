@@ -161,7 +161,7 @@ def main():
                 continue
 
         # Ready to publish
-        timestamp = int(datetime.utcnow().timestamp() * 1e9)
+        timestamp = int(datetime.now().timestamp() * 1e9)
         if publisher.publish_image(img, timestamp, frame_id, cvt_to_bgr_code):
             print(f"Published frame {frame_id} from {file}")
             frame_id += 1
