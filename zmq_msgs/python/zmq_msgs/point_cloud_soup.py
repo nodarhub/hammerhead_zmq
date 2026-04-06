@@ -17,6 +17,7 @@ class PointCloudSoup:
         frame_id=0,
         baseline=1,
         focal_length=1000,
+        projection_type=0,
         disparity_to_depth4x4=None,
         rotation_disparity_to_raw_cam=None,
         rotation_world_to_raw_cam=None,
@@ -27,6 +28,7 @@ class PointCloudSoup:
         self.frame_id = frame_id  # uint64_t
         self.baseline = baseline  # double
         self.focal_length = focal_length  # double
+        self.projection_type = projection_type  # int
         self.disparity_to_depth4x4 = disparity_to_depth4x4  # float array with 16 entries
         self.rotation_disparity_to_raw_cam = (
             rotation_disparity_to_raw_cam  # float array with 9 entries
@@ -41,7 +43,7 @@ class PointCloudSoup:
     def msg_size(self):
         return (
             self.info().msg_size()
-            + struct.calcsize("QQdd")  # time, frame_id, baseline, focal_length
+            + struct.calcsize("QQddh")  # time, frame_id, baseline, focal_length, projection_type
             + 16 * np.dtype(np.float32).itemsize  # disparity_to_depth4x4
             + 9 * np.dtype(np.float32).itemsize  # rotation_disparity_to_raw_cam
             + 9 * np.dtype(np.float32).itemsize  # rotation_world_to_raw_cam
@@ -55,10 +57,10 @@ class PointCloudSoup:
         if msg_info.is_different(self.info(), "PointCloudSoup"):
             return None
 
-        self.time, self.frame_id, self.baseline, self.focal_length = struct.unpack_from(
-            "QQdd", buffer, offset
+        self.time, self.frame_id, self.baseline, self.focal_length, self.projection_type = struct.unpack_from(
+            "QQddh", buffer, offset
         )
-        offset += struct.calcsize("QQdd")
+        offset += struct.calcsize("QQddh")
         self.disparity_to_depth4x4 = np.frombuffer(
             buffer, dtype=np.float32, count=16, offset=offset
         ).reshape(4, 4)
@@ -80,9 +82,9 @@ class PointCloudSoup:
     def write(self, buffer, offset):
         offset = self.info().write(buffer, offset)
         struct.pack_into(
-            "QQdd", buffer, offset, self.time, self.frame_id, self.baseline, self.focal_length
+            "QQddh", buffer, offset, self.time, self.frame_id, self.baseline, self.focal_length, self.projection_type
         )
-        offset += struct.calcsize("QQdd")
+        offset += struct.calcsize("QQddh")
         buffer[
             offset : offset + self.disparity_to_depth4x4.nbytes
         ] = self.disparity_to_depth4x4.tobytes()
