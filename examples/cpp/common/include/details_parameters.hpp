@@ -12,6 +12,7 @@ struct DetailsParameters {
     float focalLength{0.0f};
     float baseline{0.0f};
     float metersAboveGround{0.0f};
+    int16_t projectionType{0};  // 0: rectilinear, 1: cylindrical
     std::array<float, 16> projection{1.0f, 0.0f, 0.0f, 0.0f,  //
                                      0.0f, 1.0f, 0.0f, 0.0f,  //
                                      0.0f, 0.0f, 1.0f, 0.0f,  //
@@ -22,6 +23,9 @@ struct DetailsParameters {
     std::array<float, 9> rotationWorldToRawCam{1.0f, 0.0f, 0.0f,  //
                                                0.0f, 1.0f, 0.0f,  //
                                                0.0f, 0.0f, 1.0f};
+    std::array<float, 9> rotationRightRectToRawCam{1.0f, 0.0f, 0.0f,  //
+                                                   0.0f, 1.0f, 0.0f,  //
+                                                   0.0f, 0.0f, 1.0f};
 
     bool parse(const std::string& filePath, bool& hasErrors) {
         const std::string LEFT_TIME{"left_time"};
@@ -29,9 +33,11 @@ struct DetailsParameters {
         const std::string FOCAL_LENGTH{"focal_length"};
         const std::string BASELINE{"baseline"};
         const std::string METERS_ABOVE_GROUND{"meters_above_ground"};
+        const std::string PROJECTION_TYPE{"projection_type"};
         const std::string PROJECTION{"projection"};
         const std::string ROTATION_DISPARITY_TO_RAW_CAM{"rotation_disparity_to_raw_cam"};
         const std::string ROTATION_WORLD_TO_RAW_CAM{"rotation_world_to_raw_cam"};
+        const std::string ROTATION_RIGHT_RECT_TO_RAW_CAM{"rotation_right_rect_to_raw_cam"};
 
         YAML::Node details{};
 
@@ -50,9 +56,11 @@ struct DetailsParameters {
         noErrors &= read_scalar_field(focalLength, FOCAL_LENGTH, details);
         noErrors &= read_scalar_field(baseline, BASELINE, details);
         noErrors &= read_scalar_field(metersAboveGround, METERS_ABOVE_GROUND, details);
+        noErrors &= read_scalar_field(projectionType, PROJECTION_TYPE, details);
         noErrors &= read_collection_field(projection, PROJECTION, details);
         noErrors &= read_collection_field(rotationDisparityToRawCam, ROTATION_DISPARITY_TO_RAW_CAM, details);
         noErrors &= read_collection_field(rotationWorldToRawCam, ROTATION_WORLD_TO_RAW_CAM, details);
+        noErrors &= read_collection_field(rotationRightRectToRawCam, ROTATION_RIGHT_RECT_TO_RAW_CAM, details);
 
         hasErrors = !noErrors;
 
