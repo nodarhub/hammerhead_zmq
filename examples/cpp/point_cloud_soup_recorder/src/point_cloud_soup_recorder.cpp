@@ -135,7 +135,7 @@ public:
         // Wait for scheduler request from hammerhead, then send reply (if enabled)
         if (enable_scheduler && scheduler_socket) {
             zmq::message_t scheduler_request;
-            scheduler_socket->recv(scheduler_request, zmq::recv_flags::none);  // Blocking wait
+            auto unused{scheduler_socket->recv(scheduler_request, zmq::recv_flags::none)};  // Blocking wait
 
             // Send reply to release hammerhead for next frame
             zmq::message_t reply(2);
