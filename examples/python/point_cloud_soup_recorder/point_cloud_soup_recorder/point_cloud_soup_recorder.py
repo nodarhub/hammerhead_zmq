@@ -126,7 +126,7 @@ class PointCloudSoupRecorder:
         rotation_matrix = rotation_world_to_raw_cam.T @ rotation_disparity_to_raw_cam
         self.depth3d = reproject_image_to_3d(
             disparity_scaled, point_cloud_soup.projection_type, disparity_to_depth4x4, rotation_matrix,
-            dst=self.depth3d
+            point_cloud_soup.focal_length, True, dst=self.depth3d
         )
 
         xyz = self.depth3d

@@ -82,7 +82,8 @@ public:
         auto disparity_scaled = nodar::zmq::cvMatFromStampedImage(soup.disparity);
         disparity_scaled.convertTo(disparity_scaled, CV_32F, 1. / 16);
         const cv::Mat rotation_matrix = rotation_world_to_raw_cam.t() * rotation_disparity_to_raw_cam;
-        nodar::reprojectImageTo3D(depth3d, soup.projection_type, disparity_scaled, disparity_to_depth4x4, rotation_matrix);
+        nodar::reprojectImageTo3D(depth3d, soup.projection_type, disparity_scaled, disparity_to_depth4x4,
+                                  rotation_matrix, soup.focal_length, true);
 
         // Assert types before continuing
         assert(depth3d.type() == CV_32FC3);

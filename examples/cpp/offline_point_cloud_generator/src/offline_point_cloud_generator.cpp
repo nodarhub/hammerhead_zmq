@@ -27,10 +27,12 @@ public:
         cv::Mat rotation_world_to_raw_cam{cv::Size{3, 3}, CV_32FC1, details.rotationWorldToRawCam.data()};
         const cv::Mat rotation_matrix = rotation_world_to_raw_cam.t() * rotation_disparity_to_raw_cam;
         if (is_disparity) {
-            nodar::reprojectImageTo3D(depth3d, details.projectionType, input_image, disparity_to_depth4x4, rotation_matrix);
+            nodar::reprojectImageTo3D(depth3d, details.projectionType, input_image, disparity_to_depth4x4,
+                                      rotation_matrix, details.focalLength, true);
         } else {
             const auto disparity = details.focalLength * details.baseline / input_image;
-            nodar::reprojectImageTo3D(depth3d, details.projectionType, disparity, disparity_to_depth4x4, rotation_matrix);
+            nodar::reprojectImageTo3D(depth3d, details.projectionType, disparity, disparity_to_depth4x4,
+                                      rotation_matrix, details.focalLength, true);
         }
 
         auto xyz = reinterpret_cast<float *>(depth3d.data);

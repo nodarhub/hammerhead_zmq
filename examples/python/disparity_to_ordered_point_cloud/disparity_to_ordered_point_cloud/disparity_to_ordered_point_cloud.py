@@ -117,7 +117,8 @@ def main():
 
         rotation_matrix = details.rotation_world_to_raw_cam.T @ details.rotation_disparity_to_raw_cam
         xyz = reproject_image_to_3d(
-            disparity_scaled, details.projection_type, details.disparity_to_depth4x4, rotation_matrix
+            disparity_scaled, details.projection_type, details.disparity_to_depth4x4, rotation_matrix,
+            details.focal_length, True
         )
 
         stem = os.path.splitext(os.path.basename(tiff))[0]
