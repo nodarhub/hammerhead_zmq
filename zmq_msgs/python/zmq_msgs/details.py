@@ -45,6 +45,8 @@ class Details:
         # Load scalars
         self.left_time = get_typed_value(data, "left_time", int, 0)
         self.right_time = get_typed_value(data, "right_time", int, 0)
+        self.exposure = get_typed_value(data, "exposure", float, 0.0)
+        self.gain = get_typed_value(data, "gain", float, 0.0)
         self.focal_length = get_typed_value(data, "focal_length", float, 0.0)
         self.baseline = get_typed_value(data, "baseline", float, 0.0)
         self.meters_above_ground = get_typed_value(data, "meters_above_ground", float, 0.0)
@@ -65,6 +67,8 @@ class Details:
             "Details:\n"
             f"\tleft_time                       : {self.left_time}\n"
             f"\tright_time                      : {self.right_time}\n"
+            f"\texposure                        : {self.exposure:.6f}\n"
+            f"\tgain                            : {self.gain:.6f}\n"
             f"\tfocal_length                    : {self.focal_length:.6f}\n"
             f"\tbaseline                        : {self.baseline:.6f}\n"
             f"\tmeters_above_ground             : {self.meters_above_ground:.6f}\n"

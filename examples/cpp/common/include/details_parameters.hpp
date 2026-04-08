@@ -9,6 +9,8 @@
 struct DetailsParameters {
     uint64_t leftTime{0};
     uint64_t rightTime{0};
+    float exposure{0.0f};
+    float gain{0.0f};
     float focalLength{0.0f};
     float baseline{0.0f};
     float metersAboveGround{0.0f};
@@ -30,6 +32,8 @@ struct DetailsParameters {
     bool parse(const std::string& filePath, bool& hasErrors) {
         const std::string LEFT_TIME{"left_time"};
         const std::string RIGHT_TIME{"right_time"};
+        const std::string EXPOSURE{"exposure"};
+        const std::string GAIN{"gain"};
         const std::string FOCAL_LENGTH{"focal_length"};
         const std::string BASELINE{"baseline"};
         const std::string METERS_ABOVE_GROUND{"meters_above_ground"};
@@ -53,6 +57,8 @@ struct DetailsParameters {
 
         noErrors &= read_scalar_field(leftTime, LEFT_TIME, details);
         noErrors &= read_scalar_field(rightTime, RIGHT_TIME, details);
+        noErrors &= read_scalar_field(exposure, EXPOSURE, details);
+        noErrors &= read_scalar_field(gain, GAIN, details);
         noErrors &= read_scalar_field(focalLength, FOCAL_LENGTH, details);
         noErrors &= read_scalar_field(baseline, BASELINE, details);
         noErrors &= read_scalar_field(metersAboveGround, METERS_ABOVE_GROUND, details);
