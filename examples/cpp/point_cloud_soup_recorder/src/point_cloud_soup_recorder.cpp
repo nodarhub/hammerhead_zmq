@@ -68,7 +68,6 @@ public:
         const auto cols = soup.disparity.cols;
         point_cloud.resize(rows * cols);
 
-        // Disparity is in 11.6 format
         cv::Mat disparity_to_depth4x4(4, 4, CV_32FC1);
         memcpy(disparity_to_depth4x4.data, soup.disparity_to_depth4x4.data(),
                soup.disparity_to_depth4x4.size() * sizeof(float));
@@ -78,7 +77,7 @@ public:
         cv::Mat rotation_world_to_raw_cam(3, 3, CV_32FC1);
         memcpy(rotation_world_to_raw_cam.data, soup.rotation_world_to_raw_cam.data(),
                soup.rotation_world_to_raw_cam.size() * sizeof(float));
-
+        // Disparity is in 12.4 format
         auto disparity_scaled = nodar::zmq::cvMatFromStampedImage(soup.disparity);
         disparity_scaled.convertTo(disparity_scaled, CV_32F, 1. / 16);
         const cv::Mat rotation_matrix = rotation_world_to_raw_cam.t() * rotation_disparity_to_raw_cam;
