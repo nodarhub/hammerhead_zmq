@@ -104,7 +104,7 @@ public:
         auto bgr = soup.rectified.img.data();
         size_t total = 0;
         size_t valid = 0;
-        const auto downsample = 10;
+        const auto downsample = 1;
         size_t num_points = 0;
         for (size_t row = 0; row < rows; ++row) {
             for (size_t col = 0; col < cols; ++col, xyz += 3, bgr += bgr_step) {

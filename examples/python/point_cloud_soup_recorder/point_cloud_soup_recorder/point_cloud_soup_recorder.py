@@ -141,7 +141,7 @@ class PointCloudSoupRecorder:
         xyz = xyz[valid]
         bgr = bgr[valid]
 
-        downsample = 10
+        downsample = 1
         xyz = xyz[::downsample, :]
         bgr = bgr[::downsample, :]
 
