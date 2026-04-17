@@ -7,7 +7,9 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "CMAKE_BUILD_TYPE was not set by the user. Defaulting to ${CMAKE_BUILD_TYPE}")
 endif ()
 
-find_package(OpenCV 4 REQUIRED COMPONENTS highgui imgproc)
+if (NOT (TARGET opencv_highgui AND TARGET opencv_imgproc))
+    find_package(OpenCV 4 REQUIRED COMPONENTS highgui imgproc)
+endif ()
 find_package(TIFF REQUIRED)
 
 add_executable(image_recorder

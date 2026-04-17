@@ -7,7 +7,9 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "CMAKE_BUILD_TYPE was not set by the user. Defaulting to ${CMAKE_BUILD_TYPE}")
 endif ()
 
-find_package(OpenCV 4 REQUIRED COMPONENTS core highgui)
+if (NOT (TARGET opencv_core AND TARGET opencv_highgui))
+    find_package(OpenCV 4 REQUIRED COMPONENTS core highgui)
+endif ()
 
 add_executable(occupancy_map_viewer
         src/occupancy_map_viewer.cpp
