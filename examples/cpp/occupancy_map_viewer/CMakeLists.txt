@@ -7,8 +7,8 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "CMAKE_BUILD_TYPE was not set by the user. Defaulting to ${CMAKE_BUILD_TYPE}")
 endif ()
 
-if (NOT (TARGET opencv_core AND TARGET opencv_highgui))
-    find_package(OpenCV 4 REQUIRED COMPONENTS core highgui)
+if (NOT (TARGET opencv_core AND TARGET opencv_highgui AND TARGET opencv_imgproc))
+    find_package(OpenCV 4 REQUIRED COMPONENTS core highgui imgproc)
 endif ()
 
 add_executable(occupancy_map_viewer
@@ -20,6 +20,7 @@ target_link_libraries(occupancy_map_viewer
         hammerhead::zmq_msgs
         hammerhead::zmq_opencv
         opencv_highgui
+        opencv_imgproc
 )
 
 set_target_properties(occupancy_map_viewer PROPERTIES

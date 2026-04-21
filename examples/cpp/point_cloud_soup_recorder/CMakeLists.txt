@@ -7,8 +7,8 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "CMAKE_BUILD_TYPE was not set by the user. Defaulting to ${CMAKE_BUILD_TYPE}")
 endif ()
 
-if (NOT (TARGET opencv_calib3d AND TARGET opencv_imgproc))
-    find_package(OpenCV 4 REQUIRED COMPONENTS calib3d imgproc)
+if (NOT TARGET opencv_calib3d)
+    find_package(OpenCV 4 REQUIRED COMPONENTS calib3d)
 endif ()
 
 add_executable(point_cloud_soup_recorder
@@ -18,7 +18,6 @@ add_executable(point_cloud_soup_recorder
 target_link_libraries(point_cloud_soup_recorder
         PRIVATE
         opencv_calib3d
-        opencv_imgproc
         #stdc++fs
         hammerhead::zmq_msgs
         hammerhead::zmq_opencv
