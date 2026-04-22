@@ -30,8 +30,18 @@ private:
     BufferPool buffer_pool;
 
 public:
-    Publisher(const Topic& topic, const std::string& ip)
-        : topic(topic), context(1), socket(context, ZMQ_PUB), running(true) {
+    Publisher(const Topic& topic, const std::string& ip) : Publisher(topic, ip, BufferPool::StorageFactory{}) {}
+
+    /// Construct with a custom storage factory for the internal BufferPool.
+    /// Every Buffer handed out by this publisher's pool will be backed by
+    /// storage from `factory`. Pass an empty factory to use the default
+    /// std::vector-backed storage.
+    Publisher(const Topic& topic, const std::string& ip, BufferPool::StorageFactory factory)
+        : topic(topic),
+          context(1),
+          socket(context, ZMQ_PUB),
+          running(true),
+          buffer_pool(std::move(factory)) {
         socket.set(::zmq::sockopt::sndhwm, 1);  // set maximum queue length to 1 message
         // If the IP is empty, bind on this device.
         if (ip.empty()) {
