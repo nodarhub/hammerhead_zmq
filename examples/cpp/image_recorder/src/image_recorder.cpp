@@ -17,6 +17,9 @@
 #include <unordered_map>
 #include <zmq.hpp>
 
+#include "date_string.hpp"
+#include "frame_string.hpp"
+
 std::atomic_bool running{true};
 
 void signalHandler(int signum) {
@@ -149,12 +152,6 @@ public:
         compression_params.push_back(1);  // No compression
     }
 
-    [[nodiscard]] static std::string frame_string(uint64_t frame_no) {
-        std::ostringstream oss;
-        oss << std::setw(9) << std::setfill('0') << frame_no;
-        return oss.str();
-    }
-
     void loop_once() {
         fps.tic();
         zmq::message_t msg;
@@ -178,7 +175,7 @@ public:
         // We recommend saving tiffs with no compression if the data rate is high.
         // Depending on the underlying image type, you might want to use stamped_image.cvt_to_bgr_code
         // to convert to BGR before saving.
-        const auto frame_str = frame_string(frame_id);
+        const auto frame_str = frameString(frame_id);
         const auto tiff_path = image_dir / (frame_str + ".tiff");
         cv::imwrite(tiff_path, img, compression_params);
 
@@ -202,7 +199,7 @@ public:
             }
             f << std::flush;
         }
-        timing_file << frame_string(frame_id) << " " << stamped_image.time;
+        timing_file << frameString(frame_id) << " " << stamped_image.time;
         if (stamped_image.additional_field_size == additional_data_size) {
             timing_file << " " << right_time << " " << exposure << " " << gain;
         }
@@ -265,24 +262,11 @@ void print_usage(const std::string& default_ip, const std::string& default_port,
               << "----------------------------------------" << std::endl;
 }
 
-inline std::string date_string() {
-    const auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    std::tm buf{};
-#if defined(_WIN32)
-    gmtime_s(&buf, &now);
-#else
-    gmtime_r(&now, &buf);
-#endif
-    std::ostringstream date_ss;
-    date_ss << std::put_time(&buf, "%Y%m%d-%H%M%S");
-    return date_ss.str();
-}
-
 int main(int argc, char* argv[]) {
     constexpr auto default_ip = "127.0.0.1";
     constexpr auto default_topic = nodar::zmq::IMAGE_TOPICS[0];
     const std::string default_port = std::to_string(default_topic.port);
-    const auto dated_folder = date_string();
+    const auto dated_folder = dateString();
     const auto default_output_dir = "./" + dated_folder;
 
     signal(SIGINT, signalHandler);

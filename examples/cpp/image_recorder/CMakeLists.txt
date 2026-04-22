@@ -18,6 +18,7 @@ add_executable(image_recorder
 
 target_link_libraries(image_recorder
         PRIVATE
+        common_base
         opencv_imgcodecs
         hammerhead::zmq_msgs
         hammerhead::zmq_opencv
