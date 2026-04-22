@@ -7,6 +7,8 @@
 #include <nodar/zmq/topic_ports.hpp>
 #include <zmq.hpp>
 
+#include "frame_string.hpp"
+
 std::atomic_bool running{true};
 
 void signalHandler(int signum) {
@@ -53,9 +55,7 @@ public:
         last_frame_id = frame_id;
         std::cout << "\rFrame # " << frame_id << ". " << std::flush;
 
-        std::ostringstream filename_ss;
-        filename_ss << std::setw(9) << std::setfill('0') << frame_id << ".txt";
-        const auto filename = output_dir / filename_ss.str();
+        const auto filename = output_dir / (frameString(frame_id) + ".txt");
         std::cout << "Writing " << filename << std::flush;
         write_data(filename, obstacleData);
     }

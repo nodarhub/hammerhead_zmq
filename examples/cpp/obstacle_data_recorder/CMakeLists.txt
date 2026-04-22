@@ -13,6 +13,7 @@ add_executable(obstacle_data_recorder
 
 target_link_libraries(obstacle_data_recorder
         PRIVATE
+        common_base
         hammerhead::zmq_msgs
 )
 
