@@ -45,9 +45,12 @@ class Details:
         # Load scalars
         self.left_time = get_typed_value(data, "left_time", int, 0)
         self.right_time = get_typed_value(data, "right_time", int, 0)
+        self.exposure = get_typed_value(data, "exposure", float, 0.0)
+        self.gain = get_typed_value(data, "gain", float, 0.0)
         self.focal_length = get_typed_value(data, "focal_length", float, 0.0)
         self.baseline = get_typed_value(data, "baseline", float, 0.0)
         self.meters_above_ground = get_typed_value(data, "meters_above_ground", float, 0.0)
+        self.projection_type = get_typed_value(data, "projection_type", int, 0)
 
         # Load arrays
         self.disparity_to_depth4x4 = get_array(data, "projection", (4, 4))
@@ -55,16 +58,23 @@ class Details:
             data, "rotation_disparity_to_raw_cam", (3, 3)
         )
         self.rotation_world_to_raw_cam = get_array(data, "rotation_world_to_raw_cam", (3, 3))
+        self.rotation_right_rect_to_raw_cam = get_array(
+            data, "rotation_right_rect_to_raw_cam", (3, 3)
+        )
 
     def __str__(self):
         return (
             "Details:\n"
-            f"\tleft_time                   : {self.left_time}\n"
-            f"\tright_time                  : {self.right_time}\n"
-            f"\tfocal_length                : {self.focal_length:.6f}\n"
-            f"\tbaseline                    : {self.baseline:.6f}\n"
-            f"\tmeters_above_ground         : {self.meters_above_ground:.6f}\n"
-            f"\tdisparity_to_depth4x4       :\n{self.disparity_to_depth4x4}\n"
-            f"\trotation_disp_to_raw_cam    :\n{self.rotation_disparity_to_raw_cam}\n"
-            f"\trotation_world_to_raw_cam   :\n{self.rotation_world_to_raw_cam}\n"
+            f"\tleft_time                       : {self.left_time}\n"
+            f"\tright_time                      : {self.right_time}\n"
+            f"\texposure                        : {self.exposure:.6f}\n"
+            f"\tgain                            : {self.gain:.6f}\n"
+            f"\tfocal_length                    : {self.focal_length:.6f}\n"
+            f"\tbaseline                        : {self.baseline:.6f}\n"
+            f"\tmeters_above_ground             : {self.meters_above_ground:.6f}\n"
+            f"\tprojection_type                 : {self.projection_type}\n"
+            f"\tdisparity_to_depth4x4           :\n{self.disparity_to_depth4x4}\n"
+            f"\trotation_disp_to_raw_cam        :\n{self.rotation_disparity_to_raw_cam}\n"
+            f"\trotation_world_to_raw_cam       :\n{self.rotation_world_to_raw_cam}\n"
+            f"\trotation_right_rect_to_raw_cam  :\n{self.rotation_right_rect_to_raw_cam}\n"
         )

@@ -15,6 +15,12 @@ except ImportError:
     )
     from zmq_msgs.details import Details
 
+try:
+    from reproject_to_3d import reproject_image_to_3d
+except ImportError:
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    from reproject_to_3d import reproject_image_to_3d
+
 
 def parse_args():
     p = argparse.ArgumentParser(description="Convert disparity to ordered point cloud")
@@ -106,22 +112,13 @@ def main():
             continue
         details = Details(details_filename)
 
-        disparity_to_depth4x4 = details.disparity_to_depth4x4
-        rotation_disparity_to_raw_cam = details.rotation_disparity_to_raw_cam
-        rotation_world_to_raw_cam = details.rotation_world_to_raw_cam
-
         # Account for subpixel scaling
         disparity_scaled = disparity / np.float32(16)
 
-        # Compute disparity_to_rotated_depth4x4 (rotated Q matrix)
-        rotation_disparity_to_world = rotation_world_to_raw_cam.T @ rotation_disparity_to_raw_cam
-        rotation_disparity_to_world_4x4 = np.eye(4, dtype=np.float32)
-        rotation_disparity_to_world_4x4[:3, :3] = rotation_disparity_to_world
-        disparity_to_rotated_depth4x4 = rotation_disparity_to_world_4x4 @ disparity_to_depth4x4
-
-        # Negate the last row of the Q-matrix
-        disparity_to_rotated_depth4x4[3, :] *= -1
-        xyz = cv2.reprojectImageTo3D(disparity_scaled, disparity_to_rotated_depth4x4)
+        rotation_matrix = details.rotation_world_to_raw_cam.T @ details.rotation_disparity_to_raw_cam
+        xyz = reproject_image_to_3d(
+            disparity_scaled, details.projection_type, details.disparity_to_depth4x4, rotation_matrix
+        )
 
         stem = os.path.splitext(os.path.basename(tiff))[0]
         if split:

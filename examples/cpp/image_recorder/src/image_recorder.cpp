@@ -58,9 +58,11 @@ bool add_tiff_metadata(const std::filesystem::path& filename, uint64_t left_time
                 << "focal_length: 0.0\\n"
                 << "baseline: 0.0\\n"
                 << "meters_above_ground: 0.0\\n"
+                << "projection_type: 0\\n"
                 << "projection: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]\\n"
                 << "rotation_disparity_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
-                << "rotation_world_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n";
+                << "rotation_world_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
+                << "rotation_right_rect_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n";
 
     std::ostringstream metadata_yaml;
     metadata_yaml << "DETAILS: \"" << details_str.str() << "\"";

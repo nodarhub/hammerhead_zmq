@@ -18,6 +18,7 @@ struct PointCloudSoup {
     uint64_t frame_id{};
     double baseline{};
     double focal_length{};
+    int16_t projection_type{0};  // 0 = pinhole, 1 = cylindrical
     std::array<float, 16> disparity_to_depth4x4{};
     static constexpr uint64_t disparity_to_depth4x4_bytes = 16 * sizeof(disparity_to_depth4x4[0]);
     std::array<float, 9> rotation_disparity_to_raw_cam{};
@@ -34,6 +35,7 @@ struct PointCloudSoup {
                    uint64_t frame_id,  //
                    double baseline,  //
                    double focal_length,  //
+                   int16_t projection_type,  //
                    std::array<float, 16> disparity_to_depth4x4,  //
                    std::array<float, 9> rotation_disparity_to_raw_cam,  //
                    std::array<float, 9> rotation_world_to_raw_cam,  //
@@ -43,6 +45,7 @@ struct PointCloudSoup {
           frame_id(frame_id),
           baseline(baseline),
           focal_length(focal_length),
+          projection_type(projection_type),
           disparity_to_depth4x4(disparity_to_depth4x4),
           rotation_disparity_to_raw_cam(rotation_disparity_to_raw_cam),
           rotation_world_to_raw_cam(rotation_world_to_raw_cam),
@@ -54,6 +57,7 @@ struct PointCloudSoup {
     [[nodiscard]] static constexpr uint64_t msgSize(uint32_t rows_, uint32_t cols_, uint32_t rectified_type_,
                                                     uint32_t disparity_type_) {
         return sizeof(INFO) + sizeof(baseline) + sizeof(focal_length) + sizeof(time) + sizeof(frame_id) +
+               sizeof(projection_type) +  //
                disparity_to_depth4x4_bytes + rotation_disparity_to_raw_cam_bytes + rotation_world_to_raw_cam_bytes +
                StampedImage::msgSize(rows_, cols_, rectified_type_, 0) +
                StampedImage::msgSize(rows_, cols_, disparity_type_, 0);
@@ -80,6 +84,7 @@ struct PointCloudSoup {
         src = utils::read(src, frame_id);
         src = utils::read(src, baseline);
         src = utils::read(src, focal_length);
+        src = utils::read(src, projection_type);
         memcpy(disparity_to_depth4x4.data(), src, disparity_to_depth4x4_bytes);
         src += disparity_to_depth4x4_bytes;
         memcpy(rotation_disparity_to_raw_cam.data(), src, rotation_disparity_to_raw_cam_bytes);
@@ -101,6 +106,7 @@ struct PointCloudSoup {
                              uint64_t frame_id_,  //
                              double baseline_,  //
                              double focal_length_,  //
+                             int16_t projection_type_,  //
                              const std::array<float, 16> &disparity_to_depth4x4_,  //
                              const std::array<float, 9> &rotation_disparity_to_raw_cam_,  //
                              const std::array<float, 9> &rotation_world_to_raw_cam_,
@@ -111,6 +117,7 @@ struct PointCloudSoup {
         dst = utils::append(dst, frame_id_);
         dst = utils::append(dst, baseline_);
         dst = utils::append(dst, focal_length_);
+        dst = utils::append(dst, projection_type_);
 
         memcpy(dst, disparity_to_depth4x4_.data(), disparity_to_depth4x4_bytes);
         dst += disparity_to_depth4x4_bytes;
@@ -128,6 +135,7 @@ struct PointCloudSoup {
                       uint64_t frame_id_,  //
                       double baseline_,  //
                       double focal_length_,  //
+                      int16_t projection_type_,  //
                       const std::array<float, 16> &disparity_to_depth4x4_,  //
                       const std::array<float, 9> &rotation_disparity_to_raw_cam_,  //
                       const std::array<float, 9> &rotation_world_to_raw_cam_,
@@ -142,6 +150,7 @@ struct PointCloudSoup {
                            frame_id_,  //
                            baseline_,  //
                            focal_length_,  //
+                           projection_type_,  //
                            disparity_to_depth4x4_,  //
                            rotation_disparity_to_raw_cam_,  //
                            rotation_world_to_raw_cam_,  //
@@ -157,6 +166,7 @@ struct PointCloudSoup {
                       uint64_t frame_id_,  //
                       double baseline_,  //
                       double focal_length_,  //
+                      int16_t projection_type_,  //
                       const std::array<float, 16> &disparity_to_depth4x4_,  //
                       const std::array<float, 9> &rotation_disparity_to_raw_cam_,  //
                       const std::array<float, 9> &rotation_world_to_raw_cam_,  //
@@ -171,6 +181,7 @@ struct PointCloudSoup {
                      frame_id_,  //
                      baseline_,  //
                      focal_length_,  //
+                     projection_type_,  //
                      disparity_to_depth4x4_,  //
                      rotation_disparity_to_raw_cam_,  //
                      rotation_world_to_raw_cam_,  //
@@ -183,8 +194,8 @@ struct PointCloudSoup {
     }
 
     auto write(uint8_t *dst) const {
-        return write(dst, time, frame_id, baseline, focal_length, disparity_to_depth4x4, rotation_disparity_to_raw_cam,
-                     rotation_world_to_raw_cam, rectified, disparity);
+        return write(dst, time, frame_id, baseline, focal_length, projection_type, disparity_to_depth4x4,
+                     rotation_disparity_to_raw_cam, rotation_world_to_raw_cam, rectified, disparity);
     }
 };
 

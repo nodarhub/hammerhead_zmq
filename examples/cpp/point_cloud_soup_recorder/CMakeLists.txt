@@ -17,6 +17,7 @@ add_executable(point_cloud_soup_recorder
 
 target_link_libraries(point_cloud_soup_recorder
         PRIVATE
+        common
         opencv_calib3d
         #stdc++fs
         hammerhead::zmq_msgs

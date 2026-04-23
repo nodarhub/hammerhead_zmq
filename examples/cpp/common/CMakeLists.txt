@@ -16,6 +16,7 @@ add_library(common INTERFACE)
 target_sources(common INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/include/details_parameters.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/include/get_files.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/reproject_to_3d.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/include/safe_load.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/include/tqdm.hpp
         )

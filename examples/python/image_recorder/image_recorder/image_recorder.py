@@ -83,9 +83,11 @@ def get_tiff_metadata(left_time, right_time, exposure=0.0, gain=0.0):
         f"focal_length: 0.0\\n"
         f"baseline: 0.0\\n"
         f"meters_above_ground: 0.0\\n"
+        f"projection_type: 0\\n"
         f"projection: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]\\n"
         f"rotation_disparity_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
         f"rotation_world_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
+        f"rotation_right_rect_to_raw_cam: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]\\n"
     )
     return f'DETAILS: "{details_str}"'
 
