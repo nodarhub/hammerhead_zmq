@@ -1,5 +1,4 @@
 #include <atomic>
-#include <chrono>
 #include <csignal>
 #include <filesystem>
 #include <iostream>
@@ -14,6 +13,7 @@
 
 #include "date_string.hpp"
 #include "details_parameters.hpp"
+#include "fps.hpp"
 #include "frame_string.hpp"
 #include "ply.hpp"
 #include "point.hpp"
@@ -166,6 +166,7 @@ public:
     }
 
     void loopOnce() {
+        fps.tic();
         zmq::message_t msg;
         const auto received_bytes = socket.recv(msg, zmq::recv_flags::none);
         const nodar::zmq::PointCloudSoup soup(static_cast<uint8_t *>(msg.data()));
@@ -175,16 +176,15 @@ public:
             return;
         }
 
-        const auto start = std::chrono::steady_clock::now();
-
-        // Warn if we dropped a frame
         const auto &frame_id = soup.frame_id;
+        std::cout << "\rFrame # " << frame_id << ", Last #: " << last_frame_id  //
+                  << ", format = " << (format == OutputFormat::Raw ? "raw" : "ply") << ". ";
+        std::cout << fps.str() << ". ";
         if (last_frame_id != 0 and frame_id != last_frame_id + 1) {
-            std::cerr << (frame_id - last_frame_id - 1) << " frames dropped. Current frame ID : " << frame_id
-                      << ", last frame ID: " << last_frame_id << std::endl;
+            std::cout << "Frames dropped: " << frame_id - last_frame_id - 1 << ". ";
         }
+        std::cout << std::flush;
         last_frame_id = frame_id;
-        std::cout << "\rFrame # " << frame_id << ". " << std::endl;
 
         const auto frame_str = frameString(frame_id);
         detailsFromSoup(soup).save((details_dir / (frame_str + ".yaml")).string());
@@ -194,10 +194,6 @@ public:
         } else {
             writePointCloud(soup, frame_str);
         }
-
-        const auto elapsed_ms =
-            std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
-        std::cout << "  [" << elapsed_ms << " ms]" << std::endl;
 
         // Wait for scheduler request from hammerhead, then send reply (if enabled)
         if (enable_scheduler && scheduler_socket) {
@@ -218,7 +214,6 @@ private:
         disparity_img.convertTo(disparity_img, CV_16U);
         const auto disparity_path = disparity_dir / (frame_str + ".tiff");
         const auto left_rect_path = left_rect_dir / (frame_str + ".tiff");
-        std::cout << "Writing " << disparity_path << " and " << left_rect_path << std::endl;
         cv::imwrite(disparity_path.string(), disparity_img, tiff_params);
         cv::imwrite(left_rect_path.string(), rectified_img, tiff_params);
     }
@@ -236,7 +231,6 @@ private:
         reprojectSoupToPoints(soup, buildRotatedQMatrix(soup), downsample, point_cloud);
 
         const auto filename = point_cloud_dir / (frame_str + ".ply");
-        std::cout << "Writing " << filename << std::endl;
 
         // Hand the filled buffer to a background writer so the next frame's
         // reprojection can run in parallel with the PLY write.
@@ -260,6 +254,7 @@ private:
     OutputFormat format;
     int downsample;
     std::vector<int> tiff_params;
+    FPS fps;
 
     // Background PLY writer.
     std::thread writer;
