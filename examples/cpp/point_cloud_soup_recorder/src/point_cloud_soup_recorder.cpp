@@ -1,4 +1,5 @@
 #include <atomic>
+#include <chrono>
 #include <csignal>
 #include <filesystem>
 #include <iostream>
@@ -6,9 +7,9 @@
 #include <nodar/zmq/opencv_utils.hpp>
 #include <nodar/zmq/point_cloud_soup.hpp>
 #include <nodar/zmq/topic_ports.hpp>
-#include <opencv2/calib3d.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <string>
+#include <thread>
 #include <zmq.hpp>
 
 #include "date_string.hpp"
@@ -40,9 +41,93 @@ void signalHandler(int signum) {
     return d;
 }
 
+// Build the 4x4 projection with the disparity-to-world rotation.
+[[nodiscard]] cv::Mat buildRotatedQMatrix(const nodar::zmq::PointCloudSoup &soup) {
+    cv::Mat disparity_to_depth4x4(4, 4, CV_32FC1);
+    memcpy(disparity_to_depth4x4.data, soup.disparity_to_depth4x4.data(),
+           soup.disparity_to_depth4x4.size() * sizeof(float));
+
+    cv::Mat rotation_disparity_to_raw_cam(3, 3, CV_32FC1);
+    memcpy(rotation_disparity_to_raw_cam.data, soup.rotation_disparity_to_raw_cam.data(),
+           soup.rotation_disparity_to_raw_cam.size() * sizeof(float));
+    cv::Mat rotation_world_to_raw_cam(3, 3, CV_32FC1);
+    memcpy(rotation_world_to_raw_cam.data, soup.rotation_world_to_raw_cam.data(),
+           soup.rotation_world_to_raw_cam.size() * sizeof(float));
+
+    cv::Mat1f rotation_disparity_to_world_4x4 = cv::Mat::eye(4, 4, CV_32F);
+    cv::Mat(rotation_world_to_raw_cam.t() * rotation_disparity_to_raw_cam)
+        .convertTo(rotation_disparity_to_world_4x4(cv::Rect(0, 0, 3, 3)), CV_32F);
+    cv::Mat disparity_to_rotated_depth4x4 = rotation_disparity_to_world_4x4 * disparity_to_depth4x4;
+    disparity_to_rotated_depth4x4.row(3) = -disparity_to_rotated_depth4x4.row(3);
+    return disparity_to_rotated_depth4x4;
+}
+
+// Walk every pixel of the disparity image, reproject into world space via the
+// rotated Q matrix, and append the corresponding BGR-coloured point.
+// Pixels with disparity == 0 (no stereo match) or degenerate projections are skipped.
+// When `downsample > 1`, keep every Nth valid point.
+void reprojectSoupToPoints(const nodar::zmq::PointCloudSoup &soup, const cv::Mat &rotated_Q, int downsample,
+                           std::vector<PointXYZRGB> &out) {
+    float Q[16];
+    memcpy(Q, rotated_Q.data, sizeof(Q));
+
+    const auto rows = soup.disparity.rows;
+    const auto cols = soup.disparity.cols;
+    const auto rect_type = soup.rectified.type;
+    assert(soup.disparity.type == CV_16SC1);
+    assert(rect_type == CV_8UC3 or rect_type == CV_8SC3 or rect_type == CV_16UC3 or rect_type == CV_16SC3);
+
+    const auto *disparity_raw = reinterpret_cast<const int16_t *>(soup.disparity.img.data());
+    const auto bgr_step = rect_type == CV_8UC3 or rect_type == CV_8SC3 ? 3 : 6;
+    auto bgr = soup.rectified.img.data();
+
+    size_t valid = 0;
+    for (size_t v = 0; v < rows; ++v) {
+        for (size_t u = 0; u < cols; ++u, ++disparity_raw, bgr += bgr_step) {
+            const int16_t d_raw = *disparity_raw;
+            if (d_raw == 0) {
+                continue;
+            }
+            const float d = d_raw * (1.0f / 16.0f);
+            const float w = Q[12] * u + Q[13] * v + Q[14] * d + Q[15];
+            if (w == 0.0f) {
+                continue;
+            }
+            const float inv_w = 1.0f / w;
+
+            ++valid;
+            if (downsample > 1 and (valid % downsample)) {
+                continue;
+            }
+
+            const float x = (Q[0] * u + Q[1] * v + Q[2] * d + Q[3]) * inv_w;
+            const float y = (Q[4] * u + Q[5] * v + Q[6] * d + Q[7]) * inv_w;
+            const float z = (Q[8] * u + Q[9] * v + Q[10] * d + Q[11]) * inv_w;
+            uint8_t b8, g8, r8;
+            if (rect_type == CV_8UC3 || rect_type == CV_8SC3) {
+                b8 = bgr[0];
+                g8 = bgr[1];
+                r8 = bgr[2];
+            } else {
+                const auto *bgr16 = reinterpret_cast<const uint16_t *>(bgr);
+                b8 = static_cast<uint8_t>(bgr16[0] / 257);
+                g8 = static_cast<uint8_t>(bgr16[1] / 257);
+                r8 = static_cast<uint8_t>(bgr16[2] / 257);
+            }
+            out.emplace_back(x, y, z, r8, g8, b8);
+        }
+    }
+}
+
 class PointCloudSink {
 public:
     uint64_t last_frame_id = 0;
+
+    ~PointCloudSink() {
+        if (writer.joinable()) {
+            writer.join();
+        }
+    }
 
     PointCloudSink(const std::filesystem::path &output_dir, const std::string &endpoint,
                    const std::string &scheduler_endpoint, bool enable_scheduler, OutputFormat format, int downsample)
@@ -90,6 +175,8 @@ public:
             return;
         }
 
+        const auto start = std::chrono::steady_clock::now();
+
         // Warn if we dropped a frame
         const auto &frame_id = soup.frame_id;
         if (last_frame_id != 0 and frame_id != last_frame_id + 1) {
@@ -107,6 +194,10 @@ public:
         } else {
             writePointCloud(soup, frame_str);
         }
+
+        const auto elapsed_ms =
+            std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
+        std::cout << "  [" << elapsed_ms << " ms]" << std::endl;
 
         // Wait for scheduler request from hammerhead, then send reply (if enabled)
         if (enable_scheduler && scheduler_socket) {
@@ -133,80 +224,27 @@ private:
     }
 
     void writePointCloud(const nodar::zmq::PointCloudSoup &soup, const std::string &frame_str) {
-        // Allocate space for the point cloud
         const auto rows = soup.disparity.rows;
         const auto cols = soup.disparity.cols;
-        point_cloud.resize(rows * cols);
-
-        // Disparity is in 11.6 format
-        cv::Mat disparity_to_depth4x4(4, 4, CV_32FC1);
-        memcpy(disparity_to_depth4x4.data, soup.disparity_to_depth4x4.data(),
-               soup.disparity_to_depth4x4.size() * sizeof(float));
-
-        // Rotation disparity to raw cam
-        cv::Mat rotation_disparity_to_raw_cam(3, 3, CV_32FC1);
-        memcpy(rotation_disparity_to_raw_cam.data, soup.rotation_disparity_to_raw_cam.data(),
-               soup.rotation_disparity_to_raw_cam.size() * sizeof(float));
-        // Rotation world to raw cam
-        cv::Mat rotation_world_to_raw_cam(3, 3, CV_32FC1);
-        memcpy(rotation_world_to_raw_cam.data, soup.rotation_world_to_raw_cam.data(),
-               soup.rotation_world_to_raw_cam.size() * sizeof(float));
-
-        // Compute disparity_to_rotated_depth4x4 (rotated Q matrix)
-        cv::Mat1f rotation_disparity_to_world_4x4 = cv::Mat::eye(4, 4, CV_32F);
-        cv::Mat(rotation_world_to_raw_cam.t() * rotation_disparity_to_raw_cam)
-            .convertTo(rotation_disparity_to_world_4x4(cv::Rect(0, 0, 3, 3)), CV_32F);
-        cv::Mat disparity_to_rotated_depth4x4 = rotation_disparity_to_world_4x4 * disparity_to_depth4x4;
-
-        // Negate the last row of the Q-matrix
-        disparity_to_rotated_depth4x4.row(3) = -disparity_to_rotated_depth4x4.row(3);
-
-        auto disparity_scaled = nodar::zmq::cvMatFromStampedImage(soup.disparity);
-        disparity_scaled.convertTo(disparity_scaled, CV_32F, 1. / 16);
-        cv::reprojectImageTo3D(disparity_scaled, depth3d, disparity_to_rotated_depth4x4);
-
-        // Assert types before continuing
-        assert(depth3d.type() == CV_32FC3);
-        const auto rect_type = soup.rectified.type;
-        assert(rect_type == CV_8UC3 or rect_type == CV_8SC3 or rect_type == CV_16UC3 or rect_type == CV_16SC3);
-
-        auto xyz = reinterpret_cast<float *>(depth3d.data);
-        const auto bgr_step = rect_type == CV_8UC3 or rect_type == CV_8SC3 ? 3 : 6;
-        auto bgr = soup.rectified.img.data();
-        size_t valid = 0;
-        size_t num_points = 0;
-        for (size_t row = 0; row < rows; ++row) {
-            for (size_t col = 0; col < cols; ++col, xyz += 3, bgr += bgr_step) {
-                if (not isValid(xyz)) {
-                    continue;
-                }
-                ++valid;
-                if (downsample > 1 and (valid % downsample)) {
-                    continue;
-                }
-                auto &point = point_cloud[num_points++];
-                point.x = xyz[0], point.y = xyz[1], point.z = xyz[2];
-                if (rect_type == CV_8UC3 || rect_type == CV_8SC3) {
-                    point.b = bgr[0];
-                    point.g = bgr[1];
-                    point.r = bgr[2];
-                } else if (rect_type == CV_16UC3 || rect_type == CV_16SC3) {
-                    const auto *bgr16 = reinterpret_cast<const uint16_t *>(bgr);
-                    point.b = static_cast<uint8_t>(bgr16[0] / 257);
-                    point.g = static_cast<uint8_t>(bgr16[1] / 257);
-                    point.r = static_cast<uint8_t>(bgr16[2] / 257);
-                }
-            }
+        // Reserve capacity for the worst case (every pixel valid)
+        if (point_cloud.capacity() < rows * cols) {
+            point_cloud.reserve(rows * cols);
+            write_buffer.reserve(rows * cols);
         }
-        point_cloud.resize(num_points);
+        point_cloud.clear();
+
+        reprojectSoupToPoints(soup, buildRotatedQMatrix(soup), downsample, point_cloud);
 
         const auto filename = point_cloud_dir / (frame_str + ".ply");
         std::cout << "Writing " << filename << std::endl;
-        writePly(filename, point_cloud);
-    }
 
-    static bool isValid(const float *const xyz) {
-        return not std::isinf(xyz[0]) and not std::isinf(xyz[1]) and not std::isinf(xyz[2]);
+        // Hand the filled buffer to a background writer so the next frame's
+        // reprojection can run in parallel with the PLY write.
+        if (writer.joinable()) {
+            writer.join();
+        }
+        std::swap(point_cloud, write_buffer);
+        writer = std::thread([this, filename] { writePly(filename, write_buffer); });
     }
 
     std::filesystem::path output_dir;
@@ -214,7 +252,6 @@ private:
     std::filesystem::path disparity_dir;
     std::filesystem::path left_rect_dir;
     std::filesystem::path point_cloud_dir;
-    cv::Mat depth3d;
     std::vector<PointXYZRGB> point_cloud;
     zmq::context_t context;
     zmq::socket_t socket;
@@ -223,6 +260,10 @@ private:
     OutputFormat format;
     int downsample;
     std::vector<int> tiff_params;
+
+    // Background PLY writer.
+    std::thread writer;
+    std::vector<PointXYZRGB> write_buffer;
 };
 
 void printUsage(const std::string &default_ip) {
@@ -238,20 +279,19 @@ void printUsage(const std::string &default_ip) {
                  "  -f, --format {ply,raw}      Output format (default: ply).\n"
                  "                                ply : reconstruct a 3D point cloud and write\n"
                  "                                      {frame_id}.ply. A details/{frame_id}.yaml\n"
-                 "                                      sidecar (timestamps, baseline, focal length,\n"
+                 "                                      (timestamps, baseline, focal length,\n"
                  "                                      projection matrices) is written alongside.\n"
                  "                                raw : skip reconstruction. Write the disparity and\n"
                  "                                      left rectified images plus details/{frame_id}.yaml\n"
                  "                                      into three sibling folders (disparity/, left-rect/,\n"
-                 "                                      details/). This mirrors the layout produced by the\n"
-                 "                                      main Hammerhead `recorder` tool and lets a downstream\n"
-                 "                                      process do the 3D reconstruction offline, keeping\n"
-                 "                                      CPU usage low on the recording host.\n"
+                 "                                      details/). Lets a downstream process do the 3D\n"
+                 "                                      reconstruction offline, keeping CPU usage low on\n"
+                 "                                      the recording host.\n"
                  "  --downsample N              [ply only] Keep every Nth valid point when writing the PLY.\n"
-                 "                                Exists because writing every point can outpace disk\n"
-                 "                                bandwidth at high frame rates and large image sizes.\n"
-                 "                                Set 1 to keep all points; increase if you see dropped\n"
-                 "                                frames. Default: 10.\n"
+                 "                                Reduces output file size / disk bandwidth; does NOT reduce\n"
+                 "                                CPU cost on the recorder (reprojection still runs on every\n"
+                 "                                pixel). Use --format raw if you are CPU-bound. Default: 1\n"
+                 "                                (keep all points); increase if you see dropped frames.\n"
                  "  -w, --wait-for-scheduler    Enable scheduler synchronization with hammerhead.\n"
                  "  -h, --help                  Display this help message.\n\n"
                  "Examples:\n"
@@ -273,7 +313,7 @@ int main(int argc, char *argv[]) {
     // Parse command-line arguments
     bool enable_scheduler = false;
     OutputFormat format = OutputFormat::Ply;
-    int downsample = 10;
+    int downsample = 1;
     std::string ip = default_ip;
     std::filesystem::path base_dir{"."};
 
