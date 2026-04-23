@@ -160,6 +160,12 @@ class PointCloudSoupRecorder:
         else:
             self.point_cloud_dir = os.path.join(output_dir, "point_clouds")
             os.makedirs(self.point_cloud_dir, exist_ok=True)
+            if self.downsample == 1:
+                print(
+                    "NOTE: Python code is slow and you may see dropped frames in your "
+                    "system. If you are seeing lower performance, please consider using "
+                    "the C++ example."
+                )
 
     def loop_once(self):
         self.fps.tic()
