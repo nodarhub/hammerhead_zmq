@@ -1,5 +1,6 @@
 import argparse
 import os
+import queue
 import signal
 import sys
 import threading
@@ -147,7 +148,8 @@ class PointCloudSoupRecorder:
         self.fps = FPS()
         self._u_row = None
         self._v_col = None
-        self.writer = None
+        self._write_queue = None
+        self._writer = None
         print(f"Subscribing to {endpoint}")
 
         self.details_dir = os.path.join(output_dir, "details")
@@ -166,6 +168,9 @@ class PointCloudSoupRecorder:
                     "system. If you are seeing lower performance, please consider using "
                     "the C++ example."
                 )
+            # Persistent background writer.
+            self._writer = threading.Thread(target=self._writer_loop)
+            self._writer.start()
 
     def loop_once(self):
         self.fps.tic()
@@ -255,15 +260,22 @@ class PointCloudSoupRecorder:
         filename = os.path.join(self.point_cloud_dir, f"{frame_id:09}.ply")
         if bgr.dtype == np.uint16 or bgr.dtype == np.int16:
             bgr = (bgr / 257).astype(np.uint8)
-        if self.writer is not None:
-            self.writer.join()
-        self.writer = threading.Thread(target=write_ply_binary, args=(filename, xyz, bgr))
-        self.writer.start()
+        # Blocks if the worker hasn't drained the previous frame
+        self._write_queue.put((filename, xyz, bgr))
+
+    def _writer_loop(self):
+        while True:
+            item = self._write_queue.get()
+            if item is None:
+                return
+            filename, xyz, bgr = item
+            write_ply_binary(filename, xyz, bgr)
 
     def close(self):
-        if self.writer is not None:
-            self.writer.join()
-            self.writer = None
+        if self._writer is not None:
+            self._write_queue.put(None)
+            self._writer.join()
+            self._writer = None
 
 
 def build_arg_parser(default_ip):
