@@ -232,11 +232,8 @@ private:
     void writePointCloud(const nodar::zmq::PointCloudSoup &soup, const std::string &frame_str) {
         const auto rows = soup.disparity.rows;
         const auto cols = soup.disparity.cols;
-        // Reserve capacity for the worst case (every pixel valid)
-        if (point_cloud.capacity() < rows * cols) {
-            point_cloud.reserve(rows * cols);
-        }
-        point_cloud.clear();
+        std::vector<PointXYZRGB> point_cloud;
+        point_cloud.reserve(rows * cols);
 
         reprojectSoupToPoints(soup, buildRotatedQMatrix(soup), downsample, point_cloud);
 
@@ -252,6 +249,8 @@ private:
     }
 
     void workerLoop() {
+        std::vector<PointXYZRGB> local_buffer;
+        std::filesystem::path local_filename;
         while (true) {
             {
                 std::unique_lock<std::mutex> lock(guard);
@@ -259,10 +258,12 @@ private:
                 if (!has_work) {
                     return;  // done == true and queue is drained
                 }
-                writePly(pending_filename, write_buffer);
+                std::swap(local_buffer, write_buffer);
+                local_filename = std::move(pending_filename);
                 has_work = false;
             }
             cv.notify_all();
+            writePly(local_filename, local_buffer);
         }
     }
 
@@ -271,7 +272,6 @@ private:
     std::filesystem::path disparity_dir;
     std::filesystem::path left_rect_dir;
     std::filesystem::path point_cloud_dir;
-    std::vector<PointXYZRGB> point_cloud;
     zmq::context_t context;
     zmq::socket_t socket;
     std::unique_ptr<zmq::socket_t> scheduler_socket;
@@ -281,8 +281,9 @@ private:
     std::vector<int> tiff_params;
     FPS fps;
 
-    // Background PLY writer: main thread fills `point_cloud`, swaps it into
-    // `write_buffer`, sets `has_work`, and the worker writes `write_buffer` to disk
+    // Background PLY writer: main thread fills a local point cloud, swaps it into
+    // `write_buffer`, sets `has_work`, and the worker swaps `write_buffer` into its
+    // own local and writes that to disk.
     std::thread worker;
     std::mutex guard;
     std::condition_variable cv;
