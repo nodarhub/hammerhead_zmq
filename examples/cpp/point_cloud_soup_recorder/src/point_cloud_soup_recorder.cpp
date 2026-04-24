@@ -1,8 +1,10 @@
 #include <atomic>
+#include <condition_variable>
 #include <csignal>
 #include <filesystem>
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <nodar/zmq/opencv_utils.hpp>
 #include <nodar/zmq/point_cloud_soup.hpp>
 #include <nodar/zmq/topic_ports.hpp>
@@ -124,8 +126,13 @@ public:
     uint64_t last_frame_id = 0;
 
     ~PointCloudSink() {
-        if (writer.joinable()) {
-            writer.join();
+        {
+            std::lock_guard<std::mutex> lock(guard);
+            done = true;
+        }
+        cv.notify_all();
+        if (worker.joinable()) {
+            worker.join();
         }
     }
 
@@ -162,6 +169,10 @@ public:
             scheduler_socket = std::make_unique<zmq::socket_t>(context, ZMQ_DEALER);
             scheduler_socket->connect(scheduler_endpoint);
             std::cout << "Connected to scheduler at " << scheduler_endpoint << std::endl;
+        }
+
+        if (format == OutputFormat::Ply) {
+            worker = std::thread([this] { workerLoop(); });
         }
     }
 
@@ -230,15 +241,35 @@ private:
 
         reprojectSoupToPoints(soup, buildRotatedQMatrix(soup), downsample, point_cloud);
 
-        const auto filename = point_cloud_dir / (frame_str + ".ply");
-
-        // Hand the filled buffer to a background writer so the next frame's
-        // reprojection can run in parallel with the PLY write.
-        if (writer.joinable()) {
-            writer.join();
+        // Wait for the previous write to finish, hand off this frame, and wake the worker.
+        {
+            std::unique_lock<std::mutex> lock(guard);
+            cv.wait(lock, [this] { return !has_work; });
+            std::swap(point_cloud, write_buffer);
+            pending_filename = point_cloud_dir / (frame_str + ".ply");
+            has_work = true;
         }
-        std::swap(point_cloud, write_buffer);
-        writer = std::thread([this, filename] { writePly(filename, write_buffer); });
+        cv.notify_all();
+    }
+
+    void workerLoop() {
+        while (true) {
+            std::filesystem::path filename;
+            {
+                std::unique_lock<std::mutex> lock(guard);
+                cv.wait(lock, [this] { return has_work || done; });
+                if (!has_work) {
+                    return;  // done == true and queue is drained
+                }
+                filename = pending_filename;
+            }
+            writePly(filename, write_buffer);
+            {
+                std::lock_guard<std::mutex> lock(guard);
+                has_work = false;
+            }
+            cv.notify_all();
+        }
     }
 
     std::filesystem::path output_dir;
@@ -256,8 +287,14 @@ private:
     std::vector<int> tiff_params;
     FPS fps;
 
-    // Background PLY writer.
-    std::thread writer;
+    // Background PLY writer: main thread fills `point_cloud`, swaps it into
+    // `write_buffer`, sets `has_work`, and the worker writes `write_buffer` to disk
+    std::thread worker;
+    std::mutex guard;
+    std::condition_variable cv;
+    bool has_work = false;
+    bool done = false;
+    std::filesystem::path pending_filename;
     std::vector<PointXYZRGB> write_buffer;
 };
 
