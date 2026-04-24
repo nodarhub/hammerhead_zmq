@@ -169,6 +169,7 @@ class PointCloudSoupRecorder:
                     "the C++ example."
                 )
             # Persistent background writer.
+            self._write_queue = queue.Queue(maxsize=1)
             self._writer = threading.Thread(target=self._writer_loop)
             self._writer.start()
 
@@ -240,7 +241,7 @@ class PointCloudSoupRecorder:
         u_f = self._u_row[us]
         v_f = self._v_col[vs]
         d = disparity.ravel()[flat] * np.float32(1.0 / 16.0)
-        
+
         w = Q[3, 0] * u_f + Q[3, 1] * v_f + Q[3, 2] * d + Q[3, 3]
         w_valid = w != 0
         if not w_valid.all():
@@ -373,9 +374,11 @@ def main():
         downsample=args.downsample,
         scheduler_endpoint=scheduler_endpoint,
     )
-    while running:
-        recorder.loop_once()
-    recorder.close()
+    try:
+        while running:
+            recorder.loop_once()
+    finally:
+        recorder.close()
 
 
 if __name__ == "__main__":
