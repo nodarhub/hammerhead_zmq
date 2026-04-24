@@ -235,7 +235,6 @@ private:
         // Reserve capacity for the worst case (every pixel valid)
         if (point_cloud.capacity() < rows * cols) {
             point_cloud.reserve(rows * cols);
-            write_buffer.reserve(rows * cols);
         }
         point_cloud.clear();
 
@@ -254,18 +253,13 @@ private:
 
     void workerLoop() {
         while (true) {
-            std::filesystem::path filename;
             {
                 std::unique_lock<std::mutex> lock(guard);
                 cv.wait(lock, [this] { return has_work || done; });
                 if (!has_work) {
                     return;  // done == true and queue is drained
                 }
-                filename = pending_filename;
-            }
-            writePly(filename, write_buffer);
-            {
-                std::lock_guard<std::mutex> lock(guard);
+                writePly(pending_filename, write_buffer);
                 has_work = false;
             }
             cv.notify_all();
