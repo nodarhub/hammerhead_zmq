@@ -187,7 +187,9 @@ public:
         fps.tic();
         zmq::message_t msg;
         const auto received_bytes = socket.recv(msg, zmq::recv_flags::none);
+        const auto recv_ns = nowNs();
         const nodar::zmq::PointCloudSoup soup(static_cast<uint8_t *>(msg.data()));
+        const auto parsed_ns = nowNs();
 
         // If the soup was not received correctly, return
         if (soup.empty()) {
@@ -195,8 +197,8 @@ public:
         }
 
         const auto &frame_id = soup.frame_id;
-        const auto recv_ns = nowNs();
         const double recv_latency_ms = static_cast<double>(static_cast<int64_t>(recv_ns - soup.time)) / 1e6;
+        const double parse_ms = static_cast<double>(parsed_ns - recv_ns) / 1e6;
         last_frame_id = frame_id;
 
         const auto frame_str = frameString(frame_id);
@@ -212,6 +214,7 @@ public:
         const double write_latency_ms = static_cast<double>(static_cast<int64_t>(write_ns - soup.time)) / 1e6;
         std::cout << "Frame # " << frame_id  //
                   << "    recv: " << recv_latency_ms << " ms"
+                  << "    parse: " << parse_ms << " ms"
                   << "    post-write: " << write_latency_ms << " ms\n";
 
         // Wait for scheduler request from hammerhead, then send reply (if enabled)
