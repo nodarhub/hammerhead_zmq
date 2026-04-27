@@ -33,7 +33,6 @@ public:
     Publisher(const Topic& topic, const std::string& ip)
         : topic(topic), context(1), socket(context, ZMQ_PUB), running(true) {
         socket.set(::zmq::sockopt::sndhwm, 1);  // set maximum queue length to 1 message
-        socket.set(::zmq::sockopt::sndbuf, 64 * 1024 * 1024);  // 64 MB TCP send buffer for 10 GbE
         // If the IP is empty, bind on this device.
         if (ip.empty()) {
             const std::string endpoint = "tcp://*:" + std::to_string(topic.port);
