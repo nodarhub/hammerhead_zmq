@@ -153,7 +153,6 @@ public:
           downsample(downsample < 1 ? 1 : downsample) {
         const int hwm = 1;  // set maximum queue length to 1 message
         socket.set(zmq::sockopt::rcvhwm, hwm);
-        socket.set(zmq::sockopt::rcvbuf, 64 * 1024 * 1024);  // 64 MB TCP recv buffer for 10 GbE
         socket.set(zmq::sockopt::subscribe, "");
         socket.connect(endpoint);
         std::cout << "Subscribing to " << endpoint << std::endl;
