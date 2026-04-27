@@ -1,4 +1,5 @@
 #include <atomic>
+#include <chrono>
 #include <condition_variable>
 #include <csignal>
 #include <filesystem>
@@ -27,6 +28,12 @@ std::atomic_bool running{true};
 void signalHandler(int signum) {
     std::cerr << "SIGINT or SIGTERM received." << std::endl;
     running = false;
+}
+
+[[nodiscard]] uint64_t nowNs() {
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(
+               std::chrono::system_clock::now().time_since_epoch())
+        .count();
 }
 
 // Build a DetailsParameters from a PointCloudSoup. `rightTime`, `exposure`, `gain`,
@@ -188,13 +195,8 @@ public:
         }
 
         const auto &frame_id = soup.frame_id;
-        std::cout << "\rFrame # " << frame_id << ", Last #: " << last_frame_id  //
-                  << ", format = " << (format == OutputFormat::Raw ? "raw" : "ply") << ". ";
-        std::cout << fps.str() << ". ";
-        if (last_frame_id != 0 and frame_id != last_frame_id + 1) {
-            std::cout << "Frames dropped: " << frame_id - last_frame_id - 1 << ". ";
-        }
-        std::cout << std::flush;
+        const auto recv_ns = nowNs();
+        const double recv_latency_ms = static_cast<double>(static_cast<int64_t>(recv_ns - soup.time)) / 1e6;
         last_frame_id = frame_id;
 
         const auto frame_str = frameString(frame_id);
@@ -205,6 +207,12 @@ public:
         } else {
             writePointCloud(soup, frame_str);
         }
+
+        const auto write_ns = nowNs();
+        const double write_latency_ms = static_cast<double>(static_cast<int64_t>(write_ns - soup.time)) / 1e6;
+        std::cout << "Frame # " << frame_id  //
+                  << "    recv: " << recv_latency_ms << " ms"
+                  << "    post-write: " << write_latency_ms << " ms\n";
 
         // Wait for scheduler request from hammerhead, then send reply (if enabled)
         if (enable_scheduler && scheduler_socket) {
