@@ -43,8 +43,11 @@ void signalHandler(int signum) {
     return d;
 }
 
-// Build the 4x4 projection with the disparity-to-world rotation.
-[[nodiscard]] cv::Mat buildRotatedQMatrix(const nodar::zmq::PointCloudSoup &soup) {
+// Walk every pixel of the disparity image, reproject into world space via the
+// disparity-to-world rotated Q matrix, and append the corresponding BGR-coloured point.
+// Pixels with disparity == 0 (no stereo match) or degenerate projections are skipped.
+// When `downsample > 1`, keep every Nth valid point.
+void reprojectSoupToPoints(const nodar::zmq::PointCloudSoup &soup, int downsample, std::vector<PointXYZRGB> &out) {
     cv::Mat disparity_to_depth4x4(4, 4, CV_32FC1);
     memcpy(disparity_to_depth4x4.data, soup.disparity_to_depth4x4.data(),
            soup.disparity_to_depth4x4.size() * sizeof(float));
@@ -61,17 +64,9 @@ void signalHandler(int signum) {
         .convertTo(rotation_disparity_to_world_4x4(cv::Rect(0, 0, 3, 3)), CV_32F);
     cv::Mat disparity_to_rotated_depth4x4 = rotation_disparity_to_world_4x4 * disparity_to_depth4x4;
     disparity_to_rotated_depth4x4.row(3) = -disparity_to_rotated_depth4x4.row(3);
-    return disparity_to_rotated_depth4x4;
-}
 
-// Walk every pixel of the disparity image, reproject into world space via the
-// rotated Q matrix, and append the corresponding BGR-coloured point.
-// Pixels with disparity == 0 (no stereo match) or degenerate projections are skipped.
-// When `downsample > 1`, keep every Nth valid point.
-void reprojectSoupToPoints(const nodar::zmq::PointCloudSoup &soup, const cv::Mat &rotated_Q, int downsample,
-                           std::vector<PointXYZRGB> &out) {
     float Q[16];
-    memcpy(Q, rotated_Q.data, sizeof(Q));
+    memcpy(Q, disparity_to_rotated_depth4x4.data, sizeof(Q));
 
     const auto rows = soup.disparity.rows;
     const auto cols = soup.disparity.cols;
@@ -235,7 +230,7 @@ private:
         std::vector<PointXYZRGB> point_cloud;
         point_cloud.reserve(rows * cols);
 
-        reprojectSoupToPoints(soup, buildRotatedQMatrix(soup), downsample, point_cloud);
+        reprojectSoupToPoints(soup, downsample, point_cloud);
 
         // Wait for the previous write to finish, hand off this frame, and wake the worker.
         {
