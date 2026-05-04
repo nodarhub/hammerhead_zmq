@@ -235,7 +235,10 @@ private:
         // Wait for the previous write to finish, hand off this frame, and wake the worker.
         {
             std::unique_lock<std::mutex> lock(guard);
-            cv.wait(lock, [this] { return !has_work; });
+            cv.wait(lock, [this] { return not has_work or done; });
+            if (done) {
+                return;
+            }
             std::swap(point_cloud, write_buffer);
             pending_filename = point_cloud_dir / (frame_str + ".ply");
             has_work = true;
