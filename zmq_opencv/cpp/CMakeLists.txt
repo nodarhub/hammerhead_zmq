@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.11)
 
-find_package(OpenCV 4 QUIET COMPONENTS core)
+if (NOT TARGET opencv_core)
+    find_package(OpenCV 4 QUIET COMPONENTS core)
+endif ()
 
-if (OpenCV_FOUND)
+if (TARGET opencv_core)
     add_library(zmq_opencv INTERFACE)
     add_library(hammerhead::zmq_opencv ALIAS zmq_opencv)
 
