@@ -30,10 +30,10 @@ def signal_handler(signum, frame):
 
 PIXEL_FORMAT_MAP = {
     "BGR": StampedImage.COLOR_CONVERSION.BGR2BGR,
-    "Bayer_RGGB": cv2.COLOR_BayerBG2BGR,
-    "Bayer_GRBG": cv2.COLOR_BayerGB2BGR,
-    "Bayer_BGGR": cv2.COLOR_BayerRG2BGR,
-    "Bayer_GBRG": cv2.COLOR_BayerGR2BGR,
+    "Bayer_RGGB": cv2.COLOR_BayerRGGB2BGR,
+    "Bayer_GRBG": cv2.COLOR_BayerGRBG2BGR,
+    "Bayer_BGGR": cv2.COLOR_BayerBGGR2BGR,
+    "Bayer_GBRG": cv2.COLOR_BayerGBRG2BGR,
 }
 
 
@@ -148,10 +148,10 @@ def main():
                 print(f"[ERROR] Unsupported dtype in {file}: {img.dtype}")
                 continue
         elif cvt_to_bgr_code in [
-            cv2.COLOR_BayerBG2BGR,
-            cv2.COLOR_BayerGB2BGR,
-            cv2.COLOR_BayerRG2BGR,
-            cv2.COLOR_BayerGR2BGR,
+            cv2.COLOR_BayerRGGB2BGR,
+            cv2.COLOR_BayerGRBG2BGR,
+            cv2.COLOR_BayerBGGR2BGR,
+            cv2.COLOR_BayerGBRG2BGR,
         ]:
             if img.ndim != 2:
                 print(f"[ERROR] Image {file} is expected to be single-channel for Bayer format")
