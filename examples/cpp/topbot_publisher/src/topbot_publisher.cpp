@@ -39,10 +39,10 @@ bool isValidPort(const uint16_t& port) {
 uint8_t parsePixelFormat(const std::string& pixel_format) {
     static const std::unordered_map<std::string, uint8_t> pixel_format_map = {
         {"BGR", nodar::zmq::StampedImage::COLOR_CONVERSION::BGR2BGR},  // Default, no conversion needed
-        {"Bayer_RGGB", cv::COLOR_BayerRGGB2BGR},
-        {"Bayer_GRBG", cv::COLOR_BayerGRBG2BGR},
-        {"Bayer_BGGR", cv::COLOR_BayerBGGR2BGR},
-        {"Bayer_GBRG", cv::COLOR_BayerGBRG2BGR},
+        {"Bayer_RGGB", cv::COLOR_BayerBG2BGR},
+        {"Bayer_GRBG", cv::COLOR_BayerGB2BGR},
+        {"Bayer_BGGR", cv::COLOR_BayerRG2BGR},
+        {"Bayer_GBRG", cv::COLOR_BayerGR2BGR},
     };
 
     auto it = pixel_format_map.find(pixel_format);

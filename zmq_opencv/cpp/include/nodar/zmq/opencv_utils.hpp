@@ -55,8 +55,8 @@ inline auto isValidExternalImage(const cv::Mat& img, const uint8_t& cvt_to_bgr_c
                       << "  Expected: depth=CV_8U or CV_16U, channels=3\n";
             return false;
         }
-    } else if (cvt_to_bgr_code == cv::COLOR_BayerRGGB2BGR or cvt_to_bgr_code == cv::COLOR_BayerGRBG2BGR or
-               cvt_to_bgr_code == cv::COLOR_BayerBGGR2BGR or cvt_to_bgr_code == cv::COLOR_BayerGBRG2BGR) {
+    } else if (cvt_to_bgr_code == cv::COLOR_BayerBG2BGR or cvt_to_bgr_code == cv::COLOR_BayerGB2BGR or
+               cvt_to_bgr_code == cv::COLOR_BayerRG2BGR or cvt_to_bgr_code == cv::COLOR_BayerGR2BGR) {
         // Bayer Format (1 Channel)
         if (!((depth == CV_8U || depth == CV_16U) && channels == 1)) {
             std::cerr << "[ERROR] Invalid Bayer image type.\n"
@@ -68,10 +68,10 @@ inline auto isValidExternalImage(const cv::Mat& img, const uint8_t& cvt_to_bgr_c
         std::cerr << "[ERROR] Unknown cvt_to_bgr_code: " << cvt_to_bgr_code << "\n"
                   << "  Supported cvt_to_bgr_code:\n"
                   << "    - StampedImage::COLOR_CONVERSION::BGR2BGR\n"
-                  << "    - cv::COLOR_BayerRGGB2BGR\n"
-                  << "    - cv::COLOR_BayerGRBG2BGR\n"
-                  << "    - cv::COLOR_BayerBGGR2BGR\n"
-                  << "    - cv::COLOR_BayerGBRG2BGR\n";
+                  << "    - cv::COLOR_BayerBG2BGR\n"
+                  << "    - cv::COLOR_BayerGB2BGR\n"
+                  << "    - cv::COLOR_BayerRG2BGR\n"
+                  << "    - cv::COLOR_BayerGR2BGR\n";
         return false;
     }
 
