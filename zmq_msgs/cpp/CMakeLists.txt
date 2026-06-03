@@ -51,4 +51,9 @@ target_include_directories(zmq_msgs INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_libraries(zmq_msgs INTERFACE cppzmq)
+if (TARGET cppzmq-static)
+    target_link_libraries(zmq_msgs INTERFACE cppzmq-static)
+else ()
+    message(WARNING "cppzmq-static not available, falling back to shared cppzmq")
+    target_link_libraries(zmq_msgs INTERFACE cppzmq)
+endif ()

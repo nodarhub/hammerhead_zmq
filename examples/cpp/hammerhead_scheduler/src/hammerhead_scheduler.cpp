@@ -62,7 +62,7 @@ constexpr auto DEFAULT_IP = "127.0.0.1";
 void printUsage() {
     std::cout << "You should specify the IP address of the device running hammerhead:\n\n"
                  "     ./hammerhead_scheduler IP\n\n"
-                 "e.g. ./hammerhead_scheduler 192.168.1.9\n\n"
+                 "e.g. ./hammerhead_scheduler 10.10.1.10\n\n"
                  "In the meantime, we assume that you are running this on the device running Hammerhead,\n"
                  "that is, we assume that you specified "
               << DEFAULT_IP << "\n----------------------------------------" << std::endl;

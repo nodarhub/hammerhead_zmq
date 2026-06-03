@@ -7,14 +7,13 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "CMAKE_BUILD_TYPE was not set by the user. Defaulting to ${CMAKE_BUILD_TYPE}")
 endif ()
 
-find_package(OpenCV 4 REQUIRED COMPONENTS core)
-
 add_executable(obstacle_data_recorder
         src/obstacle_data_recorder.cpp
 )
 
 target_link_libraries(obstacle_data_recorder
         PRIVATE
+        common_base
         hammerhead::zmq_msgs
 )
 

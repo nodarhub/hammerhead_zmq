@@ -85,19 +85,17 @@ private:
 };
 
 void printUsage(const std::string &default_ip, const std::string &default_port) {
-    std::cout << "You should specify the IP address of the device running hammerhead, \n"
-                 "the port of the message that you want to listen to, "
-                 "and the folder where you want the data to be saved:\n\n"
-                 "     ./image_recorder hammerhead_ip port output_dir\n\n"
-                 "e.g. ./image_recorder 192.168.1.9 9800 recorded_images\n\n"
-                 "Alternatively, you can specify one of the image topic names in topic_ports.hpp of zmq_msgs:"
+    std::cout << "You should specify the IP address of the ZMQ source (the device running Hammerhead), \n"
+                 "as well as the port number of the message that you want to listen to:\n\n"
+                 "     ./image_viewer hammerhead_ip port\n\n"
+                 "e.g. ./image_viewer 192.168.1.9 9800\n\n"
+                 "Alternatively, you can specify one of the image topic names in topic_ports.hpp of zmq_msgs...\n\n"
                  "e.g. ./image_viewer 192.168.1.9 nodar/right/image_raw\n\n"
-                 "In the meantime, we assume that you are running this on the device running Hammerhead,\n"
-                 "and that you want the images on port 9800, that is, we assume that you specified\n\n"
-                 "     ./image_viewer " +
-                     default_ip + " " + default_port + "\n\n"
-              << "\n\nNote that the list of topic/port mappings is in topic_ports.hpp header in the zmq_msgs target."
-              << "\n----------------------------------------" << std::endl;
+                 "If unspecified, we assume you are running this on the device running Hammerhead,\n"
+                 "along with the defaults\n\n"
+              << "     ./image_viewer " << default_ip << " " << default_port << "\n\n"
+              << "Note that the list of topic/port mappings is in topic_ports.hpp in the zmq_msgs target.\n"
+              << "----------------------------------------" << std::endl;
 }
 
 int main(int argc, char *argv[]) {

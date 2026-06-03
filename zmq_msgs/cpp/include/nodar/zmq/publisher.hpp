@@ -5,7 +5,6 @@
 #include <list>
 #include <mutex>
 #include <nodar/zmq/topic_ports.hpp>
-#include <opencv2/core.hpp>
 #include <thread>
 #include <unordered_set>
 #include <vector>

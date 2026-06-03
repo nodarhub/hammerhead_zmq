@@ -7,7 +7,9 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "CMAKE_BUILD_TYPE was not set by the user. Defaulting to ${CMAKE_BUILD_TYPE}")
 endif ()
 
-find_package(OpenCV 4 REQUIRED COMPONENTS calib3d imgproc)
+if (NOT TARGET opencv_calib3d)
+    find_package(OpenCV 4 REQUIRED COMPONENTS calib3d)
+endif ()
 
 add_executable(offline_point_cloud_generator
         src/offline_point_cloud_generator.cpp
@@ -22,7 +24,6 @@ target_link_libraries(offline_point_cloud_generator
         PRIVATE
         common
         opencv_calib3d
-        opencv_imgproc
         stdc++fs
         hammerhead::zmq_msgs
         hammerhead::zmq_opencv

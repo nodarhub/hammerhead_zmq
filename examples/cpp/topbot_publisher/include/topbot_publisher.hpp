@@ -5,7 +5,7 @@
 #include <nodar/zmq/image.hpp>
 #include <nodar/zmq/opencv_utils.hpp>
 #include <nodar/zmq/publisher.hpp>
-#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
 #include <string>
 
 namespace nodar {

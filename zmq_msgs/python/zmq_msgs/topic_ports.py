@@ -18,7 +18,7 @@ LEFT_VALID_PIXELS_TOPIC = Topic("nodar/left/valid_pixel_mask", 9818)
 RIGHT_VALID_PIXELS_TOPIC = Topic("nodar/right/valid_pixel_mask", 9819)
 LEFT_RECTIFICATION_MASK_TOPIC = Topic("nodar/left/rectification_mask", 9820)
 RIGHT_RECTIFICATION_MASK_TOPIC = Topic("nodar/right/rectification_mask", 9821)
-
+TOPBOT_RECT_TOPIC = Topic("nodar/topbot_rect", 9823)
 
 # Define the image topics as a list of Topic objects
 IMAGE_TOPICS = [
@@ -36,6 +36,7 @@ IMAGE_TOPICS = [
     RIGHT_VALID_PIXELS_TOPIC,
     LEFT_RECTIFICATION_MASK_TOPIC,
     RIGHT_RECTIFICATION_MASK_TOPIC,
+    TOPBOT_RECT_TOPIC,
 ]
 
 # Define other topics as individual Topic objects
@@ -47,6 +48,8 @@ POINT_CLOUD_RGB_TOPIC = Topic("nodar/point_cloud_rgb", 9810)
 RECORDING_TOPIC = Topic("nodar/recording", 9811)
 OBSTACLE_TOPIC = Topic("nodar/obstacle", 9812)
 WAIT_TOPIC = Topic("nodar/wait", 9814)
+QA_FINDINGS_TOPIC = Topic("nodar/qa_findings", 9822)
+NAVIGATION_TOPIC = Topic("nodar/navigation", 9824)
 
 
 # Function to retrieve reserved ports dynamically
@@ -62,4 +65,6 @@ def get_reserved_ports():
     reserved_ports.add(RECORDING_TOPIC.port)
     reserved_ports.add(OBSTACLE_TOPIC.port)
     reserved_ports.add(WAIT_TOPIC.port)
+    reserved_ports.add(QA_FINDINGS_TOPIC.port)
+    reserved_ports.add(NAVIGATION_TOPIC.port)
     return reserved_ports

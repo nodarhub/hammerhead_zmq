@@ -13,6 +13,7 @@ add_executable(point_cloud_recorder
 )
 target_link_libraries(point_cloud_recorder
         PRIVATE
+        common_base
         #stdc++fs
         hammerhead::zmq_msgs
 )
@@ -28,6 +29,7 @@ add_executable(point_cloud_rgb_recorder
 )
 target_link_libraries(point_cloud_rgb_recorder
         PRIVATE
+        common_base
         #stdc++fs
         hammerhead::zmq_msgs
 )

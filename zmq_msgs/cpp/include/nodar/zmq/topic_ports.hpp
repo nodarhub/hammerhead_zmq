@@ -26,8 +26,10 @@ constexpr Topic LEFT_VALID_PIXELS_TOPIC{"nodar/left/valid_pixel_mask", 9818};
 constexpr Topic RIGHT_VALID_PIXELS_TOPIC{"nodar/right/valid_pixel_mask", 9819};
 constexpr Topic LEFT_RECTIFICATION_MASK_TOPIC{"nodar/left/rectification_mask", 9820};
 constexpr Topic RIGHT_RECTIFICATION_MASK_TOPIC{"nodar/right/rectification_mask", 9821};
+constexpr Topic TOPBOT_RECT_TOPIC{"nodar/topbot_rect", 9823};
+constexpr Topic OCCUPANCY_MAP_TOPIC{"nodar/occupancy_map", 9900};
 
-constexpr std::array<Topic, 14> IMAGE_TOPICS{{
+constexpr std::array<Topic, 16> IMAGE_TOPICS{{
     LEFT_RAW_TOPIC,  //
     RIGHT_RAW_TOPIC,  //
     LEFT_RECT_TOPIC,  //
@@ -41,8 +43,11 @@ constexpr std::array<Topic, 14> IMAGE_TOPICS{{
     LEFT_VALID_PIXELS_TOPIC,  //
     RIGHT_VALID_PIXELS_TOPIC,   //
     LEFT_RECTIFICATION_MASK_TOPIC,  //
-    RIGHT_RECTIFICATION_MASK_TOPIC   //
+    RIGHT_RECTIFICATION_MASK_TOPIC,  //
+    TOPBOT_RECT_TOPIC,  //
+    OCCUPANCY_MAP_TOPIC,  //
 }};
+
 constexpr Topic SOUP_TOPIC{"nodar/point_cloud_soup", 9806};
 
 constexpr Topic CAMERA_EXPOSURE_TOPIC{"nodar/set_exposure", 9807};
@@ -56,6 +61,10 @@ constexpr Topic RECORDING_TOPIC{"nodar/recording", 9811};
 constexpr Topic OBSTACLE_TOPIC{"nodar/obstacle", 9812};
 
 constexpr Topic WAIT_TOPIC{"nodar/wait", 9814};
+
+constexpr Topic QA_FINDINGS_TOPIC{"nodar/qa_findings", 9822};
+
+constexpr Topic NAVIGATION_TOPIC{"nodar/navigation", 9824};
 
 // Function to retrieve reserved ports dynamically
 inline auto getReservedPorts() {
@@ -71,6 +80,8 @@ inline auto getReservedPorts() {
     reserved_ports.insert(nodar::zmq::RECORDING_TOPIC.port);
     reserved_ports.insert(nodar::zmq::OBSTACLE_TOPIC.port);
     reserved_ports.insert(nodar::zmq::WAIT_TOPIC.port);
+    reserved_ports.insert(nodar::zmq::QA_FINDINGS_TOPIC.port);
+    reserved_ports.insert(nodar::zmq::NAVIGATION_TOPIC.port);
     return reserved_ports;
 }
 

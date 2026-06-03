@@ -80,6 +80,9 @@ sudo apt install build-essential cmake
 
 # Install OpenCV (optional but recommended)
 sudo apt install libopencv-dev
+
+# Install libtiff (required for image_recorder)
+sudo apt install libtiff-dev
 ```
 
 ##### Windows:
@@ -116,7 +119,10 @@ Hammerhead publishes data using structured message types over predefined ZMQ por
 | 9803 | `nodar/right/image_rect` | Rectified right image | `StampedImage` |
 | 9804 | `nodar/disparity` | Disparity map (Q12.4 format) | `StampedImage` |
 | 9805 | `nodar/color_blended_depth/image_raw` | Color-coded depth visualization | `StampedImage` |
-| 9813 | `nodar/topbot_raw` | Top/bottom camera feed | `StampedImage` |
+| 9813 | `nodar/topbot_raw` | Raw top (left) and bottom (right) camera pair | `StampedImage` |
+| 9823 | `nodar/topbot_rect` | Rectified top (left) and bottom (right) camera pair | `StampedImage` |
+| 9815 | `nodar/confidence_map` | Confidence map | `StampedImage` |
+| 9900 | `nodar/occupancy_map` | Occupancy map | `StampedImage` |
 
 ### 3D Data Streams
 | Port | Topic | Description                        | Message Type |
@@ -163,6 +169,7 @@ Python examples provide easy-to-use scripts for common Hammerhead integration ta
 #### Processing Examples
 - **[Depth to Disparity Converter](examples/python/depth_to_disparity/README.md)** - Convert depth images to disparity format
 - **[Disparity to Point Cloud](examples/python/disparity_to_ordered_point_cloud/README.md)** - Convert stored disparity images to ordered 3D point clouds
+- **[Topbot Metadata Writer](examples/python/topbot_metadata_writer/README.md)** - Write details YAML metadata into topbot TIFF Software tags
 
 #### Control Examples
 - **[Hammerhead Scheduler](examples/python/hammerhead_scheduler/README.md)** - Control Hammerhead's processing schedule

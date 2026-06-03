@@ -59,7 +59,7 @@ def print_usage(default_ip, default_output_dir):
         "You should specify the IP address of the device running Hammerhead,\n"
         "as well as the folder where you want the data to be saved:\n\n"
         "     python obstacle_data_recorder.py hammerhead_ip output_dir\n\n"
-        "e.g. python obstacle_data_recorder.py 192.168.1.9 obstacle_datas\n\n"
+        "e.g. python obstacle_data_recorder.py 10.10.1.10 obstacle_datas\n\n"
         "If unspecified, then we assume you are running this on the device running Hammerhead,\n"
         "along with the other defaults\n\n"
         f"     python obstacle_data_recorder.py {default_ip} {default_output_dir}\n"
