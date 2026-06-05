@@ -1,6 +1,5 @@
-import struct
-
 import numpy as np
+import struct
 
 try:
     from zmq_msgs.message_info import MessageInfo
@@ -80,13 +79,15 @@ class StampedImage:
         UNSPECIFIED = 255
 
     HEADER_SIZE = 64
-    HEADER_STRUCT_FORMAT = "=QQIIIBH"
+    # Fields: time, frame_id, rows, cols, type, step, cvt_to_bgr_code, additional_field_size.
+    HEADER_STRUCT_FORMAT = "=QQIIIIBH"
 
-    def __init__(self, time=0, frame_id=0, cvt_to_bgr_code=COLOR_CONVERSION.UNSPECIFIED, img=None):
+    def __init__(self, time=0, frame_id=0, cvt_to_bgr_code=COLOR_CONVERSION.UNSPECIFIED, img=None, step=0):
         self.time = time
         self.frame_id = frame_id
         self.cvt_to_bgr_code = cvt_to_bgr_code
         self.img: np.ndarray = img
+        self.step = step
         self._additional_field: bytearray = bytearray()
 
     def info(self) -> MessageInfo:
@@ -121,8 +122,9 @@ class StampedImage:
         rows = unpacked[2]
         cols = unpacked[3]
         cv_type = unpacked[4]
-        self.cvt_to_bgr_code = unpacked[5]
-        n_additional = unpacked[6]
+        step = unpacked[5]
+        self.cvt_to_bgr_code = unpacked[6]
+        n_additional = unpacked[7]
 
         if rows * cols > 1e8:
             print(
@@ -135,20 +137,46 @@ class StampedImage:
 
         # Convert opencv type to something more understandable
         channels, dtype = decode_cv_type(cv_type)
-        self.img = np.frombuffer(
-            buffer,
-            dtype=dtype,
-            count=rows * cols * channels,
-            offset=offset,
-        ).reshape(rows, cols, channels)
-        offset += self.img.nbytes
+        row_bytes = cols * channels * np.dtype(dtype).itemsize
+
+        if step < row_bytes:
+            print(
+                f"According to the message, the row step of {step} bytes is smaller than a tightly packed "
+                f"row of {row_bytes} bytes, which is invalid. We are ignoring this message."
+            )
+            return None
+
+        # Guard against an implausibly large payload (500 MB), e.g. a corrupt step.
+        image_nbytes = step * rows
+        if image_nbytes > 500 * 1024 * 1024:
+            print(
+                f"According to the message, the image payload is {image_nbytes} bytes, which is implausibly "
+                "large. We are ignoring this message so that you don't run out of memory."
+            )
+            return None
+
+        if step == row_bytes:
+            # Tightly packed rows.
+            self.img = np.frombuffer(
+                buffer,
+                dtype=dtype,
+                count=rows * cols * channels,
+                offset=offset,
+            ).reshape(rows, cols, channels)
+        else:
+            # Padded rows (e.g. a Tegra GpuMat): copy the valid leading bytes out of each padded row.
+            # The copy is what drops the padding -- the slice on its own is just a strided view.
+            raw = np.frombuffer(buffer, dtype=np.uint8, count=step * rows, offset=offset).reshape(rows, step)
+            self.img = raw[:, :row_bytes].copy().view(dtype).reshape(rows, cols, channels)
+        # We always store a tightly packed copy in memory, so its stride is the packed row size.
+        self.step = row_bytes
+        offset += image_nbytes
 
         # Read the additional field
         self._additional_field = bytearray(buffer[offset:offset + n_additional])
         offset += n_additional
 
-        assert offset == original_offset + self.msg_size()
-        return original_offset + self.msg_size()
+        return offset
 
     def write(self, buffer: bytearray, original_offset: int):
         time, frame_id, cvt_to_bgr_code, img = (
@@ -177,17 +205,18 @@ class StampedImage:
             rows,
             cols,
             encode_cv_type(channels, img.dtype),
+            cols * channels * img.dtype.itemsize,  # step: numpy rows are tightly packed, so this is the stride.
             cvt_to_bgr_code,
             len(self._additional_field),
         )
         offset = original_offset + StampedImage.HEADER_SIZE
 
         # Write image data
-        buffer[offset : offset + img.nbytes] = img.tobytes()
+        buffer[offset: offset + img.nbytes] = img.tobytes()
         offset += img.nbytes
 
         # Write additional field
-        buffer[offset : offset + len(self._additional_field)] = self._additional_field
+        buffer[offset: offset + len(self._additional_field)] = self._additional_field
         offset += len(self._additional_field)
 
         assert offset == original_offset + self.msg_size()

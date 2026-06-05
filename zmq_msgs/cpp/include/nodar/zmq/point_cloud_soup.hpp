@@ -51,6 +51,17 @@ struct PointCloudSoup {
 
     explicit PointCloudSoup(const uint8_t *src) { read(src); }
 
+    /// Message size for an explicit row stride (in bytes) per image.
+    [[nodiscard]] static constexpr uint64_t msgSize(uint32_t rows_, uint32_t cols_, uint32_t rectified_type_,
+                                                    uint32_t disparity_type_, uint32_t rectified_step_,
+                                                    uint32_t disparity_step_) {
+        return sizeof(INFO) + sizeof(baseline) + sizeof(focal_length) + sizeof(time) + sizeof(frame_id) +
+               disparity_to_depth4x4_bytes + rotation_disparity_to_raw_cam_bytes + rotation_world_to_raw_cam_bytes +
+               StampedImage::msgSize(rows_, cols_, rectified_type_, 0, rectified_step_) +
+               StampedImage::msgSize(rows_, cols_, disparity_type_, 0, disparity_step_);
+    }
+
+    /// Message size for tightly packed rows.
     [[nodiscard]] static constexpr uint64_t msgSize(uint32_t rows_, uint32_t cols_, uint32_t rectified_type_,
                                                     uint32_t disparity_type_) {
         return sizeof(INFO) + sizeof(baseline) + sizeof(focal_length) + sizeof(time) + sizeof(frame_id) +
@@ -62,7 +73,7 @@ struct PointCloudSoup {
     [[nodiscard]] bool empty() const { return rectified.empty() or disparity.empty(); }
 
     [[nodiscard]] uint64_t msgSize() const {
-        return msgSize(rectified.rows, rectified.cols, rectified.type, disparity.type);
+        return msgSize(rectified.rows, rectified.cols, rectified.type, disparity.type, rectified.step, disparity.step);
     }
 
     void read(const uint8_t *src) {
@@ -136,7 +147,9 @@ struct PointCloudSoup {
                       uint32_t rectified_type_,  //
                       const uint8_t *rectified_data_,  //
                       uint32_t disparity_type_,  //
-                      const uint8_t *disparity_data_) {
+                      const uint8_t *disparity_data_,  //
+                      uint32_t rectified_step_,  //
+                      uint32_t disparity_step_) {
         dst = write_header(dst,  //
                            time_,  //
                            frame_id_,  //
@@ -147,8 +160,10 @@ struct PointCloudSoup {
                            rotation_world_to_raw_cam_,  //
                            rows_,  //
                            cols_);
-        dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, rectified_type_, rectified_data_, 0);
-        dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, disparity_type_, disparity_data_, 0);
+        dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, rectified_type_, rectified_data_, 0,
+                                  rectified_step_);
+        dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, disparity_type_, disparity_data_, 0,
+                                  disparity_step_);
         return dst;
     }
 
@@ -179,7 +194,9 @@ struct PointCloudSoup {
                      rectified_.type,  //
                      rectified_.img.data(),  //
                      disparity_.type,  //
-                     disparity_.img.data());
+                     disparity_.img.data(),  //
+                     rectified_.step,  //
+                     disparity_.step);
     }
 
     auto write(uint8_t *dst) const {
