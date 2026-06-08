@@ -1,12 +1,9 @@
 #include <tiffio.h>
 
 #include <atomic>
-#include <chrono>
 #include <csignal>
-#include <deque>
 #include <filesystem>
 #include <fstream>
-#include <iomanip>
 #include <iostream>
 #include <nodar/zmq/image.hpp>
 #include <nodar/zmq/opencv_utils.hpp>
@@ -16,6 +13,10 @@
 #include <string>
 #include <unordered_map>
 #include <zmq.hpp>
+
+#include "date_string.hpp"
+#include "fps.hpp"
+#include "frame_string.hpp"
 
 std::atomic_bool running{true};
 
@@ -73,59 +74,6 @@ bool add_tiff_metadata(const std::filesystem::path& filename, uint64_t left_time
     return success;
 }
 
-class FPS {
-public:
-    // Store timestamps for up to 100 frames
-    explicit FPS(size_t maxlen = 100) : frame_times(), start_time(), total_frames(0), maxlen(maxlen) {}
-
-    /** Call this once per frame. **/
-    void tic() {
-        auto now = Clock::now();
-        if (total_frames == 0) {
-            start_time = now;
-        }
-        frame_times.push_back(now);
-        if (frame_times.size() > maxlen) {
-            frame_times.pop_front();
-        }
-        ++total_frames;
-    }
-
-    /** Compute FPS over the last n frames (if enough data). **/
-    [[nodiscard]] double fps_over_window(size_t n) const {
-        if (frame_times.size() < 2) {
-            return 0.0;
-        }
-        if (frame_times.size() < n) {
-            n = frame_times.size();
-        }
-        const auto t1 = frame_times[frame_times.size() - n];
-        const auto t2 = frame_times.back();
-        const std::chrono::duration<double> delta = t2 - t1;
-        return (t2 == t1) ? 0.0 : static_cast<double>(n - 1) / delta.count();
-    }
-
-    [[nodiscard]] auto str() const {
-        const double fps_100 = fps_over_window(100);
-        std::ostringstream ss;
-        ss << std::fixed << std::setprecision(2) << "fps_100: " << fps_100 << ", fps_inf: ";
-        if (total_frames <= 1) {
-            ss << 0.0;
-        } else {
-            const std::chrono::duration<double> total_time = frame_times.back() - start_time;
-            ss << static_cast<double>(total_frames - 1) / total_time.count();
-        }
-        return ss.str();
-    }
-
-private:
-    using Clock = std::chrono::steady_clock;
-    std::deque<Clock::time_point> frame_times;
-    Clock::time_point start_time;
-    size_t total_frames;
-    size_t maxlen;
-};
-
 class ZMQImageRecorder {
 public:
     static constexpr auto additional_data_size = 16;
@@ -151,12 +99,6 @@ public:
         compression_params.push_back(1);  // No compression
     }
 
-    [[nodiscard]] static std::string frame_string(uint64_t frame_no) {
-        std::ostringstream oss;
-        oss << std::setw(9) << std::setfill('0') << frame_no;
-        return oss.str();
-    }
-
     void loop_once() {
         fps.tic();
         zmq::message_t msg;
@@ -180,7 +122,7 @@ public:
         // We recommend saving tiffs with no compression if the data rate is high.
         // Depending on the underlying image type, you might want to use stamped_image.cvt_to_bgr_code
         // to convert to BGR before saving.
-        const auto frame_str = frame_string(frame_id);
+        const auto frame_str = frameString(frame_id);
         const auto tiff_path = image_dir / (frame_str + ".tiff");
         cv::imwrite(tiff_path, img, compression_params);
 
@@ -204,7 +146,7 @@ public:
             }
             f << std::flush;
         }
-        timing_file << frame_string(frame_id) << " " << stamped_image.time;
+        timing_file << frameString(frame_id) << " " << stamped_image.time;
         if (stamped_image.additional_field_size == additional_data_size) {
             timing_file << " " << right_time << " " << exposure << " " << gain;
         }
@@ -267,24 +209,11 @@ void print_usage(const std::string& default_ip, const std::string& default_port,
               << "----------------------------------------" << std::endl;
 }
 
-inline std::string date_string() {
-    const auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    std::tm buf{};
-#if defined(_WIN32)
-    gmtime_s(&buf, &now);
-#else
-    gmtime_r(&now, &buf);
-#endif
-    std::ostringstream date_ss;
-    date_ss << std::put_time(&buf, "%Y%m%d-%H%M%S");
-    return date_ss.str();
-}
-
 int main(int argc, char* argv[]) {
     constexpr auto default_ip = "127.0.0.1";
     constexpr auto default_topic = nodar::zmq::IMAGE_TOPICS[0];
     const std::string default_port = std::to_string(default_topic.port);
-    const auto dated_folder = date_string();
+    const auto dated_folder = dateString();
     const auto default_output_dir = "./" + dated_folder;
 
     signal(SIGINT, signalHandler);

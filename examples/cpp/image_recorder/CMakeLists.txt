@@ -7,7 +7,9 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "CMAKE_BUILD_TYPE was not set by the user. Defaulting to ${CMAKE_BUILD_TYPE}")
 endif ()
 
-find_package(OpenCV 4 REQUIRED COMPONENTS highgui imgproc)
+if (NOT TARGET opencv_imgcodecs)
+    find_package(OpenCV 4 REQUIRED COMPONENTS imgcodecs)
+endif ()
 find_package(TIFF REQUIRED)
 
 add_executable(image_recorder
@@ -16,8 +18,8 @@ add_executable(image_recorder
 
 target_link_libraries(image_recorder
         PRIVATE
-        opencv_highgui
-        opencv_imgproc
+        common_base
+        opencv_imgcodecs
         hammerhead::zmq_msgs
         hammerhead::zmq_opencv
         TIFF::TIFF

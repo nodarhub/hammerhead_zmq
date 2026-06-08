@@ -7,6 +7,10 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "CMAKE_BUILD_TYPE was not set by the user. Defaulting to ${CMAKE_BUILD_TYPE}")
 endif ()
 
+if (NOT TARGET opencv_imgcodecs)
+    find_package(OpenCV 4 REQUIRED COMPONENTS imgcodecs)
+endif ()
+
 add_executable(topbot_publisher
         src/topbot_publisher.cpp
 )
@@ -20,6 +24,7 @@ target_link_libraries(topbot_publisher
         PRIVATE
         hammerhead::zmq_msgs
         hammerhead::zmq_opencv
+        opencv_imgcodecs
         common
 )
 

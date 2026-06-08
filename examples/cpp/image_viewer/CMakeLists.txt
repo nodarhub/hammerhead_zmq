@@ -7,7 +7,9 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "CMAKE_BUILD_TYPE was not set by the user. Defaulting to ${CMAKE_BUILD_TYPE}")
 endif ()
 
-find_package(OpenCV 4 REQUIRED COMPONENTS highgui imgproc)
+if (NOT TARGET opencv_highgui)
+    find_package(OpenCV 4 REQUIRED COMPONENTS highgui)
+endif ()
 
 add_executable(image_viewer
         src/image_viewer.cpp
@@ -16,7 +18,6 @@ add_executable(image_viewer
 target_link_libraries(image_viewer
         PRIVATE
         opencv_highgui
-        opencv_imgproc
         hammerhead::zmq_msgs
         hammerhead::zmq_opencv
 )
