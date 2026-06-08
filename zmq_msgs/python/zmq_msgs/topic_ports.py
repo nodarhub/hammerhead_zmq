@@ -9,7 +9,7 @@ RIGHT_RAW_TOPIC = Topic("nodar/right/image_raw", 9801)
 LEFT_RECT_TOPIC = Topic("nodar/left/image_rect", 9802)
 RIGHT_RECT_TOPIC = Topic("nodar/right/image_rect", 9803)
 DISPARITY_TOPIC = Topic("nodar/disparity", 9804)
-COLOR_BLENDED_DEPTH_TOPIC = Topic("nodar/color_blended_depth/image_raw", 9805)
+# 9805 reserved (was COLOR_BLENDED_DEPTH_TOPIC, retired)
 TOPBOT_RAW_TOPIC = Topic("nodar/topbot_raw", 9813)
 TOPBOT_RECT_TOPIC = Topic("nodar/topbot_rect", 9823)
 
@@ -20,7 +20,6 @@ IMAGE_TOPICS = [
     LEFT_RECT_TOPIC,
     RIGHT_RECT_TOPIC,
     DISPARITY_TOPIC,
-    COLOR_BLENDED_DEPTH_TOPIC,
     TOPBOT_RAW_TOPIC,
     TOPBOT_RECT_TOPIC,
 ]

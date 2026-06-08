@@ -39,7 +39,6 @@ python image_recorder.py 127.0.0.1 nodar/right/image_raw output_dir
 | `nodar/left/image_rect` | 9802 | Rectified left image |
 | `nodar/right/image_rect` | 9803 | Rectified right image |
 | `nodar/disparity` | 9804 | Disparity map |
-| `nodar/color_blended_depth/image_raw` | 9805 | Color-coded depth visualization |
 | `nodar/topbot_raw` | 9813 | Raw top (left) and bottom (right) camera pair |
 | `nodar/topbot_rect` | 9823 | Rectified top (left) and bottom (right) camera pair |
 | `nodar/confidence_map` | 9815 | Confidence map |

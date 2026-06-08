@@ -118,7 +118,6 @@ Hammerhead publishes data using structured message types over predefined ZMQ por
 | 9802 | `nodar/left/image_rect` | Rectified left image | `StampedImage` |
 | 9803 | `nodar/right/image_rect` | Rectified right image | `StampedImage` |
 | 9804 | `nodar/disparity` | Disparity map (Q12.4 format) | `StampedImage` |
-| 9805 | `nodar/color_blended_depth/image_raw` | Color-coded depth visualization | `StampedImage` |
 | 9813 | `nodar/topbot_raw` | Raw top (left) and bottom (right) camera pair | `StampedImage` |
 | 9823 | `nodar/topbot_rect` | Rectified top (left) and bottom (right) camera pair | `StampedImage` |
 | 9815 | `nodar/confidence_map` | Confidence map | `StampedImage` |
