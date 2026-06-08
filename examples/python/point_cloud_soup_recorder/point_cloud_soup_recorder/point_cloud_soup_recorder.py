@@ -254,6 +254,7 @@ class PointCloudSoupRecorder:
         rotation_disparity_to_world_4x4[:3, :3] = rotation_disparity_to_world
         Q = (rotation_disparity_to_world_4x4 @ disparity_to_depth4x4).astype(np.float32)
         Q[3, :] *= -1
+        # TODO: add cylindrical projection right before merging is about to happen.
 
         H, W = disparity.shape
         if self._u_row is None or self._u_row.shape[0] != W:

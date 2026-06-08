@@ -34,6 +34,7 @@ void signalHandler(int signum) {
 // and `metersAboveGround` are not carried by the soup — they stay at the struct's
 // default of 0 and are written out as such by DetailsParameters::save().
 [[nodiscard]] DetailsParameters detailsFromSoup(const nodar::zmq::PointCloudSoup &soup) {
+    // TODO: add new detail fields right before merging is about to happen.
     DetailsParameters d;
     d.leftTime = soup.time;
     d.focalLength = static_cast<float>(soup.focal_length);
@@ -49,6 +50,8 @@ void signalHandler(int signum) {
 // Pixels with disparity == 0 (no stereo match) or degenerate projections are skipped.
 // When `downsample > 1`, keep every Nth valid point.
 void reprojectSoupToPoints(const nodar::zmq::PointCloudSoup &soup, int downsample, std::vector<PointXYZRGB> &out) {
+    // TODO: add cylindrical projection right before merging is about to happen.
+    // TODO: consider moving this implementation to the unified reprojection code.
     cv::Mat disparity_to_depth4x4(4, 4, CV_32FC1);
     memcpy(disparity_to_depth4x4.data, soup.disparity_to_depth4x4.data(),
            soup.disparity_to_depth4x4.size() * sizeof(float));
