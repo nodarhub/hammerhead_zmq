@@ -179,9 +179,6 @@ std::string get_folder_name(const std::string& topic_name) {
     if (topic_name == DISPARITY_TOPIC.name) {
         return "disparity";
     }
-    if (topic_name == COLOR_BLENDED_DEPTH_TOPIC.name) {
-        return "color_blended_depth";
-    }
     if (topic_name == TOPBOT_RAW_TOPIC.name) {
         return "topbot_raw";
     }

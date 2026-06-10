@@ -31,7 +31,6 @@ folder_name_dict = {
     LEFT_RECT_TOPIC.name: "left_rect",
     RIGHT_RECT_TOPIC.name: "right_rect",
     DISPARITY_TOPIC.name: "disparity",
-    COLOR_BLENDED_DEPTH_TOPIC.name: "color_blended_depth",
     TOPBOT_RAW_TOPIC.name: "topbot_raw",
     TOPBOT_RECT_TOPIC.name: "topbot_rect",
 }
