@@ -2,12 +2,9 @@
 
 #include <atomic>
 #include <condition_variable>
-#include <list>
 #include <mutex>
 #include <nodar/zmq/topic_ports.hpp>
 #include <thread>
-#include <unordered_set>
-#include <vector>
 #include <zmq.hpp>
 
 #include "buffer_pool.hpp"
