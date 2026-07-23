@@ -2,12 +2,9 @@
 
 #include <atomic>
 #include <condition_variable>
-#include <list>
 #include <mutex>
 #include <nodar/zmq/topic_ports.hpp>
 #include <thread>
-#include <unordered_set>
-#include <vector>
 #include <zmq.hpp>
 
 #include "buffer_pool.hpp"
@@ -15,7 +12,6 @@
 namespace nodar {
 namespace zmq {
 
-template <typename Data>
 class Publisher {
 private:
     Topic topic;
@@ -77,14 +73,26 @@ public:
      * so if a buffer never gets sent, we are sure that it will not leak.
      */
     void send(Buffer* buffer) {
-        if (not running) {
-            return;
-        }
-        // However, if a queued buffer never gets sent, then it will never be returned to the pool.
+        // A buffer that never reaches ZMQ never has Buffer::release called on it,
+        // so we must reclaim buffers that never make it.
+        // There are two cases this happens:
+        // 1. We are shutting down (won't send at all),
+        // 2. We previously queued a buffer that hasn't been consumed by loop() before another send call comes.
+        Buffer* to_reclaim = nullptr;
         {
             std::lock_guard<std::mutex> lock(buffer_guard);
-            queued_buffer = buffer;
-            buffer_is_queued = true;
+            if (not running) {
+                to_reclaim = buffer;
+            } else {
+                if (buffer_is_queued) {
+                    to_reclaim = queued_buffer;
+                }
+                queued_buffer = buffer;
+                buffer_is_queued = true;
+            }
+        }
+        if (to_reclaim) {
+            buffer_pool.put(to_reclaim);
         }
         condition.notify_one();
     }
