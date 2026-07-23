@@ -12,7 +12,6 @@
 namespace nodar {
 namespace zmq {
 
-template <typename Data>
 class Publisher {
 private:
     Topic topic;
