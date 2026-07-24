@@ -37,7 +37,7 @@ public:
     }
 
 private:
-    nodar::zmq::Publisher<nodar::zmq::StampedImage> publisher;
+    nodar::zmq::Publisher publisher;
 };
 
 }  // namespace zmq
