@@ -26,7 +26,7 @@ public:
     }
 
 private:
-    nodar::zmq::Publisher<nodar::zmq::NavigationData> publisher;
+    nodar::zmq::Publisher publisher;
 };
 
 }  // namespace zmq
