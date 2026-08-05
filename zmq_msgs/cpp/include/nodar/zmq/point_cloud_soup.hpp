@@ -136,7 +136,9 @@ struct PointCloudSoup {
                       uint32_t rectified_type_,  //
                       const uint8_t *rectified_data_,  //
                       uint32_t disparity_type_,  //
-                      const uint8_t *disparity_data_) {
+                      const uint8_t *disparity_data_,  //
+                      uint8_t rectified_cvt_to_bgr_code_ = StampedImage::UNSPECIFIED,  //
+                      uint8_t disparity_cvt_to_bgr_code_ = StampedImage::UNSPECIFIED) {
         dst = write_header(dst,  //
                            time_,  //
                            frame_id_,  //
@@ -147,8 +149,10 @@ struct PointCloudSoup {
                            rotation_world_to_raw_cam_,  //
                            rows_,  //
                            cols_);
-        dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, rectified_type_, rectified_data_, 0);
-        dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, disparity_type_, disparity_data_, 0);
+        dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, rectified_type_, rectified_cvt_to_bgr_code_,
+                                  rectified_data_, 0);
+        dst = StampedImage::write(dst, time_, frame_id_, rows_, cols_, disparity_type_, disparity_cvt_to_bgr_code_,
+                                  disparity_data_, 0);
         return dst;
     }
 
@@ -179,7 +183,9 @@ struct PointCloudSoup {
                      rectified_.type,  //
                      rectified_.img.data(),  //
                      disparity_.type,  //
-                     disparity_.img.data());
+                     disparity_.img.data(),  //
+                     rectified_.cvt_to_bgr_code,  //
+                     disparity_.cvt_to_bgr_code);
     }
 
     auto write(uint8_t *dst) const {
