@@ -37,6 +37,7 @@ class ZMQImageViewer:
         self.socket.connect(endpoint)
         self.window_name = endpoint
         self.last_frame_id = 0
+        self.warned_unspecified = False
         print(f"Subscribing to {endpoint}")
         cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
 
@@ -51,6 +52,26 @@ class ZMQImageViewer:
         if img is None or img.size == 0:
             print("img is None or img.size == 0")
             return True
+
+        # The sender tells us how to get to BGR.
+        # Anything that is not one of these three sentinels is a real OpenCV conversion code, so we apply it.
+        conversion = StampedImage.COLOR_CONVERSION
+        cvt_to_bgr_code = stamped_image.cvt_to_bgr_code
+        if cvt_to_bgr_code == conversion.BGR2BGR:
+            # Data is already BGR. Nothing to do.
+            pass
+        elif cvt_to_bgr_code not in (conversion.INCONVERTIBLE, conversion.UNSPECIFIED):
+            img = cv2.cvtColor(img, cvt_to_bgr_code)
+        else:
+            # Neither sentinel tells us how to reach BGR, so we show the image as-is.
+            # INCONVERTIBLE is a deliberate statement about images like disparity and needs no comment,
+            # but UNSPECIFIED means the sender never said, which is worth mentioning once.
+            if cvt_to_bgr_code == conversion.UNSPECIFIED and not self.warned_unspecified:
+                self.warned_unspecified = True
+                print(
+                    "\nThis image did not declare a cvt_to_bgr_code, so we are just showing it as-is. "
+                    "If it is undemosaiced Bayer data, it will look grey."
+                )
 
         frame_id = stamped_image.frame_id
         if self.last_frame_id != 0 and frame_id != self.last_frame_id + 1:
