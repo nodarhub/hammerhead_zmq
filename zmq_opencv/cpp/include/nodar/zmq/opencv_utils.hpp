@@ -23,6 +23,58 @@ inline StampedImage stampedImageFromCvMat(uint64_t time, uint64_t frame_id, cons
     return stampedImageFromCvMat(time, frame_id, StampedImage::COLOR_CONVERSION::UNSPECIFIED, mat);
 }
 
+// Non-owning view of a serialized StampedImage: the header fields plus a cv::Mat pointing into the buffer.
+// Only valid while the underlying message buffer is alive.
+struct StampedImageView {
+    uint64_t time{0};
+    uint64_t frame_id{0};
+    uint8_t cvt_to_bgr_code{StampedImage::COLOR_CONVERSION::UNSPECIFIED};
+    cv::Mat img;
+    const uint8_t* additional_field{nullptr};
+    uint16_t additional_field_size{0};
+};
+
+// Parses a StampedImage message without copying the image payload.
+// Returns false if the buffer is not a StampedImage or is smaller than its header claims.
+inline bool stampedImageViewFromBuffer(const uint8_t* data, size_t size, StampedImageView& view) {
+    if (size < StampedImage::HEADER_SIZE) {
+        return false;
+    }
+
+    const uint8_t* header = data;
+
+    MessageInfo info;
+    header = utils::read(header, info);
+    if (info != StampedImage::getInfo()) {
+        std::cerr << "This message either is not an image message, or is a different message version." << std::endl;
+        return false;
+    }
+
+    uint32_t rows;
+    uint32_t cols;
+    uint32_t type;
+    header = utils::read(header, view.time);
+    header = utils::read(header, view.frame_id);
+    header = utils::read(header, rows);
+    header = utils::read(header, cols);
+    header = utils::read(header, type);
+    header = utils::read(header, view.cvt_to_bgr_code);
+    header = utils::read(header, view.additional_field_size);
+
+    const uint64_t image_bytes = StampedImage::dataSize(rows, cols, type, 0);
+    if (size < StampedImage::HEADER_SIZE + image_bytes + view.additional_field_size) {
+        std::cerr << "According to its header, this image message should be larger than it is. Ignoring it."
+                  << std::endl;
+        return false;
+    }
+
+    uint8_t* payload = const_cast<uint8_t*>(data) + StampedImage::HEADER_SIZE;
+    view.img = cv::Mat(static_cast<int>(rows), static_cast<int>(cols), static_cast<int>(type), payload);
+    view.additional_field = payload + image_bytes;
+
+    return true;
+}
+
 inline auto depthToString(const int& depth) {
     switch (depth) {
         case CV_8U:
