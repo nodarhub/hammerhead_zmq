@@ -116,14 +116,24 @@ inline auto isValidExternalImage(const cv::Mat& img, const uint8_t& cvt_to_bgr_c
                       << "  Expected: depth=CV_8U or CV_16U, channels=1\n";
             return false;
         }
+    } else if (cvt_to_bgr_code == cv::COLOR_GRAY2BGR) {
+        // Greyscale (1 Channel)
+        if (!((depth == CV_8U || depth == CV_16U) && channels == 1)) {
+            std::cerr << "[ERROR] Invalid greyscale image type.\n"
+                      << "  Received: depth=" << depthToString(depth) << ", channels=" << channels << "\n"
+                      << "  Expected: depth=CV_8U or CV_16U, channels=1\n";
+            return false;
+        }
     } else {
-        std::cerr << "[ERROR] Unknown cvt_to_bgr_code: " << cvt_to_bgr_code << "\n"
+        // Cast to int so that the code prints as a number rather than as a character.
+        std::cerr << "[ERROR] Unknown cvt_to_bgr_code: " << static_cast<int>(cvt_to_bgr_code) << "\n"
                   << "  Supported cvt_to_bgr_code:\n"
                   << "    - StampedImage::COLOR_CONVERSION::BGR2BGR\n"
                   << "    - cv::COLOR_BayerBG2BGR\n"
                   << "    - cv::COLOR_BayerGB2BGR\n"
                   << "    - cv::COLOR_BayerRG2BGR\n"
-                  << "    - cv::COLOR_BayerGR2BGR\n";
+                  << "    - cv::COLOR_BayerGR2BGR\n"
+                  << "    - cv::COLOR_GRAY2BGR\n";
         return false;
     }
 

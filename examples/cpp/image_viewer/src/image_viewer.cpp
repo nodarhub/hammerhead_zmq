@@ -5,6 +5,7 @@
 #include <nodar/zmq/opencv_utils.hpp>
 #include <nodar/zmq/topic_ports.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 #include <unordered_map>
 #include <zmq.hpp>
 
@@ -56,6 +57,27 @@ public:
         if (img.empty()) {
             return;
         }
+
+        // The sender tells us how to get to BGR.
+        // Anything that is not one of these three sentinels is a real OpenCV conversion code, so we apply it.
+        using COLOR_CONVERSION = nodar::zmq::StampedImage::COLOR_CONVERSION;
+        const auto cvt_to_bgr_code = stamped_image.cvt_to_bgr_code;
+        if (cvt_to_bgr_code == COLOR_CONVERSION::BGR2BGR) {
+            // Data is already BGR. Nothing to do.
+        } else if (cvt_to_bgr_code != COLOR_CONVERSION::INCONVERTIBLE and
+                   cvt_to_bgr_code != COLOR_CONVERSION::UNSPECIFIED) {
+            cv::cvtColor(img, img, cvt_to_bgr_code);
+        } else {
+            // Neither sentinel tells us how to reach BGR, so we show the image as-is.
+            // INCONVERTIBLE is a deliberate statement about images like disparity and needs no comment,
+            // but UNSPECIFIED means the sender never said, which is worth mentioning once.
+            if (cvt_to_bgr_code == COLOR_CONVERSION::UNSPECIFIED and not warned_unspecified) {
+                warned_unspecified = true;
+                std::cerr << "\nThis image did not declare a cvt_to_bgr_code, so we are just showing it as-is. "
+                             "If it is undemosaiced Bayer data, it will look grey.\n";
+            }
+        }
+
         const auto &frame_id = stamped_image.frame_id;
         if (last_frame_id != 0 and frame_id != last_frame_id + 1) {
             std::cerr << (frame_id - last_frame_id - 1) << " frames dropped. Current frame ID : " << frame_id
@@ -82,6 +104,7 @@ private:
     zmq::context_t context;
     zmq::socket_t socket;
     std::string window_name;
+    bool warned_unspecified = false;
 };
 
 void printUsage(const std::string &default_ip, const std::string &default_port) {
