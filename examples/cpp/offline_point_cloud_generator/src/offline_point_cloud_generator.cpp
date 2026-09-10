@@ -21,9 +21,9 @@ public:
         point_cloud.resize(rows * cols);
 
         // Convert the input map to a point cloud
-        cv::Mat disparity_to_depth4x4{cv::Size{4, 4}, CV_32FC1, details.projection.data()};
-        cv::Mat rotation_disparity_to_raw_cam{cv::Size{3, 3}, CV_32FC1, details.rotationDisparityToRawCam.data()};
-        cv::Mat rotation_world_to_raw_cam{cv::Size{3, 3}, CV_32FC1, details.rotationWorldToRawCam.data()};
+        cv::Mat disparity_to_depth4x4(cv::Size{4, 4}, CV_32FC1, details.projection.data());
+        cv::Mat rotation_disparity_to_raw_cam(cv::Size{3, 3}, CV_32FC1, details.rotationDisparityToRawCam.data());
+        cv::Mat rotation_world_to_raw_cam(cv::Size{3, 3}, CV_32FC1, details.rotationWorldToRawCam.data());
 
         // Compute disparity_to_rotated_depth4x4 (rotated Q matrix)
         cv::Mat1f rotation_disparity_to_world_4x4 = cv::Mat::eye(4, 4, CV_32F);
