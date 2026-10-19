@@ -183,7 +183,7 @@ class StampedImage:
         offset = original_offset + StampedImage.HEADER_SIZE
 
         # Write image data
-        buffer[offset : offset + img.nbytes] = img.tobytes()
+        buffer[offset : offset + img.nbytes] = memoryview(np.ascontiguousarray(img)).cast("B")
         offset += img.nbytes
 
         # Write additional field
