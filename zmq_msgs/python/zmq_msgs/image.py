@@ -184,7 +184,8 @@ class StampedImage:
 
         # Write image data.
         # Equivalent to img.tobytes(), but avoids extra copies.
-        buffer[offset : offset + img.nbytes] = memoryview(np.ascontiguousarray(img)).cast("B")
+        if img.nbytes:  # memoryview.cast rejects zero-size arrays
+            buffer[offset : offset + img.nbytes] = memoryview(np.ascontiguousarray(img)).cast("B")
         offset += img.nbytes
 
         # Write additional field

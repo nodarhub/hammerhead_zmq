@@ -53,5 +53,8 @@ class PointCloud:
         struct.pack_into("QQQ", buffer, offset, time, frame_id, len(points))
         offset = original_offset + PointCloud.HEADER_SIZE
         # Equivalent to points.tobytes(), but avoids extra copies.
-        buffer[offset : offset + points.nbytes] = memoryview(np.ascontiguousarray(points)).cast("B")
+        if points.nbytes:  # memoryview.cast rejects zero-size arrays
+            buffer[offset : offset + points.nbytes] = memoryview(
+                np.ascontiguousarray(points)
+            ).cast("B")
         return original_offset + self.msg_size()
