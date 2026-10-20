@@ -68,7 +68,15 @@ class PointCloudRGB:
         offset = self.info().write(buffer, original_offset)
         struct.pack_into("QQIII", buffer, offset, time, frame_id, len(points))
         offset = original_offset + PointCloudRGB.HEADER_SIZE
-        buffer[offset : offset + points.nbytes] = points.tobytes()
+        # Equivalent to points.tobytes(), but avoids extra copies.
+        if points.nbytes:  # memoryview.cast rejects zero-size arrays
+            buffer[offset : offset + points.nbytes] = memoryview(
+                np.ascontiguousarray(points)
+            ).cast("B")
         offset += points.nbytes
-        buffer[offset : offset + colors.nbytes] = colors.tobytes()
+        # Equivalent to colors.tobytes(), but avoids extra copies.
+        if colors.nbytes:  # memoryview.cast rejects zero-size arrays
+            buffer[offset : offset + colors.nbytes] = memoryview(
+                np.ascontiguousarray(colors)
+            ).cast("B")
         return original_offset + self.msg_size()
