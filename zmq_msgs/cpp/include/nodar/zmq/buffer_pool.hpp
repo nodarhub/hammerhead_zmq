@@ -1,24 +1,40 @@
 #pragma once
 
+#include <functional>
 #include <list>
+#include <memory>
 #include <mutex>
-#include <vector>
 
 namespace nodar {
 namespace zmq {
 
+/**
+ * Allocates the storage of a Buffer: `size` bytes, freed by the returned pointer's deleter.
+ * The default allocates on the heap. Supply your own to e.g. use page-locked memory,
+ * so that GPU downloads into the buffers are faster.
+ */
+using Allocator = std::function<std::shared_ptr<uint8_t[]>(size_t size)>;
+inline std::shared_ptr<uint8_t[]> allocateOnHeap(size_t size) { return std::shared_ptr<uint8_t[]>(new uint8_t[size]); }
+
 struct BufferPool;
 class Buffer {
-    std::vector<uint8_t> vec{};
+    std::shared_ptr<uint8_t[]> storage{};
+    size_t storage_size = 0;
+    size_t storage_capacity = 0;
 
 public:
     BufferPool* buffer_pool;
     explicit Buffer(BufferPool* pool) : buffer_pool(pool) {}
-    Buffer(size_t size, BufferPool* pool) : vec(size), buffer_pool(pool) {}
-    [[nodiscard]] auto size() const { return vec.size(); }
-    [[nodiscard]] auto capacity() const { return vec.capacity(); }
-    [[nodiscard]] auto data() { return vec.data(); }
-    void resize(size_t size) { vec.resize(size); }
+    Buffer(size_t size, BufferPool* pool) : buffer_pool(pool) { resize(size); }
+    [[nodiscard]] auto size() const { return storage_size; }
+    [[nodiscard]] auto capacity() const { return storage_capacity; }
+    [[nodiscard]] auto data() { return storage.get(); }
+
+    /**
+     * Resize the buffer. The storage is only reallocated (with the pool's allocator) when growing past the capacity.
+     * The contents are not preserved.
+     */
+    void resize(size_t size);
 
     /**
      * Release a buffer back to the pool. This is the signature that is used by ZMQ.
@@ -28,6 +44,8 @@ public:
 };
 
 struct BufferPool {
+    // Allocates the storage of the buffers
+    Allocator allocator;
     // Maintain a list of all created buffers. This ensures that all buffers are destroyed when the pool is destroyed.
     std::list<Buffer> created;
     // A list of all the buffers that are available, that is, the buffers that have been returned to the pool.
@@ -35,6 +53,8 @@ struct BufferPool {
     // Mutexes for thread safety
     std::mutex created_guard;
     std::mutex available_guard;
+
+    explicit BufferPool(Allocator allocator = allocateOnHeap) : allocator(std::move(allocator)) {}
 
     /**
      * Get a buffer. If none are available, then make a new one.
@@ -69,6 +89,14 @@ struct BufferPool {
         available.push_back(buffer);
     }
 };
+
+inline void Buffer::resize(size_t size) {
+    if (size > storage_capacity) {
+        storage = buffer_pool->allocator(size);
+        storage_capacity = size;
+    }
+    storage_size = size;
+}
 
 inline void Buffer::release(void* data, void* hint) {
     auto buffer = static_cast<Buffer*>(hint);

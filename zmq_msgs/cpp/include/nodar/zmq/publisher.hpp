@@ -26,8 +26,12 @@ private:
     BufferPool buffer_pool;
 
 public:
-    Publisher(const Topic& topic, const std::string& ip)
-        : topic(topic), context(1), socket(context, ZMQ_PUB), running(true) {
+    /**
+     * Publish on a topic, binding on this device if the IP is empty, else connecting to the subscriber at that IP.
+     * The allocator allocates the storage of the buffers, see Allocator.
+     */
+    Publisher(const Topic& topic, const std::string& ip, Allocator allocator = allocateOnHeap)
+        : topic(topic), context(1), socket(context, ZMQ_PUB), running(true), buffer_pool(std::move(allocator)) {
         socket.set(::zmq::sockopt::sndhwm, 1);  // set maximum queue length to 1 message
         // If the IP is empty, bind on this device.
         if (ip.empty()) {
